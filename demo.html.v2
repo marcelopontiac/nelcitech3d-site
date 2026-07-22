@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NELCi Tech 3D - Finance Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0f1117; --bg-card: #1a1d27; --bg-hover: #242836; --border: #2a2e3a; --text: #e4e6f0; --text-muted: #8b8fa3; --green: #22c55e; --green-bg: rgba(34,197,94,0.12); --red: #ef4444; --red-bg: rgba(239,68,68,0.12); --blue: #3b82f6; --blue-bg: rgba(59,130,246,0.12); --purple: #a855f7; --purple-bg: rgba(168,85,247,0.12); --yellow: #eab308; --yellow-bg: rgba(234,179,8,0.12); --radius: 12px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; text-align: center; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .demo-back-btn { background: rgba(255,255,255,0.2); color: white; text-decoration: none; padding: 0.35rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; transition: background 0.2s; margin-left: 0.5rem; }
+    .demo-back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.8rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.3rem; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.8rem; }
+
+    .nav-tabs { display: flex; gap: 0.3rem; overflow-x: auto; }
+    .nav-btn { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: none; color: var(--text-muted); padding: 0.55rem 1.1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .nav-btn:hover { color: var(--text); background: var(--bg-hover); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-bg); font-weight: 600; }
+    .nav-btn.nav-updates { color: var(--yellow); }
+    .nav-btn.nav-updates.active { color: var(--yellow); background: var(--yellow-bg); }
+    .nav-btn.nav-subscribe { color: var(--green); }
+    .nav-btn.nav-subscribe.active { color: var(--green); background: var(--green-bg); }
+
+    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .card-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-value { font-size: 1.6rem; font-weight: 700; }
+    .card-balance { border-left: 4px solid var(--blue); }
+    .card-balance .card-value { color: var(--blue); }
+    .card-income { border-left: 4px solid var(--green); }
+    .card-income .card-value { color: var(--green); }
+    .card-expense { border-left: 4px solid var(--red); }
+    .card-expense .card-value { color: var(--red); }
+    .card-count { border-left: 4px solid var(--purple); }
+    .card-count .card-value { color: var(--purple); }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .chart-container h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }
+
+    .transactions-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+    .transactions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .transactions-header h2 { font-size: 1.1rem; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 0.7rem 0.8rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 2px solid var(--border); font-weight: 600; }
+    td { padding: 0.7rem 0.8rem; font-size: 0.88rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: var(--bg-hover); }
+
+    .amount-positive { color: var(--green); font-weight: 600; }
+    .amount-negative { color: var(--red); font-weight: 600; }
+    .amount-profit { color: var(--green); font-weight: 600; }
+    .amount-loss { color: var(--red); font-weight: 600; }
+
+    .type-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .type-income { background: var(--green-bg); color: var(--green); }
+    .type-expense { background: var(--red-bg); color: var(--red); }
+
+    .payment-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; white-space: nowrap; }
+    .pay-avista { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .pay-aprazo { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+    .ticker-badge { display: inline-block; background: var(--blue-bg); color: var(--blue); padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3px; }
+
+    .commercial-subtabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); background: var(--bg-card); border-radius: var(--radius) var(--radius) 0 0; padding: 0.3rem 0.3rem 0; border: 1px solid var(--border); border-bottom: none; overflow-x: auto; }
+    .subtab-btn { background: none; border: none; color: var(--text-muted); padding: 0.75rem 1.4rem; cursor: pointer; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; border-radius: var(--radius) var(--radius) 0 0; transition: all 0.2s; position: relative; white-space: nowrap; }
+    .subtab-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: transparent; transition: background 0.2s; }
+    .subtab-btn:hover { color: var(--text); background: var(--bg-hover); }
+    .subtab-btn.active { color: var(--blue); background: var(--bg); font-weight: 600; }
+    .subtab-btn.active::after { background: var(--blue); }
+    .subtab-content { display: none; }
+    .subtab-content.active { display: block; }
+
+    .invest-intl-subtabs { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .intl-subtab-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .intl-subtab-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .intl-subtab-btn.active { color: var(--blue); border-color: var(--blue); background: var(--blue-bg); font-weight: 600; }
+    .intl-content { display: none; }
+    .intl-content.active { display: block; }
+
+    /* Updates Tab */
+    .update-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; transition: border-color 0.2s; }
+    .update-card:hover { border-color: var(--text-muted); }
+    .update-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; gap: 1rem; }
+    .update-version { font-size: 1.2rem; font-weight: 700; }
+    .update-date { color: var(--muted); font-size: 0.8rem; }
+    .update-status { padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+    .status-available { background: var(--green-bg); color: var(--green); }
+    .status-installed { background: var(--blue-bg); color: var(--blue); }
+    .status-pending { background: var(--yellow-bg); color: var(--yellow); }
+    .update-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.6; }
+    .update-features { list-style: none; margin-bottom: 1rem; }
+    .update-features li { padding: 0.3rem 0; font-size: 0.85rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+    .update-features li::before { content: '✓'; color: var(--green); font-weight: 700; }
+    .update-btn { background: var(--green); color: #000; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .update-btn:hover { background: #16a34a; }
+    .update-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+    /* Subscribe Tab */
+    .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .plan-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; transition: all 0.3s; position: relative; }
+    .plan-card:hover { border-color: var(--text-muted); }
+    .plan-card.plan-featured { border-color: var(--green); }
+    .plan-card.plan-featured::before { content: 'MAIS POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; }
+    .plan-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .plan-price { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+    .plan-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .plan-features { list-style: none; text-align: left; margin-bottom: 1.5rem; }
+    .plan-features li { padding: 0.5rem 0; font-size: 0.88rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features li .check { color: var(--green); font-weight: 700; }
+    .plan-features li .cross { color: var(--red); }
+    .plan-btn { width: 100%; padding: 0.85rem; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; }
+    .plan-btn-primary { background: var(--green); color: #000; }
+    .plan-btn-primary:hover { background: #16a34a; }
+    .plan-btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .plan-btn-outline:hover { border-color: var(--text-muted); }
+
+    .pix-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
+    .pix-section h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .pix-section p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .pix-qr { width: 200px; height: 200px; background: #fff; border-radius: 12px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .pix-qr img { max-width: 100%; max-height: 100%; }
+    .pix-copy { display: flex; gap: 0.5rem; max-width: 500px; margin: 0 auto; }
+    .pix-copy input { flex: 1; padding: 0.7rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.8rem; font-family: monospace; }
+    .pix-copy button { padding: 0.7rem 1.2rem; background: var(--green); color: #000; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+    .pix-copy button:hover { background: #16a34a; }
+
+    .faq { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .faq h3 { margin-bottom: 1rem; }
+    .faq-item { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem; }
+    .faq-a { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; justify-content: center; align-items: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 500px; padding: 1.5rem; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { font-size: 1.1rem; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: var(--text); }
+
+    @media (max-width: 768px) {
+      main { padding: 1rem; }
+      .header-content { flex-direction: column; align-items: flex-start; }
+      .charts-row { grid-template-columns: 1fr; }
+      .commercial-subtabs { flex-wrap: nowrap; overflow-x: auto; }
+      .plan-grid { grid-template-columns: 1fr; }
+      .pix-copy { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Modo Demo - Finance Dashboard
+    <a href="index.html" class="demo-back-btn">← Voltar ao Site</a>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Finance Dashboard</h1>
+        <span class="subtitle">Controle financeiro completo</span>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('dashboard', this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" onclick="switchTab('commercial', this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          Comercial
+        </button>
+        <button class="nav-btn" onclick="switchTab('investments', this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Investimentos
+        </button>
+        <button class="nav-btn nav-updates" onclick="switchTab('updates', this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 019-9"/></svg>
+          Atualizações
+        </button>
+        <button class="nav-btn nav-subscribe" onclick="switchTab('subscribe', this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Assinar
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <section class="cards">
+        <div class="card card-balance">
+          <span class="card-label">Saldo</span>
+          <span class="card-value">R$ 3.780,00</span>
+        </div>
+        <div class="card card-income">
+          <span class="card-label">Receitas</span>
+          <span class="card-value">R$ 9.500,00</span>
+        </div>
+        <div class="card card-expense">
+          <span class="card-label">Despesas</span>
+          <span class="card-value">R$ 5.720,00</span>
+        </div>
+        <div class="card card-count">
+          <span class="card-label">Transações</span>
+          <span class="card-value">8</span>
+        </div>
+      </section>
+      <section class="charts-row">
+        <div class="chart-container">
+          <h3>Receitas vs Despesas por Categoria</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Evolução Mensal</h3>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </section>
+      <section class="transactions-section">
+        <div class="transactions-header"><h2>Transações</h2></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td>01/07/2026</td><td>Salário</td><td>Salário</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 5.000,00</td></tr>
+              <tr><td>05/07/2026</td><td>Freelance Site</td><td>Projeto</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 2.500,00</td></tr>
+              <tr><td>08/07/2026</td><td>Consultoria TI</td><td>Serviço</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 2.000,00</td></tr>
+              <tr><td>02/07/2026</td><td>Aluguel</td><td>Moradia</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 1.800,00</td></tr>
+              <tr><td>03/07/2026</td><td>Supermercado</td><td>Alimentação</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 420,00</td></tr>
+              <tr><td>04/07/2026</td><td>Internet + TV</td><td>Serviços</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 150,00</td></tr>
+              <tr><td>06/07/2026</td><td>Energia Elétrica</td><td>Moradia</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 280,00</td></tr>
+              <tr><td>10/07/2026</td><td>Academia</td><td>Saúde</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 120,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: COMMERCIAL -->
+    <div class="tab-content" id="tab-commercial">
+      <div class="commercial-subtabs">
+        <button class="subtab-btn active" onclick="switchSubtab('suppliers', this)">Fornecedores</button>
+        <button class="subtab-btn" onclick="switchSubtab('purchases', this)">Compras</button>
+        <button class="subtab-btn" onclick="switchSubtab('sales', this)">Vendas</button>
+      </div>
+      <div class="subtab-content active" id="subtab-suppliers">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Fornecedores</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Nome</th><th>Contato</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th></tr></thead>
+              <tbody>
+                <tr><td>Tech Solutions Ltda</td><td>João Pereira</td><td>12.345.678/0001-90</td><td>(11) 99999-1234</td><td>contato@techsolutions.com.br</td></tr>
+                <tr><td>Distribuidora Central</td><td>Ana Lima</td><td>98.765.432/0001-10</td><td>(11) 98888-5678</td><td>vendas@distcentral.com.br</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-purchases">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Compras</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Fornecedor</th><th>Pagamento</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>01/07/2026</td><td>Compra de material de escritório</td><td>Tech Solutions Ltda</td><td><span class="payment-badge pay-avista">À Vista</span></td><td class="amount-negative">R$ 1.250,00</td></tr>
+                <tr><td>10/07/2026</td><td>Compra de equipamentos</td><td>Distribuidora Central</td><td><span class="payment-badge pay-aprazo">6x</span></td><td class="amount-negative">R$ 8.750,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-sales">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Vendas</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Pagamento</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>05/07/2026</td><td>Venda de consultoria</td><td><span class="payment-badge pay-aprazo">3x</span></td><td class="amount-positive">R$ 4.500,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB: INVESTMENTS -->
+    <div class="tab-content" id="tab-investments">
+      <section class="cards">
+        <div class="card" style="border-left:4px solid var(--blue)"><span class="card-label">Total Investido</span><span class="card-value" style="color:var(--blue)">R$ 37.730,00</span></div>
+        <div class="card" style="border-left:4px solid var(--purple)"><span class="card-label">Valor Atual</span><span class="card-value" style="color:var(--purple)">R$ 48.897,20</span></div>
+        <div class="card" style="border-left:4px solid var(--green)"><span class="card-label">Lucro / Prejuízo</span><span class="card-value amount-profit">+ R$ 11.167,20</span></div>
+        <div class="card card-count"><span class="card-label">Total Ativos</span><span class="card-value">12</span></div>
+      </section>
+      <div class="commercial-subtabs" id="investSubtabs">
+        <button class="subtab-btn active" onclick="switchInvestSubtab('acoes', this)">Ações B3</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('fiis', this)">FIIs</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('etfs', this)">ETFs</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('renda-fixa', this)">Renda Fixa</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('cripto', this)">Cripto</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('internacional', this)">Internacional</button>
+      </div>
+      <div class="subtab-content active" id="subtab-acoes">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Ações B3</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+            <tbody><tr><td><span class="ticker-badge">PETR4</span></td><td>Petrobras PN</td><td>100</td><td>R$ 28,50</td><td>R$ 36,80</td><td>R$ 2.850,00</td><td>R$ 3.680,00</td><td class="amount-profit">+ R$ 830,00</td><td>15/01/2026</td></tr></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-fiis">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Fundos Imobiliários</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+            <tbody><tr><td><span class="ticker-badge">HGLG11</span></td><td>CSHG Logística FII</td><td>20</td><td>R$ 160,00</td><td>R$ 175,30</td><td>R$ 3.200,00</td><td>R$ 3.506,00</td><td class="amount-profit">+ R$ 306,00</td><td>10/03/2026</td></tr></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-etfs">
+        <section class="transactions-section"><div class="transactions-header"><h2>ETFs</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum ETF cadastrado</td></tr></tbody></table></div></section>
+      </div>
+      <div class="subtab-content" id="subtab-renda-fixa">
+        <section class="transactions-section"><div class="transactions-header"><h2>Renda Fixa</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Título</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum título cadastrado</td></tr></tbody></table></div></section>
+      </div>
+      <div class="subtab-content" id="subtab-cripto">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Criptomoedas</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Moeda</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+            <tbody><tr><td><span class="ticker-badge">BTC</span></td><td>Bitcoin</td><td>0,05</td><td>R$ 350.000,00</td><td>R$ 520.000,00</td><td>R$ 17.500,00</td><td>R$ 26.000,00</td><td class="amount-profit">+ R$ 8.500,00</td><td>20/11/2025</td></tr></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-internacional">
+        <div class="invest-intl-subtabs">
+          <button class="intl-subtab-btn active" onclick="switchIntlSubtab('intl-etfs', this)">ETFs</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-rf', this)">ETF Renda Fixa</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-crypto', this)">ETF Cripto</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-acoes', this)">Ações</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-reits', this)">REITs</button>
+        </div>
+        <div class="intl-content active" id="intl-etfs"><section class="transactions-section"><div class="transactions-header"><h2>ETFs Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td><span class="ticker-badge">VT</span></td><td>Vanguard Total World Stock ETF</td><td>10</td><td>$280,00</td><td>$310,50</td><td>$2.800,00</td><td>$3.105,00</td><td class="amount-profit">+ $305,00</td><td>10/02/2026</td></tr><tr><td><span class="ticker-badge">QQQ</span></td><td>Invesco QQQ Trust (Nasdaq 100)</td><td>5</td><td>$450,00</td><td>$510,20</td><td>$2.250,00</td><td>$2.551,00</td><td class="amount-profit">+ $301,00</td><td>20/01/2026</td></tr></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-rf"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Renda Fixa Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td><span class="ticker-badge">TLT</span></td><td>iShares 20+ Year Treasury Bond ETF</td><td>20</td><td>$95,00</td><td>$88,50</td><td>$1.900,00</td><td>$1.770,00</td><td class="amount-loss">- $130,00</td><td>05/04/2026</td></tr></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-crypto"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Criptomoedas Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td><span class="ticker-badge">IBIT</span></td><td>iShares Bitcoin Trust ETF</td><td>15</td><td>$52,00</td><td>$68,30</td><td>$780,00</td><td>$1.024,50</td><td class="amount-profit">+ $244,50</td><td>15/03/2026</td></tr><tr><td><span class="ticker-badge">BITO</span></td><td>ProShares Bitcoin Strategy ETF</td><td>25</td><td>$28,00</td><td>$35,70</td><td>$700,00</td><td>$892,50</td><td class="amount-profit">+ $192,50</td><td>01/05/2026</td></tr></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-acoes"><section class="transactions-section"><div class="transactions-header"><h2>Ações Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td><span class="ticker-badge">AAPL</span></td><td>Apple Inc.</td><td>8</td><td>$185,00</td><td>$210,40</td><td>$1.480,00</td><td>$1.683,20</td><td class="amount-profit">+ $203,20</td><td>25/02/2026</td></tr><tr><td><span class="ticker-badge">MSFT</span></td><td>Microsoft Corp.</td><td>5</td><td>$410,00</td><td>$455,80</td><td>$2.050,00</td><td>$2.279,00</td><td class="amount-profit">+ $229,00</td><td>20/03/2026</td></tr></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-reits"><section class="transactions-section"><div class="transactions-header"><h2>REITs</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead><tbody><tr><td><span class="ticker-badge">XLRE</span></td><td>Real Estate Select Sector SPDR Fund</td><td>30</td><td>$40,00</td><td>$43,20</td><td>$1.200,00</td><td>$1.296,00</td><td class="amount-profit">+ $96,00</td><td>10/04/2026</td></tr><tr><td><span class="ticker-badge">VNQ</span></td><td>Vanguard Real Estate ETF</td><td>12</td><td>$85,00</td><td>$92,50</td><td>$1.020,00</td><td>$1.110,00</td><td class="amount-profit">+ $90,00</td><td>15/05/2026</td></tr></tbody></table></div></section></div>
+      </div>
+    </div>
+
+    <!-- TAB: UPDATES -->
+    <div class="tab-content" id="tab-updates">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>📦 Atualizações Disponíveis</h2>
+          <span style="color:var(--text-muted);font-size:0.85rem">Atualize sem custo adicional</span>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Todos os clientes NELCi Tech 3D recebem atualizações gratuitas do sistema.
+          As melhorias incluem correções de bugs, novos recursos e otimizações de desempenho.
+        </p>
+      </section>
+
+      <div class="update-card">
+        <div class="update-header">
+          <div>
+            <div class="update-version">v3.2.0</div>
+            <div class="update-date">Lançado em 15/07/2026</div>
+          </div>
+          <span class="update-status status-available">Disponível</span>
+        </div>
+        <div class="update-desc">Nova aba de gerenciamento de assinatura, sistema de atualizações automáticas e melhorias gerais de performance.</div>
+        <ul class="update-features">
+          <li>Aba "Assinar" com pagamento via PIX integrado</li>
+          <li>Sistema de atualizações automáticas sem custo</li>
+          <li>Otimização de carregamento dos gráficos (-40% tempo)</li>
+          <li>Suporte a exportação de relatórios em PDF</li>
+          <li>Correção: Cálculo de rendimentos em moedas estrangeiras</li>
+        </ul>
+        <button class="update-btn" onclick="simulateUpdate(this, 'v3.2.0')">Instalar Atualização</button>
+      </div>
+
+      <div class="update-card">
+        <div class="update-header">
+          <div>
+            <div class="update-version">v3.1.2</div>
+            <div class="update-date">Lançado em 01/07/2026</div>
+          </div>
+          <span class="update-status status-installed">Instalado</span>
+        </div>
+        <div class="update-desc">Correções de segurança e melhorias na aba de investimentos internacionais.</div>
+        <ul class="update-features">
+          <li>Correção de vulnerabilidade de sessão</li>
+          <li>Correção de cálculo de FIIs</li>
+          <li>Novos filtros por data na aba Comercial</li>
+        </ul>
+        <button class="update-btn" disabled>Já Instalado</button>
+      </div>
+
+      <div class="update-card">
+        <div class="update-header">
+          <div>
+            <div class="update-version">v3.1.1</div>
+            <div class="update-date">Lançado em 15/06/2026</div>
+          </div>
+          <span class="update-status status-installed">Instalado</span>
+        </div>
+        <div class="update-desc">Correções de bugs reportados pelos usuários.</div>
+        <ul class="update-features">
+          <li>Correção no gráfico de evolução mensal</li>
+          <li>Ajuste no layout mobile da tabela de investimentos</li>
+        </ul>
+        <button class="update-btn" disabled>Já Instalado</button>
+      </div>
+    </div>
+
+    <!-- TAB: SUBSCRIBE -->
+    <div class="tab-content" id="tab-subscribe">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>🛡️ Planos NELCi Tech 3D</h2>
+          <span style="color:var(--text-muted);font-size:0.85rem">Escolha o plano ideal para voce</span>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Assine e tenha acesso completo ao Finance Dashboard com todas as funcionalidades.
+          Pagamento rapido e seguro via PIX.
+        </p>
+      </section>
+
+      <div class="plan-grid">
+        <!-- PLANO ESSENCIAL -->
+        <div class="plan-card">
+          <div class="plan-name">Essencial</div>
+          <div class="plan-price">R$ 29<span>/mês</span></div>
+          <div class="plan-period">Pagamento via PIX</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Controle de receitas e despesas</li>
+            <li><span class="check">✓</span> Gráficos mensais</li>
+            <li><span class="check">✓</span> Cadastro de transações</li>
+            <li><span class="check">✓</span> Atualizações gratuitas</li>
+            <li><span class="cross">✗</span> <span style="color:var(--text-muted)">Gestão de investimentos</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--text-muted)">Módulo comercial</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--text-muted)">Relatórios avançados</span></li>
+          </ul>
+          <button class="plan-btn plan-btn-outline" onclick="selectPlan('essencial', 29)">Selecionar Plano</button>
+        </div>
+
+        <!-- PLANO PRO -->
+        <div class="plan-card plan-featured">
+          <div class="plan-name">Profissional</div>
+          <div class="plan-price" style="color:var(--green)">R$ 59<span>/mês</span></div>
+          <div class="plan-period">Pagamento via PIX</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Tudo do plano Essencial</li>
+            <li><span class="check">✓</span> Gestão de investimentos completa</li>
+            <li><span class="check">✓</span> Módulo comercial (fornecedores, compras, vendas)</li>
+            <li><span class="check">✓</span> Investimentos internacionais</li>
+            <li><span class="check">✓</span> Exportação em PDF</li>
+            <li><span class="check">✓</span> Atualizações prioritárias</li>
+            <li><span class="cross">✗</span> <span style="color:var(--text-muted)">Suporte prioritário 24/7</span></li>
+          </ul>
+          <button class="plan-btn plan-btn-primary" onclick="selectPlan('profissional', 59)">Selecionar Plano</button>
+        </div>
+
+        <!-- PLANO PREMIUM -->
+        <div class="plan-card">
+          <div class="plan-name">Premium</div>
+          <div class="plan-price">R$ 99<span>/mês</span></div>
+          <div class="plan-period">Pagamento via PIX</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Tudo do plano Profissional</li>
+            <li><span class="check">✓</span> Suporte prioritário 24/7</li>
+            <li><span class="check">✓</span> Acesso antecipado a novos recursos</li>
+            <li><span class="check">✓</span> Consultoria financeira mensal</li>
+            <li><span class="check">✓</span> Dashboard personalizado</li>
+            <li><span class="check">✓</span> API de integração</li>
+            <li><span class="check">✓</span> Backup automático na nuvem</li>
+          </ul>
+          <button class="plan-btn plan-btn-outline" onclick="selectPlan('premium', 99)">Selecionar Plano</button>
+        </div>
+      </div>
+
+      <!-- PIX PAYMENT SECTION -->
+      <div class="pix-section" id="pixSection" style="display:none">
+        <h3>💳 Pagamento via PIX</h3>
+        <p id="pixPlanInfo">Plano: <strong>-</strong> | Valor: <strong>R$ -</strong></p>
+        <div class="pix-qr">
+          <svg viewBox="0 0 200 200" width="180" height="180">
+            <!-- QR Code placeholder -->
+            <rect width="200" height="200" fill="white"/>
+            <rect x="10" y="10" width="50" height="50" fill="black" rx="4"/>
+            <rect x="15" y="15" width="40" height="40" fill="white" rx="2"/>
+            <rect x="20" y="20" width="30" height="30" fill="black" rx="2"/>
+            <rect x="140" y="10" width="50" height="50" fill="black" rx="4"/>
+            <rect x="145" y="15" width="40" height="40" fill="white" rx="2"/>
+            <rect x="150" y="20" width="30" height="30" fill="black" rx="2"/>
+            <rect x="10" y="140" width="50" height="50" fill="black" rx="4"/>
+            <rect x="15" y="145" width="40" height="40" fill="white" rx="2"/>
+            <rect x="20" y="150" width="30" height="30" fill="black" rx="2"/>
+            <!-- Center pattern -->
+            <rect x="70" y="70" width="10" height="10" fill="black"/>
+            <rect x="90" y="70" width="10" height="10" fill="black"/>
+            <rect x="110" y="70" width="10" height="10" fill="black"/>
+            <rect x="70" y="90" width="10" height="10" fill="black"/>
+            <rect x="110" y="90" width="10" height="10" fill="black"/>
+            <rect x="70" y="110" width="10" height="10" fill="black"/>
+            <rect x="90" y="110" width="10" height="10" fill="black"/>
+            <rect x="110" y="110" width="10" height="10" fill="black"/>
+            <!-- Random dots -->
+            <rect x="70" y="10" width="6" height="6" fill="black"/>
+            <rect x="85" y="20" width="6" height="6" fill="black"/>
+            <rect x="100" y="15" width="6" height="6" fill="black"/>
+            <rect x="75" y="40" width="6" height="6" fill="black"/>
+            <rect x="110" y="35" width="6" height="6" fill="black"/>
+            <rect x="90" y="45" width="6" height="6" fill="black"/>
+            <rect x="130" y="80" width="6" height="6" fill="black"/>
+            <rect x="140" y="95" width="6" height="6" fill="black"/>
+            <rect x="155" y="110" width="6" height="6" fill="black"/>
+            <rect x="10" y="80" width="6" height="6" fill="black"/>
+            <rect x="20" y="95" width="6" height="6" fill="black"/>
+            <rect x="40" y="100" width="6" height="6" fill="black"/>
+            <rect x="80" y="140" width="6" height="6" fill="black"/>
+            <rect x="100" y="155" width="6" height="6" fill="black"/>
+            <rect x="120" y="145" width="6" height="6" fill="black"/>
+            <rect x="140" y="150" width="6" height="6" fill="black"/>
+            <rect x="160" y="140" width="6" height="6" fill="black"/>
+          </svg>
+        </div>
+        <div class="pix-copy">
+          <input type="text" id="pixKey" value="00020126580014br.gov.bcb.pix0136nelcitech3d@pix.com.br520400005303986554040.015802BR5913NELCi Tech 3D6009SAO PAULO62070503***6304" readonly>
+          <button onclick="copyPixKey()">Copiar Chave</button>
+        </div>
+        <p style="margin-top:1rem;color:var(--text-muted);font-size:0.82rem">⚠️ Após o pagamento, envie o comprovante para <strong style="color:var(--green)">nelcitech3d@gmail.com</strong> para ativação imediata.</p>
+      </div>
+
+      <div class="faq">
+        <h3>Perguntas Frequentes</h3>
+        <div class="faq-item">
+          <div class="faq-q">Como funciona o pagamento via PIX?</div>
+          <div class="faq-a">Voce seleciona o plano, escaneia o QR Code ou copia a chave PIX e realiza o pagamento. Envie o comprovante para nelcitech3d@gmail.com e sua assinatura sera ativada em ate 1 hora.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Posso cancelar a qualquer momento?</div>
+          <div class="faq-a">Sim! Voce pode cancelar sua assinatura a qualquer momento sem multa ou taxa adicional. O acesso continua ate o final do periodo ja pago.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">As atualizações são realmente gratuitas?</div>
+          <div class="faq-a">Sim! Todos os planos incluem atualizações gratuitas do sistema. Novas funcionalidades e correções são disponibilizadas automaticamente.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Posso trocar de plano depois?</div>
+          <div class="faq-a">Sim! Voce pode fazer upgrade ou downgrade do seu plano a qualquer momento. O valor é proporcional ao periodo restante.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="detailModal" onclick="this.classList.remove('active')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="detailTitle">Detalhes</h3>
+        <button class="modal-close" onclick="document.getElementById('detailModal').classList.remove('active')">&times;</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function switchSubtab(subtab, btn) {
+      document.querySelectorAll('#tab-commercial .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-commercial .subtab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchInvestSubtab(subtab, btn) {
+      document.querySelectorAll('#investSubtabs .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-investments .subtab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchIntlSubtab(subtab, btn) {
+      document.querySelectorAll('.invest-intl-subtabs .intl-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#subtab-internacional .intl-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(subtab).classList.add('active');
+    }
+
+    function selectPlan(name, price) {
+      document.getElementById('pixSection').style.display = 'block';
+      document.getElementById('pixPlanInfo').innerHTML = 'Plano: <strong>' + name.charAt(0).toUpperCase() + name.slice(1) + '</strong> | Valor: <strong>R$ ' + price + ',00/mês</strong>';
+      document.getElementById('pixSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyPixKey() {
+      const input = document.getElementById('pixKey');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = input.nextElementSibling;
+        const orig = btn.textContent;
+        btn.textContent = 'Copiado!';
+        setTimeout(() => btn.textContent = orig, 2000);
+      }).catch(() => {
+        document.execCommand('copy');
+      });
+    }
+
+    function simulateUpdate(btn, version) {
+      btn.disabled = true;
+      btn.textContent = 'Instalando...';
+      setTimeout(() => {
+        btn.textContent = 'Instalado ✓';
+        btn.style.background = 'var(--border)';
+        btn.style.color = 'var(--text-muted)';
+        const card = btn.closest('.update-card');
+        const status = card.querySelector('.update-status');
+        status.textContent = 'Instalado';
+        status.className = 'update-status status-installed';
+      }, 2000);
+    }
+
+    // Charts
+    function initCharts() {
+      const muted = '#8b8fa3';
+      new Chart(document.getElementById('categoryChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Salário', 'Projeto', 'Serviço', 'Moradia', 'Alimentação', 'Serviços', 'Saúde'],
+          datasets: [
+            { label: 'Receitas', data: [5000, 2500, 2000, 0, 0, 0, 0], backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4 },
+            { label: 'Despesas', data: [0, 0, 0, 2080, 420, 150, 120], backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4 }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+      });
+      new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26'],
+          datasets: [
+            { label: 'Saldo', data: [1200, 2100, 1800, 3200, 2900, 3500, 3780], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b82f6' },
+            { label: 'Receitas', data: [5000, 6500, 7200, 8000, 8500, 9000, 9500], borderColor: 'rgba(34,197,94,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] },
+            { label: 'Despesas', data: [3800, 4400, 5400, 4800, 5600, 5500, 5720], borderColor: 'rgba(239,68,68,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+      });
+    }
+    initCharts();
+  </script>
+</body>
+</html>

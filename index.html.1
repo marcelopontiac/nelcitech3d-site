@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NELCi Tech 3D - Soluções em Tecnologia e Impressão 3D</title>
+  <meta name="description" content="NELCi Tech 3D - Soluções em tecnologia, impressão 3D, desenvolvimento de sistemas e infraestrutura de TI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --accent: #06b6d4;
+      --bg: #0a0e1a;
+      --bg-card: #111827;
+      --bg-card-hover: #1a2332;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --green: #22c55e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 14, 26, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 0.8rem 0;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: white;
+    }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--primary);
+      color: white !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--primary-dark); }
+
+    /* HERO */
+    .hero {
+      min-height: 35vh;
+      display: flex;
+      align-items: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: var(--primary);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .hero-buttons { display: flex; gap: 1rem; }
+
+    .btn-hero {
+      padding: 0.8rem 2rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary-hero {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary-hero:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    .btn-outline-hero {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline-hero:hover { border-color: var(--text-muted); background: var(--bg-card); }
+
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cube-3d {
+      width: 280px;
+      height: 280px;
+      position: relative;
+      perspective: 600px;
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border: 2px solid rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .cube-face:nth-child(1) { top: 20px; left: 50px; animation-delay: 0s; }
+    .cube-face:nth-child(2) { top: 60px; left: 80px; animation-delay: 0.5s; border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.05); }
+    .cube-face:nth-child(3) { top: 100px; left: 30px; animation-delay: 1s; border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05); }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 3rem 2rem;
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    /* SERVICES */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+
+    .service-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .service-icon.blue { background: rgba(59, 130, 246, 0.1); }
+    .service-icon.cyan { background: rgba(6, 182, 212, 0.1); }
+    .service-icon.green { background: rgba(34, 197, 94, 0.1); }
+    .service-icon.purple { background: rgba(168, 85, 247, 0.1); }
+    .service-icon.orange { background: rgba(249, 115, 22, 0.1); }
+    .service-icon.red { background: rgba(239, 68, 68, 0.1); }
+
+    .service-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .service-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      max-width: 400px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* CONTACT */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      justify-items: center;
+    }
+
+    .contact-info h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+
+    .contact-item-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .contact-item-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .contact-item-value a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .contact-item-value a:hover { color: var(--primary); }
+
+    .contact-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 550px;
+      width: 100%;
+      margin-top: -5rem;
+    }
+
+    .contact-form h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 100px; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: var(--primary-dark); }
+
+    /* PROJECTS */
+    .project-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-top: 2rem;
+      transition: all 0.3s;
+    }
+
+    .project-card:hover {
+      border-color: var(--primary);
+    }
+
+    .project-info h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .project-info p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-features {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-features li {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 0.3rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .project-features li::before {
+      content: '✓';
+      color: var(--green);
+      position: absolute;
+      left: 0;
+      font-weight: 700;
+    }
+
+    .project-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-placeholder {
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+    }
+
+    .preview-placeholder:hover {
+      border-color: var(--primary);
+      background: var(--bg-card-hover);
+    }
+
+    .preview-placeholder span {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .preview-placeholder p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* GALLERY */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .gallery-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .gallery-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-item-info {
+      padding: 1rem;
+    }
+
+    .gallery-item-info h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .gallery-item-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .gallery-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero p { max-width: 100%; }
+      .hero-buttons { justify-content: center; }
+      .hero-visual { display: none; }
+      .services-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">N</div>
+        NELCi Tech 3D
+      </a>
+      <ul class="nav-links">
+        <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#galeria-3d">Projetos 3D</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#contato">Contato</a></li>
+        <li><a href="demo.html" class="nav-cta">Ver Demo</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge">&#9889; Inovação e Tecnologia</div>
+        <h1>Soluções em <span>Tecnologia 3D</span> e Infraestrutura de TI</h1>
+        <p>Desenvolvimento de sistemas, impressão 3D, infraestrutura de redes e suporte técnico. Transformamos suas ideias em realidade.</p>
+        <div class="hero-buttons">
+          <a href="#contato" class="btn-hero btn-primary-hero">Solicitar Orçamento</a>
+          <a href="demo.html" class="btn-hero btn-outline-hero">Ver Demo</a>
+          <a href="#servicos" class="btn-hero btn-outline-hero">Nossos Serviços</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="cube-3d">
+          <div class="cube-face">&#128736;</div>
+          <div class="cube-face">&#128300;</div>
+          <div class="cube-face">&#9881;</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicos">
+    <div class="section-inner">
+      <span class="section-tag">Serviços</span>
+      <h2 class="section-title">O que fazemos</h2>
+      <p class="section-desc">Oferecemos soluções completas em tecnologia para empresas e pessoas físicas.</p>
+
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon blue">&#128300;</div>
+          <h3>Impressão 3D</h3>
+          <p>Protótipos, peças sob medida, modelagem e fabricação aditiva com alta precisão.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon cyan">&#128187;</div>
+          <h3>Desenvolvimento de Sistemas</h3>
+          <p>Aplicações web, APIs, dashboards e sistemas personalizados para seu negócio.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon green">&#128246;</div>
+          <h3>Infraestrutura de TI</h3>
+          <p>Redes, servidores, nuvem, segurança e gerenciamento de infraestrutura completa.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon purple">&#128736;</div>
+          <h3>Suporte Técnico</h3>
+          <p>Manutenção de computadores, notebooks e equipamentos de TI.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon orange">&#128202;</div>
+          <h3>Consultoria em TI</h3>
+          <p Planejamento estratégico, auditoria de TI e otimização de processos tecnológicos.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon red">&#128274;</div>
+          <h3>Segurança da Informação</h3>
+          <p>Proteção de dados, firewalls, monitoramento e conformidade com LGPD.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projetos" style="background: var(--bg-card);">
+    <div class="section-inner">
+      <span class="section-tag">Projetos</span>
+      <h2 class="section-title">Nosso Trabalho</h2>
+      <p class="section-desc">Conheça um dos nossos projetos: um sistema financeiro completo com dashboard, investimentos e gestão comercial.</p>
+      
+      <div class="project-card">
+        <div class="project-info">
+          <h3>Finance Dashboard</h3>
+          <p>Sistema financeiro pessoal com controle de transações, investimentos (B3 e internacionais), gestão comercial e relatórios.</p>
+          <ul class="project-features">
+            <li>Dashboard com gráficos e resumos</li>
+            <li>Controle de receitas e despesas</li>
+            <li>Gestão de investimentos (Ações, FIIs, ETFs, Cripto)</li>
+            <li>Carteira internacional (REITs, Ações EUA)</li>
+            <li>Gestão de fornecedores e compras/vendas</li>
+            <li>Relatórios e análises</li>
+          </ul>
+          <a href="demo.html" class="btn-hero btn-primary-hero">Ver Demo ao Vivo</a>
+        </div>
+        <div class="project-preview">
+          <div class="preview-placeholder">
+            <span>&#128200;</span>
+            <p>Clique para ver a demo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="galeria-3d" style="background: var(--bg);">
+    <div class="section-inner">
+      <span class="section-tag">Portfólio</span>
+      <h2 class="section-title">Projetos 3D</h2>
+      <p class="section-desc">Conheça nossos trabalhos realizados em impressão 3D e modelagem.</p>
+      
+      <div class="gallery-grid" id="gallery3d">
+        <!-- Galeria será preenchida via JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <section id="sobre" style="background: var(--bg);">
+    <div class="section-inner">
+      <div class="about-grid">
+        <div>
+          <span class="section-tag">Sobre Nós</span>
+          <h2 class="section-title">NELCi Tech 3D</h2>
+          <p class="section-desc" style="margin-bottom: 1.5rem;">
+            Somos uma empresa focada em soluções tecnológicas, combinando expertise em TI com inovação em impressão 3D, infraestrutura de rede doméstica. Nosso compromisso é entregar resultados de alta qualidade para nossos clientes.
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Atendemos desde pequenas empresas e pessoas físicas, sempre com atendimento personalizado e preço justo.
+          </p>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value">5+</div>
+            <div class="stat-label">Anos de Experiência</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color: var(--green);">100%</div>
+            <div class="stat-label">Compromisso</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato">
+    <div class="section-inner">
+      <span class="section-tag">Contato</span>
+      <h2 class="section-title">Fale Conosco</h2>
+      <p class="section-desc">Estamos prontos para ajudar. Envie sua mensagem ou entre em contato diretamente.</p>
+
+      <div class="contact-grid">
+        <div class="contact-info">
+          <h3>Informações</h3>
+          <div class="contact-item">
+            <div class="contact-item-icon">&#128205;</div>
+            <div>
+              <div class="contact-item-label">Endereço</div>
+              <div class="contact-item-value">Santos, SP - Brasil</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon">&#128231;</div>
+            <div>
+              <div class="contact-item-label">E-mail</div>
+              <div class="contact-item-value"><a href="mailto:contato@sever.marcelotech@gmail.com">contato@sever.marcelotech@gmail.com</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form">
+          <h3>Envie uma mensagem</h3>
+          <form onsubmit="event.preventDefault(); alert('Mensagem enviada! Em breve entraremos em contato.');">
+            <div class="form-group">
+              <label>Nome</label>
+              <input type="text" placeholder="Seu nome" required>
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" placeholder="seu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label>Telefone</label>
+              <input type="text" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group">
+              <label>Mensagem</label>
+              <textarea placeholder="Como podemos ajudar?" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Enviar Mensagem</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 NELCi Tech 3D. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // Galeria de Projetos 3D
+    const projects3D = [
+      { id: 1, file: '20260115_121833.jpg', title: 'Projeto 3D #1', desc: 'Descrição do projeto' },
+      { id: 2, file: '20260123_163810.jpg', title: 'Projeto 3D #2', desc: 'Descrição do projeto' },
+      { id: 3, file: '20260125_143850.jpg', title: 'Projeto 3D #3', desc: 'Descrição do projeto' },
+      { id: 4, file: '20260127_115940.jpg', title: 'Projeto 3D #4', desc: 'Descrição do projeto' },
+      { id: 5, file: '20260127_122145.jpg', title: 'Projeto 3D #5', desc: 'Descrição do projeto' },
+      { id: 6, file: '20260227_183623.jpg', title: 'Projeto 3D #6', desc: 'Descrição do projeto' },
+      { id: 7, file: '20260227_183654.jpg', title: 'Projeto 3D #7', desc: 'Descrição do projeto' },
+      { id: 8, file: '20260227_183705.jpg', title: 'Projeto 3D #8', desc: 'Descrição do projeto' },
+      { id: 9, file: '20260309_212357.jpg', title: 'Projeto 3D #9', desc: 'Descrição do projeto' },
+      { id: 10, file: '20260421_173405.jpg', title: 'Projeto 3D #10', desc: 'Descrição do projeto' },
+      { id: 11, file: '20260506_121748.jpg', title: 'Projeto 3D #11', desc: 'Descrição do projeto' },
+      { id: 12, file: '20260515_115657.jpg', title: 'Projeto 3D #12', desc: 'Descrição do projeto' },
+      { id: 13, file: '20260515_181042.jpg', title: 'Projeto 3D #13', desc: 'Descrição do projeto' },
+      { id: 14, file: '20260622_144708.jpg', title: 'Projeto 3D #14', desc: 'Descrição do projeto' },
+      { id: 15, file: '20260622_162002.jpg', title: 'Projeto 3D #15', desc: 'Descrição do projeto' },
+      { id: 16, file: '20260622_162706.jpg', title: 'Projeto 3D #16', desc: 'Descrição do projeto' },
+      { id: 17, file: '20260622_194340.jpg', title: 'Projeto 3D #17', desc: 'Descrição do projeto' },
+      { id: 18, file: '20260622_194501.jpg', title: 'Projeto 3D #18', desc: 'Descrição do projeto' },
+      { id: 19, file: '20260712_194940.jpg', title: 'Projeto 3D #19', desc: 'Descrição do projeto' },
+      { id: 20, file: '20260714_150738.jpg', title: 'Projeto 3D #20', desc: 'Descrição do projeto' },
+      { id: 21, file: '20260714_150750.jpg', title: 'Projeto 3D #21', desc: 'Descrição do projeto' },
+      { id: 22, file: '20260714_210420.jpg', title: 'Projeto 3D #22', desc: 'Descrição do projeto' },
+      { id: 23, file: '20260714_210428.jpg', title: 'Projeto 3D #23', desc: 'Descrição do projeto' },
+      { id: 24, file: '20260714_210435.jpg', title: 'Projeto 3D #24', desc: 'Descrição do projeto' }
+    ];
+
+    // Caminho base das imagens (ajuste conforme necessário)
+    const basePath = 'projeto-fotos/';
+
+    function loadGallery() {
+      const gallery = document.getElementById('gallery3d');
+      gallery.innerHTML = projects3D.map(p => `
+        <div class="gallery-item" onclick="openLightbox('${basePath}${p.file}')">
+          <img src="${basePath}${p.file}" alt="${p.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=gallery-placeholder>&#128300;</div>'">
+          <div class="gallery-item-info">
+            <h4>${p.title}</h4>
+            <p>${p.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Lightbox simples
+    function openLightbox(src) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000';
+      
+      // Barra superior com botão fechar
+      const topBar = document.createElement('div');
+      topBar.style.cssText = 'position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;z-index:1001';
+      topBar.innerHTML = `
+        <a href="#" onclick="closeLightbox(event)" style="color:white;text-decoration:none;font-size:0.9rem;display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.1);padding:0.5rem 1rem;border-radius:8px;transition:background 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+          ← Voltar ao Site
+        </a>
+        <button onclick="closeLightbox(event)" style="background:rgba(255,255,255,0.1);border:none;color:white;font-size:1.5rem;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕</button>
+      `;
+      
+      // Imagem
+      const imgContainer = document.createElement('div');
+      imgContainer.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;padding:80px 2rem 2rem;width:100%';
+      imgContainer.innerHTML = `<img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px" onerror="this.parentElement.innerHTML='<p style=color:white;font-size:1.2rem>Imagem não encontrada</p>'">`;
+      
+      overlay.appendChild(topBar);
+      overlay.appendChild(imgContainer);
+      overlay.id = 'lightbox-overlay';
+      overlay.onclick = (e) => { if(e.target === overlay) closeLightbox(e); };
+      document.body.appendChild(overlay);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      e.stopPropagation();
+      const overlay = document.getElementById('lightbox-overlay');
+      if(overlay) {
+        overlay.remove();
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Fechar com ESC
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closeLightbox(e);
+    });
+
+    loadGallery();
+  </script>
+
+</body>
+</html>

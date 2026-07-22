@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NELCi Tech 3D - Demo Finance Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    [data-theme="dark"] {
+      --bg: #0f1117;
+      --bg-card: #1a1d27;
+      --bg-hover: #242836;
+      --border: #2a2e3a;
+      --text: #e4e6f0;
+      --text-muted: #8b8fa3;
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59,130,246,0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168,85,247,0.12);
+    }
+
+    :root { --radius: 12px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .demo-banner {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+      text-align: center;
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-back-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      margin-left: 0.5rem;
+    }
+
+    .demo-back-btn:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.3rem; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.8rem; }
+
+    .nav-tabs { display: flex; gap: 0.3rem; }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover { color: var(--text); background: var(--bg-hover); }
+    .nav-btn.active { color: var(--blue); background: var(--blue-bg); font-weight: 600; }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .card-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-value { font-size: 1.6rem; font-weight: 700; }
+
+    .card-balance { border-left: 4px solid var(--blue); }
+    .card-balance .card-value { color: var(--blue); }
+    .card-income { border-left: 4px solid var(--green); }
+    .card-income .card-value { color: var(--green); }
+    .card-expense { border-left: 4px solid var(--red); }
+    .card-expense .card-value { color: var(--red); }
+    .card-count { border-left: 4px solid var(--purple); }
+    .card-count .card-value { color: var(--purple); }
+    .card-invest-total { border-left: 4px solid var(--blue); }
+    .card-invest-current { border-left: 4px solid var(--purple); }
+    .card-invest-profit { border-left: 4px solid var(--green); }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .chart-container h3 {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .transactions-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .transactions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .transactions-header h2 { font-size: 1.1rem; font-weight: 600; }
+
+    .transactions-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      text-align: left;
+      padding: 0.7rem 0.8rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+    }
+
+    td {
+      padding: 0.7rem 0.8rem;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: var(--bg-hover); }
+
+    .amount-positive { color: var(--green); font-weight: 600; }
+    .amount-negative { color: var(--red); font-weight: 600; }
+    .amount-profit { color: var(--green); font-weight: 600; }
+    .amount-loss { color: var(--red); font-weight: 600; }
+
+    .type-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .type-income { background: var(--green-bg); color: var(--green); }
+    .type-expense { background: var(--red-bg); color: var(--red); }
+
+    .payment-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .pay-avista { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .pay-aprazo { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+    .ticker-badge {
+      display: inline-block;
+      background: var(--blue-bg);
+      color: var(--blue);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .commercial-subtabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      background: var(--bg-card);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 0.3rem 0.3rem 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      overflow-x: auto;
+    }
+
+    .subtab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.75rem 1.4rem;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-radius: var(--radius) var(--radius) 0 0;
+      transition: all 0.2s;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .subtab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background 0.2s;
+    }
+
+    .subtab-btn:hover { color: var(--text); background: var(--bg-hover); }
+
+    .subtab-btn.active { color: var(--blue); background: var(--bg); font-weight: 600; }
+    .subtab-btn.active::after { background: var(--blue); }
+
+    .subtab-content { display: none; }
+    .subtab-content.active { display: block; }
+
+    .invest-intl-subtabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .intl-subtab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .intl-subtab-btn:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .intl-subtab-btn.active {
+      color: var(--blue);
+      border-color: var(--blue);
+      background: var(--blue-bg);
+      font-weight: 600;
+    }
+
+    .intl-content { display: none; }
+    .intl-content.active { display: block; }
+
+    .detail-header {
+      background: var(--bg-hover);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-muted); font-size: 0.85rem; }
+    .detail-value { color: var(--text); font-size: 0.9rem; font-weight: 500; }
+    .detail-total { font-size: 1.05rem; font-weight: 700; }
+    .detail-positive { color: var(--green) !important; }
+    .detail-negative { color: var(--red) !important; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 500px;
+      padding: 1.5rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 { font-size: 1.1rem; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+
+    .btn-small {
+      font-size: 0.78rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      background: var(--bg-hover);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .btn-small:hover { color: var(--text); border-color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      main { padding: 1rem; }
+      .header-content { flex-direction: column; align-items: flex-start; }
+      .charts-row { grid-template-columns: 1fr; }
+      .commercial-subtabs { flex-wrap: nowrap; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    Modo Demo - Visualização Somente Leitura
+    <a href="index.html" class="demo-back-btn">← Voltar ao Site</a>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Finance Dashboard</h1>
+        <span class="subtitle">Demo - Controle financeiro pessoal</span>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" onclick="switchTab('commercial')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          Comercial
+        </button>
+        <button class="nav-btn" onclick="switchTab('investments')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Investimentos
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <section class="cards">
+        <div class="card card-balance">
+          <span class="card-label">Saldo</span>
+          <span class="card-value">R$ 3.780,00</span>
+        </div>
+        <div class="card card-income">
+          <span class="card-label">Receitas</span>
+          <span class="card-value">R$ 9.500,00</span>
+        </div>
+        <div class="card card-expense">
+          <span class="card-label">Despesas</span>
+          <span class="card-value">R$ 5.720,00</span>
+        </div>
+        <div class="card card-count">
+          <span class="card-label">Transações</span>
+          <span class="card-value">8</span>
+        </div>
+      </section>
+
+      <section class="charts-row">
+        <div class="chart-container">
+          <h3>Receitas vs Despesas por Categoria</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Evolução Mensal</h3>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </section>
+
+      <section class="transactions-section">
+        <div class="transactions-header">
+          <h2>Transações</h2>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01/07/2026</td>
+                <td>Salário</td>
+                <td>Salário</td>
+                <td><span class="type-badge type-income">Receita</span></td>
+                <td class="amount-positive">+ R$ 5.000,00</td>
+              </tr>
+              <tr>
+                <td>05/07/2026</td>
+                <td>Freelance Site</td>
+                <td>Projeto</td>
+                <td><span class="type-badge type-income">Receita</span></td>
+                <td class="amount-positive">+ R$ 2.500,00</td>
+              </tr>
+              <tr>
+                <td>08/07/2026</td>
+                <td>Consultoria TI</td>
+                <td>Serviço</td>
+                <td><span class="type-badge type-income">Receita</span></td>
+                <td class="amount-positive">+ R$ 2.000,00</td>
+              </tr>
+              <tr>
+                <td>02/07/2026</td>
+                <td>Aluguel</td>
+                <td>Moradia</td>
+                <td><span class="type-badge type-expense">Despesa</span></td>
+                <td class="amount-negative">- R$ 1.800,00</td>
+              </tr>
+              <tr>
+                <td>03/07/2026</td>
+                <td>Supermercado</td>
+                <td>Alimentação</td>
+                <td><span class="type-badge type-expense">Despesa</span></td>
+                <td class="amount-negative">- R$ 420,00</td>
+              </tr>
+              <tr>
+                <td>04/07/2026</td>
+                <td>Internet + TV</td>
+                <td>Serviços</td>
+                <td><span class="type-badge type-expense">Despesa</span></td>
+                <td class="amount-negative">- R$ 150,00</td>
+              </tr>
+              <tr>
+                <td>06/07/2026</td>
+                <td>Energia Elétrica</td>
+                <td>Moradia</td>
+                <td><span class="type-badge type-expense">Despesa</span></td>
+                <td class="amount-negative">- R$ 280,00</td>
+              </tr>
+              <tr>
+                <td>10/07/2026</td>
+                <td>Academia</td>
+                <td>Saúde</td>
+                <td><span class="type-badge type-expense">Despesa</span></td>
+                <td class="amount-negative">- R$ 120,00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: COMMERCIAL -->
+    <div class="tab-content" id="tab-commercial">
+      <div class="commercial-subtabs">
+        <button class="subtab-btn active" onclick="switchSubtab('suppliers')">Fornecedores</button>
+        <button class="subtab-btn" onclick="switchSubtab('purchases')">Compras</button>
+        <button class="subtab-btn" onclick="switchSubtab('sales')">Vendas</button>
+      </div>
+
+      <div class="subtab-content active" id="subtab-suppliers">
+        <section class="transactions-section">
+          <div class="transactions-header">
+            <h2>Fornecedores</h2>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Contato</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Tech Solutions Ltda</td><td>João Pereira</td><td>12.345.678/0001-90</td><td>(11) 99999-1234</td><td>contato@techsolutions.com.br</td></tr>
+                <tr><td>Distribuidora Central</td><td>Ana Lima</td><td>98.765.432/0001-10</td><td>(11) 98888-5678</td><td>vendas@distcentral.com.br</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="subtab-content" id="subtab-purchases">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Compras</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Fornecedor</th><th>Pagamento</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>01/07/2026</td><td>Compra de material de escritório</td><td>Tech Solutions Ltda</td><td><span class="payment-badge pay-avista">À Vista</span></td><td class="amount-negative">R$ 1.250,00</td></tr>
+                <tr><td>10/07/2026</td><td>Compra de equipamentos</td><td>Distribuidora Central</td><td><span class="payment-badge pay-aprazo">6x</span></td><td class="amount-negative">R$ 8.750,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="subtab-content" id="subtab-sales">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Vendas</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Pagamento</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>05/07/2026</td><td>Venda de consultoria</td><td><span class="payment-badge pay-aprazo">3x</span></td><td class="amount-positive">R$ 4.500,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB: INVESTMENTS -->
+    <div class="tab-content" id="tab-investments">
+      <section class="cards">
+        <div class="card card-invest-total">
+          <span class="card-label">Total Investido</span>
+          <span class="card-value">R$ 37.730,00</span>
+        </div>
+        <div class="card card-invest-current">
+          <span class="card-label">Valor Atual</span>
+          <span class="card-value">R$ 48.897,20</span>
+        </div>
+        <div class="card card-invest-profit">
+          <span class="card-label">Lucro / Prejuízo</span>
+          <span class="card-value amount-profit">+ R$ 11.167,20</span>
+        </div>
+        <div class="card card-count">
+          <span class="card-label">Total Ativos</span>
+          <span class="card-value">12</span>
+        </div>
+      </section>
+
+      <div class="commercial-subtabs" id="investSubtabs">
+        <button class="subtab-btn active" onclick="switchInvestSubtab('acoes')">Ações B3</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('fiis')">FIIs</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('etfs')">ETFs</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('renda-fixa')">Renda Fixa</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('cripto')">Cripto</button>
+        <button class="subtab-btn" onclick="switchInvestSubtab('internacional')">Internacional</button>
+      </div>
+
+      <!-- AÇÕES B3 -->
+      <div class="subtab-content active" id="subtab-acoes">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Ações B3</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker-badge">PETR4</span></td>
+                  <td>Petrobras PN</td><td>100</td><td>R$ 28,50</td><td>R$ 36,80</td><td>R$ 2.850,00</td><td>R$ 3.680,00</td>
+                  <td class="amount-profit">+ R$ 830,00</td><td>15/01/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- FIIs -->
+      <div class="subtab-content" id="subtab-fiis">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Fundos Imobiliários</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker-badge">HGLG11</span></td>
+                  <td>CSHG Logística FII</td><td>20</td><td>R$ 160,00</td><td>R$ 175,30</td><td>R$ 3.200,00</td><td>R$ 3.506,00</td>
+                  <td class="amount-profit">+ R$ 306,00</td><td>10/03/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ETFs -->
+      <div class="subtab-content" id="subtab-etfs">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>ETFs</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+              <tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum ETF cadastrado</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- RENDA FIXA -->
+      <div class="subtab-content" id="subtab-renda-fixa">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Renda Fixa</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Título</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+              <tbody><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum título cadastrado</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- CRIPTO -->
+      <div class="subtab-content" id="subtab-cripto">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Criptomoedas</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Moeda</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker-badge">BTC</span></td>
+                  <td>Bitcoin</td><td>0,05</td><td>R$ 350.000,00</td><td>R$ 520.000,00</td><td>R$ 17.500,00</td><td>R$ 26.000,00</td>
+                  <td class="amount-profit">+ R$ 8.500,00</td><td>20/11/2025</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- INTERNACIONAL -->
+      <div class="subtab-content" id="subtab-internacional">
+        <div class="invest-intl-subtabs">
+          <button class="intl-subtab-btn active" onclick="switchIntlSubtab('intl-etfs')">ETFs</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-rf')">ETF Renda Fixa</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-crypto')">ETF Cripto</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-acoes')">Ações</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-reits')">REITs</button>
+        </div>
+
+        <div class="intl-content active" id="intl-etfs">
+          <section class="transactions-section">
+            <div class="transactions-header"><h2>ETFs Internacionais</h2></div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="ticker-badge">VT</span></td><td>Vanguard Total World Stock ETF</td><td>10</td><td>$280,00</td><td>$310,50</td><td>$2.800,00</td><td>$3.105,00</td><td class="amount-profit">+ $305,00</td><td>10/02/2026</td></tr>
+                  <tr><td><span class="ticker-badge">QQQ</span></td><td>Invesco QQQ Trust (Nasdaq 100)</td><td>5</td><td>$450,00</td><td>$510,20</td><td>$2.250,00</td><td>$2.551,00</td><td class="amount-profit">+ $301,00</td><td>20/01/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="intl-content" id="intl-etf-rf">
+          <section class="transactions-section">
+            <div class="transactions-header"><h2>ETFs de Renda Fixa Internacional</h2></div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="ticker-badge">TLT</span></td><td>iShares 20+ Year Treasury Bond ETF</td><td>20</td><td>$95,00</td><td>$88,50</td><td>$1.900,00</td><td>$1.770,00</td><td class="amount-loss">- $130,00</td><td>05/04/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="intl-content" id="intl-etf-crypto">
+          <section class="transactions-section">
+            <div class="transactions-header"><h2>ETFs de Criptomoedas Internacional</h2></div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="ticker-badge">IBIT</span></td><td>iShares Bitcoin Trust ETF</td><td>15</td><td>$52,00</td><td>$68,30</td><td>$780,00</td><td>$1.024,50</td><td class="amount-profit">+ $244,50</td><td>15/03/2026</td></tr>
+                  <tr><td><span class="ticker-badge">BITO</span></td><td>ProShares Bitcoin Strategy ETF</td><td>25</td><td>$28,00</td><td>$35,70</td><td>$700,00</td><td>$892,50</td><td class="amount-profit">+ $192,50</td><td>01/05/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="intl-content" id="intl-acoes">
+          <section class="transactions-section">
+            <div class="transactions-header"><h2>Ações Internacionais</h2></div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="ticker-badge">AAPL</span></td><td>Apple Inc.</td><td>8</td><td>$185,00</td><td>$210,40</td><td>$1.480,00</td><td>$1.683,20</td><td class="amount-profit">+ $203,20</td><td>25/02/2026</td></tr>
+                  <tr><td><span class="ticker-badge">MSFT</span></td><td>Microsoft Corp.</td><td>5</td><td>$410,00</td><td>$455,80</td><td>$2.050,00</td><td>$2.279,00</td><td class="amount-profit">+ $229,00</td><td>20/03/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="intl-content" id="intl-reits">
+          <section class="transactions-section">
+            <div class="transactions-header"><h2>REITs</h2></div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preço Médio</th><th>Preço Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuízo</th><th>Data</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="ticker-badge">XLRE</span></td><td>Real Estate Select Sector SPDR Fund</td><td>30</td><td>$40,00</td><td>$43,20</td><td>$1.200,00</td><td>$1.296,00</td><td class="amount-profit">+ $96,00</td><td>10/04/2026</td></tr>
+                  <tr><td><span class="ticker-badge">VNQ</span></td><td>Vanguard Real Estate ETF</td><td>12</td><td>$85,00</td><td>$92,50</td><td>$1.020,00</td><td>$1.110,00</td><td class="amount-profit">+ $90,00</td><td>15/05/2026</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="detailModal" onclick="this.classList.remove('active')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="detailTitle">Detalhes</h3>
+        <button class="modal-close" onclick="document.getElementById('detailModal').classList.remove('active')">&times;</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- Tab switching ---
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // --- Subtab switching ---
+    function switchSubtab(subtab) {
+      document.querySelectorAll('#tab-commercial .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-commercial .subtab-content').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchInvestSubtab(subtab) {
+      document.querySelectorAll('#investSubtabs .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-investments .subtab-content').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchIntlSubtab(subtab) {
+      document.querySelectorAll('.invest-intl-subtabs .intl-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#subtab-internacional .intl-content').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById(subtab).classList.add('active');
+    }
+
+    // --- Charts ---
+    function initCharts() {
+      const muted = '#8b8fa3';
+
+      new Chart(document.getElementById('categoryChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Salário', 'Projeto', 'Serviço', 'Moradia', 'Alimentação', 'Serviços', 'Saúde'],
+          datasets: [
+            { label: 'Receitas', data: [5000, 2500, 2000, 0, 0, 0, 0], backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4 },
+            { label: 'Despesas', data: [0, 0, 0, 2080, 420, 150, 120], backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: muted, font: { size: 12 } } } },
+          scales: {
+            x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: 'rgba(128,128,128,0.15)' } },
+            y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } }
+          }
+        }
+      });
+
+      new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26'],
+          datasets: [
+            { label: 'Saldo', data: [1200, 2100, 1800, 3200, 2900, 3500, 3780], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b82f6' },
+            { label: 'Receitas', data: [5000, 6500, 7200, 8000, 8500, 9000, 9500], borderColor: 'rgba(34,197,94,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] },
+            { label: 'Despesas', data: [3800, 4400, 5400, 4800, 5600, 5500, 5720], borderColor: 'rgba(239,68,68,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: muted, font: { size: 12 } } } },
+          scales: {
+            x: { ticks: { color: muted, font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.15)' } },
+            y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } }
+          }
+        }
+      });
+    }
+
+    initCharts();
+  </script>
+</body>
+</html>

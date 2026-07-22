@@ -1,0 +1,300 @@
+{
+  "transactions": [
+    {
+      "date": "2026-07-21",
+      "type": "Receita",
+      "description": "Salario ",
+      "category": "Salario",
+      "value": "4000",
+      "id": "038346f2c5c0cdc5",
+      "created": "2026-07-21 09:11:21",
+      "updated": "2026-07-21 15:29:31"
+    },
+    {
+      "date": "2026-07-20",
+      "type": "Despesa",
+      "description": "alimentaçao",
+      "category": "Alimentacao",
+      "value": "500",
+      "id": "e2241e3d722a27b6",
+      "created": "2026-07-21 14:25:08"
+    },
+    {
+      "date": "2026-07-29",
+      "type": "Despesa",
+      "description": "IPTU",
+      "category": "Servico",
+      "value": "253.00",
+      "id": "f073286af70bfcaf",
+      "created": "2026-07-21 14:40:28"
+    },
+    {
+      "date": "2926-07-20",
+      "type": "Despesa",
+      "description": "Academia",
+      "category": "Servicos",
+      "value": "299.00",
+      "id": "8f91c251aa739b95",
+      "created": "2026-07-21 14:41:33"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Aluguel",
+      "category": "Moradia",
+      "value": "1600",
+      "id": "cf56119b066f911a",
+      "created": "2026-07-21 14:42:12",
+      "updated": "2026-07-21 14:42:28"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Cartao PaN",
+      "category": "Outros",
+      "value": "1253",
+      "id": "3b3956c973c29444",
+      "created": "2026-07-21 14:43:08"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Cartao 6C Banck",
+      "category": "Outros",
+      "value": "758",
+      "id": "57abb21d6a6ce0dc",
+      "created": "2026-07-21 14:43:59"
+    },
+    {
+      "date": "2026-07-07",
+      "type": "Receita",
+      "description": "Acões",
+      "category": "Outros",
+      "value": "800",
+      "id": "7abe4db4fb17a090",
+      "created": "2026-07-21 14:44:40"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Cartao Itau",
+      "category": "Outros",
+      "value": "189",
+      "id": "a09bc7943a2425ce",
+      "created": "2026-07-21 14:45:29"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Receita",
+      "description": "Acoes Anjo",
+      "category": "Outros",
+      "value": "1000",
+      "id": "1598c162c479e1a8",
+      "created": "2026-07-21 14:46:03"
+    },
+    {
+      "date": "2026-07-20",
+      "type": "Despesa",
+      "description": "Vivo  Interneti",
+      "category": "Outros",
+      "value": "256",
+      "id": "61dfd325525a5baa",
+      "created": "2026-07-21 14:46:45"
+    },
+    {
+      "date": "2026-07-15",
+      "type": "Despesa",
+      "description": "GPS Anjo",
+      "category": "Outros",
+      "value": "189",
+      "id": "0ec7fa418adb8599",
+      "created": "2026-07-21 14:47:20"
+    },
+    {
+      "date": "2026-02-17",
+      "type": "Despesa",
+      "description": "GPS Anjo",
+      "category": "Outros",
+      "value": "179",
+      "id": "2fccd71f47597668",
+      "created": "2026-07-21 14:47:49"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Tim Anjo",
+      "category": "Outros",
+      "value": "79",
+      "id": "64f9a5db4fab3c83",
+      "created": "2026-07-21 14:48:18"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Cemitério",
+      "category": "Outros",
+      "value": "189",
+      "id": "008bfd898508d58c",
+      "created": "2026-07-21 14:49:40"
+    },
+    {
+      "date": "2026-07-05",
+      "type": "Receita",
+      "description": "BA",
+      "category": "Outros",
+      "value": "1300",
+      "id": "844e9cd4f3791a94",
+      "created": "2026-07-21 15:29:09"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Cartao Amjo Nu Banco",
+      "category": "Outros",
+      "value": "650",
+      "id": "0d9ecc057a64f20d",
+      "created": "2026-07-21 15:36:30"
+    },
+    {
+      "date": "2026-07-07",
+      "type": "Despesa",
+      "description": "CPFL luz",
+      "category": "Outros",
+      "value": "853",
+      "id": "8b0543691ca5b962",
+      "created": "2026-07-21 15:37:40"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Osam",
+      "category": "Outros",
+      "value": "80",
+      "id": "9b57d4fafa96d9da",
+      "created": "2026-07-21 15:38:38"
+    },
+    {
+      "date": "2026-07-05",
+      "type": "Receita",
+      "description": "Mae osam e cemiterio",
+      "category": "Outros",
+      "value": "300",
+      "id": "6dc4ffa2d1531051",
+      "created": "2026-07-21 15:39:14"
+    }
+  ],
+  "investments": [
+    {
+      "category": "Acoes B3",
+      "ticker": "PETR4",
+      "name": "Petrobras PN",
+      "qty": "1",
+      "avg_price": "37.52",
+      "current_price": "41.63",
+      "date": "2026-05-15",
+      "id": "inv-1",
+      "created": "2026-07-21 13:02:56",
+      "updated": "2026-07-21 14:54:33"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "ITSA3",
+      "name": "ITSA3",
+      "qty": "4",
+      "avg_price": "12.82",
+      "current_price": "13.57",
+      "date": "2026-07-01",
+      "id": "2ba71128d0030c47",
+      "created": "2026-07-21 14:52:55"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "BBAS3",
+      "name": "BBAS3",
+      "qty": "1",
+      "avg_price": "19.44",
+      "current_price": "20.66",
+      "date": "2026-07-01",
+      "id": "9b76741b15cc5eab",
+      "created": "2026-07-21 14:55:45"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "MXRF11",
+      "name": "MXRF11",
+      "qty": "2",
+      "avg_price": "19.32",
+      "current_price": "19.32",
+      "date": "2026-07-01",
+      "id": "c69e5505bf7fe10c",
+      "created": "2026-07-21 14:56:47"
+    },
+    {
+      "category": "Renda Fixa",
+      "ticker": "CDB",
+      "name": "CDB 102%",
+      "qty": "1",
+      "avg_price": "1100",
+      "current_price": "1100",
+      "date": "2026-07-01",
+      "id": "be2068eb3bbd0358",
+      "created": "2026-07-21 15:15:13",
+      "updated": "2026-07-21 16:23:38"
+    },
+    {
+      "category": "Internacional",
+      "ticker": "ETFS",
+      "name": "XLRE",
+      "qty": "1.3756",
+      "avg_price": "41.60",
+      "current_price": "62.12",
+      "date": "2026-03-01",
+      "id": "58b0bfeea0428572",
+      "created": "2026-07-21 15:46:58"
+    },
+    {
+      "category": "FIIs",
+      "ticker": "XMRF11",
+      "name": "XMRF11",
+      "qty": "1",
+      "avg_price": "9.69",
+      "current_price": "9.62",
+      "date": "2026-07-01",
+      "id": "5506c4bad64c7e73",
+      "created": "2026-07-21 15:59:09"
+    }
+  ],
+  "suppliers": [
+    {
+      "name": "Tech Solutions",
+      "contact": "Joao",
+      "cnpj": "123456",
+      "phone": "1199999",
+      "email": "tech@test.com",
+      "id": "92214e8d302fafa8",
+      "created": "2026-07-21 09:27:38",
+      "updated": "2026-07-21 17:32:34"
+    }
+  ],
+  "purchases": [
+    {
+      "date": "2026-07-21",
+      "description": "Material escrito",
+      "supplier": "Tech Solutions",
+      "payment": "A Vista",
+      "value": "500",
+      "id": "69e9c0cb4222e687",
+      "created": "2026-07-21 09:27:38"
+    }
+  ],
+  "sales": [
+    {
+      "date": "2026-07-21",
+      "description": "Projeto site",
+      "payment": "3x",
+      "value": "3000",
+      "id": "2c065e788f5e776f",
+      "created": "2026-07-21 09:27:38"
+    }
+  ]
+}

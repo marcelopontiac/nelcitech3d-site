@@ -1,0 +1,40 @@
+{
+  "current_version": "3.2.0",
+  "installed_at": "15/07/2026",
+  "updates": [
+    {
+      "version": "3.2.0",
+      "date": "15/07/2026",
+      "status": "installed",
+      "description": "Nova aba de gerenciamento de assinatura, sistema de atualizações automáticas e melhorias gerais de performance.",
+      "features": [
+        "Aba Assinar com pagamento via PIX integrado",
+        "Sistema de atualizações automáticas sem custo",
+        "Otimização de carregamento dos gráficos (-40% tempo)",
+        "Suporte a exportação de relatórios em PDF",
+        "Correção: Cálculo de rendimentos em moedas estrangeiras"
+      ]
+    },
+    {
+      "version": "3.1.2",
+      "date": "01/07/2026",
+      "status": "installed",
+      "description": "Correções de segurança e melhorias na aba de investimentos internacionais.",
+      "features": [
+        "Correção de vulnerabilidade de sessão",
+        "Correção de cálculo de FIIs",
+        "Novos filtros por data na aba Comercial"
+      ]
+    },
+    {
+      "version": "3.1.1",
+      "date": "15/06/2026",
+      "status": "installed",
+      "description": "Correções de bugs reportados pelos usuários.",
+      "features": [
+        "Correção no gráfico de evolução mensal",
+        "Ajuste no layout mobile da tabela de investimentos"
+      ]
+    }
+  ]
+}

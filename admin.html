@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Admin - NELCi Tech 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06080f;--card:#0d1017;--border:#1a1f2e;--green:#00ff88;--blue:#3b82f6;--purple:#8b5cf6;--yellow:#eab308;--red:#ef4444;--text:#e2e8f0;--muted:#64748b}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:1.1rem;font-weight:700}.topbar h1 span{color:var(--green)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.badge-admin{background:var(--red);color:#fff;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.7rem;font-weight:700}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;border-radius:8px;cursor:pointer;font-size:0.8rem}.btn-logout:hover{color:var(--text);border-color:var(--text)}
+main{max-width:1200px;margin:0 auto;padding:1.5rem}
+.section-title{font-size:1.2rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem}
+.stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem}
+.stat-value{font-size:1.8rem;font-weight:800}
+.stat-value.green{color:var(--green)}.stat-value.blue{color:var(--blue)}.stat-value.yellow{color:var(--yellow)}.stat-value.red{color:var(--red)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem}
+.panel-header h2{font-size:1rem;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:0.6rem 0.8rem;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);border-bottom:2px solid var(--border);font-weight:600}
+td{padding:0.6rem 0.8rem;font-size:0.85rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.badge{padding:0.2rem 0.6rem;border-radius:20px;font-size:0.72rem;font-weight:600}
+.badge-yes{background:rgba(0,255,136,0.12);color:var(--green)}.badge-no{background:rgba(239,68,68,0.12);color:var(--red)}
+.code-box{font-family:monospace;font-size:0.82rem;background:var(--bg);padding:0.3rem 0.6rem;border-radius:6px;border:1px solid var(--border)}
+.btn{border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-green{background:var(--green);color:#000}.btn-green:hover{opacity:0.8}
+.btn-red{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}.btn-red:hover{background:rgba(239,68,68,0.25)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{opacity:0.8}
+.gen-form{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap}
+.gen-form input{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0.5rem 0.8rem;width:80px;font-size:0.85rem;text-align:center}
+.copied{position:fixed;top:1rem;right:1rem;background:var(--green);color:#000;padding:0.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:0.85rem;z-index:999;animation:fadeInOut 2s forwards}
+@keyframes fadeInOut{0%{opacity:0;transform:translateY(-10px)}10%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0}}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:0.9rem}
+.tab-bar{display:flex;gap:0.3rem;margin-bottom:1.5rem;border-bottom:2px solid var(--border);padding-bottom:0}
+.tab-btn{background:none;border:none;color:var(--muted);padding:0.7rem 1.2rem;cursor:pointer;font-size:0.88rem;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s}
+.tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+.tab-page{display:none}.tab-page.active{display:block}
+@media(max-width:768px){main{padding:1rem}.stats{grid-template-columns:1fr 1fr}.gen-form{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div class="topbar">
+<h1>🛡️ Admin <span>Panel</span></h1>
+<div class="topbar-right">
+<span class="badge-admin">ADMIN</span>
+<button class="btn-logout" onclick="localStorage.removeItem('nelci_token');fetch('/api/logout',{method:'POST'}).then(()=>window.location.href='/login.html')">Sair</button>
+</div>
+</div>
+<main>
+<div class="stats">
+<div class="stat-card"><div class="stat-label">Usuarios</div><div class="stat-value blue" id="totalUsers">0</div></div>
+<div class="stat-card"><div class="stat-label">Premium</div><div class="stat-value green" id="totalPremium">0</div></div>
+<div class="stat-card"><div class="stat-label">Codigos Disponiveis</div><div class="stat-value yellow" id="totalCodes">0</div></div>
+<div class="stat-card"><div class="stat-label">Codigos Usados</div><div class="stat-value red" id="totalUsed">0</div></div>
+</div>
+
+<div class="tab-bar">
+<button class="tab-btn active" onclick="showAdminTab('users',this)">Usuarios</button>
+<button class="tab-btn" onclick="showAdminTab('codes',this)">Codigos</button>
+<button class="tab-btn" onclick="showAdminTab('version',this)">Versoes</button>
+</div>
+
+<!-- USERS TAB -->
+<div class="tab-page active" id="atp-users">
+<div class="panel">
+<div class="panel-header"><h2>👥 Todos os Usuarios</h2><button class="btn btn-blue" onclick="loadData()">Atualizar</button></div>
+<div id="usersTable"></div>
+</div>
+</div>
+
+<!-- CODES TAB -->
+<div class="tab-page" id="atp-codes">
+<div class="panel">
+<div class="panel-header">
+<h2>🔑 Gerar Codigos de Ativacao</h2>
+</div>
+<div class="gen-form" style="margin-bottom:1rem">
+<span style="font-size:0.85rem;color:var(--muted)">Quantidade:</span>
+<input type="number" id="codeCount" value="5" min="1" max="50">
+<button class="btn btn-green" onclick="generateCodes()">Gerar Codigos</button>
+</div>
+<div id="newCodes" style="display:none;margin-bottom:1rem"></div>
+</div>
+<div class="panel">
+<div class="panel-header"><h2>📋 Todos os Codigos</h2></div>
+<div id="codesTable"></div>
+</div>
+</div>
+
+<!-- VERSION TAB -->
+<div class="tab-page" id="atp-version">
+<div class="panel">
+<div class="panel-header"><h2>📦 Versao Atual</h2></div>
+<div id="versionInfo"></div>
+</div>
+</div>
+</main>
+
+<script>
+let adminData = {users:[], licenses:{codes:[]}};
+
+const _urlParams = new URLSearchParams(window.location.search);
+const _urlToken = _urlParams.get('token');
+if(_urlToken){localStorage.setItem('nelci_token', _urlToken);window.history.replaceState({},'', '/admin.html');}
+const _token = localStorage.getItem('nelci_token');
+const _authHeaders = _token ? {'Authorization':'Bearer '+_token} : {};
+
+fetch('/api/me', {credentials:'same-origin', headers: _authHeaders}).then(r=>r.json()).then(d=>{
+  if(!d.logged_in || !d.is_admin){ window.location.href = '/login.html'; return; }
+  document.getElementById('adminName').textContent = d.name;
+  loadData();
+}).catch(()=>{ window.location.href = '/login.html'; });
+
+function showAdminTab(tab, btn) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('atp-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function loadData() {
+  fetch('/api/users',{headers:_authHeaders}).then(r=>r.json()).then(d=>{
+    adminData.users = d.users || [];
+    document.getElementById('totalUsers').textContent = adminData.users.length;
+    document.getElementById('totalPremium').textContent = adminData.users.filter(u=>u.premium).length;
+    let html = '<table><thead><tr><th>Nome</th><th>Email</th><th>Premium</th><th>Licenca</th><th>Criado em</th></tr></thead><tbody>';
+    if(adminData.users.length===0) html+='<tr><td colspan="5" class="empty">Nenhum usuario cadastrado</td></tr>';
+    adminData.users.forEach(u=>{
+      html+='<tr><td>'+u.name+'</td><td>'+u.email+'</td><td><span class="badge '+(u.premium?'badge-yes':'badge-no')+'">'+(u.premium?'SIM':'NAO')+'</span></td><td>'+(u.license?'<span class="code-box">'+u.license+'</span>':'—')+'</td><td>'+u.created+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('usersTable').innerHTML = html;
+  });
+
+  fetch('/api/licenses',{headers:_authHeaders}).then(r=>r.json()).then(d=>{
+    adminData.licenses = d;
+    const codes = d.codes || [];
+    document.getElementById('totalCodes').textContent = codes.filter(c=>!c.used).length;
+    document.getElementById('totalUsed').textContent = codes.filter(c=>c.used).length;
+    let html = '<table><thead><tr><th>Codigo</th><th>Status</th><th>Usado por</th><th>Data</th><th>Acao</th></tr></thead><tbody>';
+    if(codes.length===0) html+='<tr><td colspan="5" class="empty">Nenhum codigo gerado</td></tr>';
+    codes.forEach(c=>{
+      html+='<tr><td><span class="code-box">'+c.code+'</span></td><td><span class="badge '+(c.used?'badge-no':'badge-yes')+'">'+(c.used?'USADO':'DISPONIVEL')+'</span></td><td>'+(c.used_by||'—')+'</td><td>'+c.created+'</td><td>'+(c.used?'':'<button class="btn btn-red" onclick="deleteCode(\''+c.code+'\')">Excluir</button>')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('codesTable').innerHTML = html;
+  });
+
+  fetch('/api/version',{headers:_authHeaders}).then(r=>r.json()).then(d=>{
+    let html = '<p style="margin-bottom:0.5rem;font-size:0.9rem">Versao atual: <strong style="color:var(--green)">v'+d.current_version+'</strong></p>';
+    html+='<table><thead><tr><th>Versao</th><th>Data</th><th>Status</th></tr></thead><tbody>';
+    (d.updates||[]).forEach(u=>{
+      html+='<tr><td>v'+u.version+'</td><td>'+u.date+'</td><td><span class="badge '+(u.status==='installed'?'badge-yes':'badge-no')+'">'+u.status+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('versionInfo').innerHTML = html;
+  });
+}
+
+function generateCodes() {
+  const count = document.getElementById('codeCount').value;
+  fetch('/api/admin/generate-code',{
+    method:'POST',headers:{'Content-Type':'application/json',..._authHeaders},body:JSON.stringify({count:parseInt(count)})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      let html = '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem"><p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.8rem">Codigos gerados (clique para copiar):</p>';
+      d.codes.forEach(c=>{
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border)"><span class="code-box" style="cursor:pointer" onclick="copyCode(\''+c+'\')">'+c+'</span><span style="font-size:0.75rem;color:var(--muted)">clique p/ copiar</span></div>';
+      });
+      html+='</div>';
+      document.getElementById('newCodes').innerHTML = html;
+      document.getElementById('newCodes').style.display = 'block';
+      loadData();
+    }
+  });
+}
+
+function deleteCode(code) {
+  if(!confirm('Excluir codigo '+code+'?')) return;
+  fetch('/api/admin/delete-code',{method:'POST',headers:{'Content-Type':'application/json',..._authHeaders},body:JSON.stringify({code:code})}).then(()=>loadData());
+}
+
+function copyCode(code) {
+  var ta = document.createElement('textarea');
+  ta.value = code;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    var div = document.createElement('div');
+    div.className = 'copied';
+    div.textContent = 'Copiado: ' + code;
+    document.body.appendChild(div);
+    setTimeout(()=>div.remove(), 2500);
+  } catch(e) { prompt('Copie o codigo:', code); }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>

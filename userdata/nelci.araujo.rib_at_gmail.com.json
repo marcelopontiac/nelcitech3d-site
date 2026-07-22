@@ -1,0 +1,370 @@
+{
+  "transactions": [
+    {
+      "date": "2026-07-01",
+      "type": "Receita",
+      "description": "Salario",
+      "category": "Salario",
+      "value": "500",
+      "id": "tx-1",
+      "created": "2026-07-21 17:36:23",
+      "updated": "2026-07-21 17:38:12"
+    },
+    {
+      "date": "2026-07-05",
+      "type": "Receita",
+      "description": "Freelance Site",
+      "category": "Projeto",
+      "value": "2500",
+      "id": "tx-2",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-02",
+      "type": "Despesa",
+      "description": "Aluguel",
+      "category": "Moradia",
+      "value": "1800",
+      "id": "tx-4",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-03",
+      "type": "Despesa",
+      "description": "Supermercado",
+      "category": "Alimentacao",
+      "value": "420",
+      "id": "tx-5",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-06",
+      "type": "Despesa",
+      "description": "Energia Eletrica",
+      "category": "Moradia",
+      "value": "280",
+      "id": "tx-7",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-08",
+      "type": "Receita",
+      "description": "Consultoria TI",
+      "category": "Servico",
+      "value": "2000",
+      "id": "tx-3",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-04",
+      "type": "Despesa",
+      "description": "Internet + TV",
+      "category": "Servicos",
+      "value": "150",
+      "id": "tx-6",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Academia",
+      "category": "Saude",
+      "value": "120",
+      "id": "tx-8",
+      "created": "2026-07-21 17:36:23"
+    }
+  ],
+  "investments": [
+    {
+      "category": "Acoes B3",
+      "ticker": "PETR4",
+      "name": "Petrobras PN",
+      "qty": "100",
+      "avg_price": "28.50",
+      "current_price": "36.80",
+      "date": "2026-01-15",
+      "id": "inv-1",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "ITUB4",
+      "name": "Itau Unibanco PN",
+      "qty": "80",
+      "avg_price": "25.30",
+      "current_price": "31.50",
+      "date": "2026-03-10",
+      "id": "inv-3",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "FIIs",
+      "ticker": "XPML11",
+      "name": "XP Malls FII",
+      "qty": "15",
+      "avg_price": "105.00",
+      "current_price": "112.80",
+      "date": "2026-04-15",
+      "id": "inv-6",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "VALE5",
+      "name": "Vale ON",
+      "qty": "50",
+      "avg_price": "62.00",
+      "current_price": "58.90",
+      "date": "2026-02-20",
+      "id": "inv-2",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "FIIs",
+      "ticker": "HGLG11",
+      "name": "CSHG Logistica FII",
+      "qty": "20",
+      "avg_price": "160.00",
+      "current_price": "175.30",
+      "date": "2026-03-10",
+      "id": "inv-5",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Acoes B3",
+      "ticker": "BBDC4",
+      "name": "Bradesco PN",
+      "qty": "60",
+      "avg_price": "14.80",
+      "current_price": "15.20",
+      "date": "2026-04-05",
+      "id": "inv-4",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "ETFs",
+      "ticker": "BOVA11",
+      "name": "iShares Ibovespa ETF",
+      "qty": "30",
+      "avg_price": "110.00",
+      "current_price": "118.50",
+      "date": "2026-02-01",
+      "id": "inv-8",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "FIIs",
+      "ticker": "KNRI11",
+      "name": "Kinea Renda Imob FII",
+      "qty": "10",
+      "avg_price": "135.00",
+      "current_price": "142.60",
+      "date": "2026-05-01",
+      "id": "inv-7",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "ETFs",
+      "ticker": "HASH11",
+      "name": "Hashdex Crypto ETF",
+      "qty": "25",
+      "avg_price": "45.00",
+      "current_price": "52.30",
+      "date": "2026-03-15",
+      "id": "inv-9",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "ETFs",
+      "ticker": "QQQ",
+      "name": "Invesco QQQ Trust",
+      "qty": "5",
+      "avg_price": "450.00",
+      "current_price": "510.20",
+      "date": "2026-01-20",
+      "id": "inv-14",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "ETFs",
+      "ticker": "VT",
+      "name": "Vanguard Total World Stock ETF",
+      "qty": "10",
+      "avg_price": "280.00",
+      "current_price": "310.50",
+      "date": "2026-02-10",
+      "id": "inv-13",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "ETF Renda Fixa",
+      "ticker": "TLT",
+      "name": "iShares 20+ Year Treasury Bond ETF",
+      "qty": "20",
+      "avg_price": "95.00",
+      "current_price": "88.50",
+      "date": "2026-04-05",
+      "id": "inv-15",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "ETF Cripto",
+      "ticker": "BITO",
+      "name": "ProShares Bitcoin Strategy ETF",
+      "qty": "25",
+      "avg_price": "28.00",
+      "current_price": "35.70",
+      "date": "2026-05-01",
+      "id": "inv-17",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "Acoes",
+      "ticker": "AAPL",
+      "name": "Apple Inc.",
+      "qty": "8",
+      "avg_price": "185.00",
+      "current_price": "210.40",
+      "date": "2026-02-25",
+      "id": "inv-18",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "ETF Cripto",
+      "ticker": "IBIT",
+      "name": "iShares Bitcoin Trust ETF",
+      "qty": "15",
+      "avg_price": "52.00",
+      "current_price": "68.30",
+      "date": "2026-03-15",
+      "id": "inv-16",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "Acoes",
+      "ticker": "MSFT",
+      "name": "Microsoft Corp.",
+      "qty": "5",
+      "avg_price": "410.00",
+      "current_price": "455.80",
+      "date": "2026-03-20",
+      "id": "inv-19",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "REITs",
+      "ticker": "VNQ",
+      "name": "Vanguard Real Estate ETF",
+      "qty": "12",
+      "avg_price": "85.00",
+      "current_price": "92.50",
+      "date": "2026-05-15",
+      "id": "inv-21",
+      "created": "2026-07-21 17:36:23",
+      "updated": "2026-07-21 17:37:03"
+    },
+    {
+      "category": "Internacional",
+      "intl_sub": "REITs",
+      "ticker": "XLRE",
+      "name": "Real Estate Select Sector SPDR Fund",
+      "qty": "30",
+      "avg_price": "40.00",
+      "current_price": "43.20",
+      "date": "2026-04-10",
+      "id": "inv-20",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "category": "Renda Fixa",
+      "ticker": "LCI",
+      "name": "Banco Inter LCI 115%",
+      "qty": "1",
+      "avg_price": "3000.00",
+      "current_price": "3120.00",
+      "date": "2026-06-01",
+      "id": "inv-11",
+      "created": "2026-07-21 17:36:24"
+    },
+    {
+      "category": "Renda Fixa",
+      "ticker": "CDB",
+      "name": "Banco XP CDB 140%",
+      "qty": "1",
+      "avg_price": "5000.00",
+      "current_price": "5350.00",
+      "date": "2026-01-01",
+      "id": "inv-10",
+      "created": "2026-07-21 17:36:24"
+    },
+    {
+      "category": "Cripto",
+      "ticker": "BTC",
+      "name": "Bitcoin",
+      "qty": "0.05",
+      "avg_price": "350000.00",
+      "current_price": "520000.00",
+      "date": "2025-11-20",
+      "id": "inv-12",
+      "created": "2026-07-21 17:36:24"
+    }
+  ],
+  "suppliers": [
+    {
+      "name": "Tech Solutions Ltda",
+      "contact": "Joao Pereira",
+      "cnpj": "12.345.678/0001-90",
+      "phone": "(11) 99999-1234",
+      "email": "contato@techsolutions.com.br",
+      "id": "sp-1",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "name": "Distribuidora Central",
+      "contact": "Ana Lima",
+      "cnpj": "98.765.432/0001-10",
+      "phone": "(11) 98888-5678",
+      "email": "vendas@distcentral.com.br",
+      "id": "sp-2",
+      "created": "2026-07-21 17:36:23"
+    }
+  ],
+  "purchases": [
+    {
+      "date": "2026-07-01",
+      "description": "Compra de material de escritorio",
+      "supplier": "Tech Solutions Ltda",
+      "payment": "A Vista",
+      "value": "1250",
+      "id": "pu-1",
+      "created": "2026-07-21 17:36:23"
+    },
+    {
+      "date": "2026-07-10",
+      "description": "Compra de equipamentos",
+      "supplier": "Distribuidora Central",
+      "payment": "6x",
+      "value": "8750",
+      "id": "pu-2",
+      "created": "2026-07-21 17:36:23"
+    }
+  ],
+  "sales": [
+    {
+      "date": "2026-07-05",
+      "description": "Venda de consultoria",
+      "payment": "3x",
+      "value": "4500",
+      "id": "sl-1",
+      "created": "2026-07-21 17:36:23"
+    }
+  ]
+}

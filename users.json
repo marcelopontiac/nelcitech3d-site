@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "name": "Marcelo",
+      "email": "marcelo.silva504@gmail.com",
+      "password_hash": "80296072effbc61e23413b4f9e22aa329b4cd3eb14e4c22ae639b499c4ba9682",
+      "premium": false,
+      "license": "",
+      "created": "2026-07-20 20:17:10"
+    },
+    {
+      "name": "Nelci Ribeiro",
+      "email": "nelci.araujo.rib@gmail.com",
+      "password_hash": "80296072effbc61e23413b4f9e22aa329b4cd3eb14e4c22ae639b499c4ba9682",
+      "premium": false,
+      "license": "",
+      "created": "2026-07-21 10:09:07"
+    }
+  ]
+}

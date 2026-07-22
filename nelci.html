@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>NELCi Tech 3D - Finance Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0f1117; --bg-card: #1a1d27; --bg-hover: #242836; --border: #2a2e3a; --text: #e4e6f0; --text-muted: #8b8fa3; --green: #22c55e; --green-bg: rgba(34,197,94,0.12); --red: #ef4444; --red-bg: rgba(239,68,68,0.12); --blue: #3b82f6; --blue-bg: rgba(59,130,246,0.12); --purple: #a855f7; --purple-bg: rgba(168,85,247,0.12); --yellow: #eab308; --yellow-bg: rgba(234,179,8,0.12); --radius: 12px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; text-align: center; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .demo-back-btn { background: rgba(255,255,255,0.2); color: white; text-decoration: none; padding: 0.35rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; transition: background 0.2s; margin-left: 0.5rem; }
+    .demo-back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.8rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.1rem; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.75rem; }
+
+    .menu-fab { width: 42px; height: 42px; border-radius: 10px; background: var(--bg-hover); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; z-index: 310; position: relative; }
+    .menu-fab:hover { background: var(--border); }
+    .menu-fab.open { background: var(--green); border-color: var(--green); }
+    .menu-fab.open svg circle { fill: #000; }
+    .menu-fab svg { width: 20px; height: 20px; }
+    .menu-fab svg circle { fill: var(--text-muted); transition: fill 0.2s; }
+
+    .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 250; }
+    .menu-overlay.active { display: block; }
+
+    .menu-popup { display: none; position: fixed; top: 105px; right: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 0.4rem; z-index: 260; min-width: 230px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .menu-popup.active { display: block; animation: menuFade 0.15s ease-out; }
+    @keyframes menuFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .menu-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 1rem; border: none; background: none; color: var(--text-muted); width: 100%; border-radius: 10px; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; }
+    .menu-item:hover { background: var(--bg-hover); color: var(--text); }
+    .menu-item.active { color: var(--blue); background: var(--blue-bg); font-weight: 600; }
+    .menu-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .menu-item.nav-updates.active { color: var(--yellow); background: var(--yellow-bg); }
+    .menu-item.nav-subscribe.active { color: var(--green); background: var(--green-bg); }
+    .menu-divider { height: 1px; background: var(--border); margin: 0.3rem 0.5rem; }
+
+    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .card-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-value { font-size: 1.6rem; font-weight: 700; }
+    .card-balance { border-left: 4px solid var(--blue); }
+    .card-balance .card-value { color: var(--blue); }
+    .card-income { border-left: 4px solid var(--green); }
+    .card-income .card-value { color: var(--green); }
+    .card-expense { border-left: 4px solid var(--red); }
+    .card-expense .card-value { color: var(--red); }
+    .card-count { border-left: 4px solid var(--purple); }
+    .card-count .card-value { color: var(--purple); }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .chart-container h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }
+
+    .transactions-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+    .transactions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .transactions-header h2 { font-size: 1.1rem; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 0.7rem 0.8rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 2px solid var(--border); font-weight: 600; }
+    td { padding: 0.7rem 0.8rem; font-size: 0.88rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: var(--bg-hover); }
+
+    .amount-positive { color: var(--green); font-weight: 600; }
+    .amount-negative { color: var(--red); font-weight: 600; }
+    .amount-profit { color: var(--green); font-weight: 600; }
+    .amount-loss { color: var(--red); font-weight: 600; }
+
+    .type-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .type-income { background: var(--green-bg); color: var(--green); }
+    .type-expense { background: var(--red-bg); color: var(--red); }
+
+    .payment-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500; white-space: nowrap; }
+    .pay-avista { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .pay-aprazo { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+    .ticker-badge { display: inline-block; background: var(--blue-bg); color: var(--blue); padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3px; }
+
+    .commercial-subtabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); background: var(--bg-card); border-radius: var(--radius) var(--radius) 0 0; padding: 0.3rem 0.3rem 0; border: 1px solid var(--border); border-bottom: none; overflow-x: auto; }
+    .subtab-btn { background: none; border: none; color: var(--text-muted); padding: 0.75rem 1.4rem; cursor: pointer; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; border-radius: var(--radius) var(--radius) 0 0; transition: all 0.2s; position: relative; white-space: nowrap; }
+    .subtab-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: transparent; transition: background 0.2s; }
+    .subtab-btn:hover { color: var(--text); background: var(--bg-hover); }
+    .subtab-btn.active { color: var(--blue); background: var(--bg); font-weight: 600; }
+    .subtab-btn.active::after { background: var(--blue); }
+    .subtab-content { display: none; }
+    .subtab-content.active { display: block; }
+
+    .invest-intl-subtabs { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .intl-subtab-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .intl-subtab-btn:hover { background: var(--bg-hover); color: var(--text); }
+    .intl-subtab-btn.active { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); font-weight: 600; }
+    .intl-content { display: none; }
+    .intl-content.active { display: block; }
+
+    .plan-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+    .plan-featured { border-color: var(--green); position: relative; }
+    .plan-featured::before { content: 'MAIS POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 1rem; border-radius: 20px; letter-spacing: 0.5px; }
+    .plan-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .plan-price { font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0; }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+    .plan-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .plan-features { list-style: none; text-align: left; margin: 1.5rem 0; }
+    .plan-features li { padding: 0.5rem 0; font-size: 0.9rem; display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted); }
+    .plan-features .check { color: var(--green); font-weight: 700; }
+    .plan-btn { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .plan-btn-primary { background: var(--green); color: #000; }
+    .plan-btn-primary:hover { background: #1aad4f; transform: translateY(-1px); }
+
+    .pix-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; text-align: center; margin-top: 1.5rem; }
+    .pix-box h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; font-weight: 500; }
+    .pix-key-row { display: flex; gap: 0.5rem; align-items: center; justify-content: center; }
+    .pix-key { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1rem; font-family: monospace; font-size: 0.85rem; color: var(--green); flex: 1; max-width: 400px; }
+    .copy-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .copy-btn:hover { background: #2563eb; }
+
+    .update-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+    .update-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+    .update-version { font-size: 1.1rem; font-weight: 700; }
+    .update-date { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .update-status { font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.8rem; border-radius: 20px; }
+    .status-installed { background: var(--green-bg); color: var(--green); }
+    .status-available { background: var(--blue-bg); color: var(--blue); }
+    .update-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.8rem; line-height: 1.5; }
+    .update-features { list-style: none; margin-bottom: 1rem; }
+    .update-features li { padding: 0.3rem 0; font-size: 0.85rem; color: var(--text-muted); }
+    .update-features li::before { content: '- '; color: var(--blue); }
+    .update-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .update-btn:hover { background: #2563eb; }
+    .update-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pass-wrap{position:relative;display:inline-block;width:100%}
+    .pass-wrap input{padding-right:2.8rem}
+    .pass-toggle{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text);cursor:pointer;font-size:1.2rem;padding:0.4rem;line-height:1;transition:color 0.2s;opacity:0.7}
+    .pass-toggle:hover{color:var(--green);opacity:1}
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+
+    #lockScreen { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:2rem; }
+    #lockScreen.active { display:flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { font-size: 1rem; font-weight: 600; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 0.3rem; }
+    .modal-close:hover { color: var(--text); }
+
+    .copied { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 0.6rem 1.2rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; z-index: 999; animation: fadeIn 0.2s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+    @media (max-width: 768px) {
+      .charts-row { grid-template-columns: 1fr; }
+      main { padding: 1rem; }
+      .header-content { gap: 0.5rem; }
+      header h1 { font-size: 0.95rem; }
+    }
+
+    .admin-fab { display:none; position:fixed; bottom:24px; right:24px; width:56px; height:56px; border-radius:16px; background:var(--green); color:#000; border:none; font-size:28px; font-weight:700; cursor:pointer; z-index:200; box-shadow:0 4px 20px rgba(34,197,94,0.4); transition:all 0.2s; }
+    .admin-fab:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(34,197,94,0.5); }
+    .admin-fab.visible { display:flex; align-items:center; justify-content:center; }
+
+    .modal-add { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:400; align-items:flex-end; justify-content:center; }
+    .modal-add.active { display:flex; }
+    .modal-add-card { background:var(--bg-card); border:1px solid var(--border); border-radius:20px 20px 0 0; width:100%; max-width:500px; max-height:85vh; overflow-y:auto; padding:1.5rem; animation:slideUp 0.25s ease-out; }
+    @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+    .modal-add-title { font-size:1.1rem; font-weight:700; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center; }
+    .modal-add-close { background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; padding:0.3rem; }
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.4rem; font-weight:600; }
+    .form-group input, .form-group select { width:100%; padding:0.75rem 1rem; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-size:0.9rem; transition:border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color:var(--green); outline:none; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+    .form-submit { width:100%; padding:0.85rem; background:var(--green); color:#000; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; margin-top:0.5rem; transition:all 0.2s; }
+    .form-submit:hover { background:#1aad4f; }
+    .form-submit:disabled { opacity:0.5; cursor:not-allowed; }
+    .admin-badge { display:none; background:var(--green-bg); color:var(--green); font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:6px; letter-spacing:0.5px; }
+    .admin-badge.visible { display:inline-block; }
+    .btn-del { background:none; border:none; color:var(--red); cursor:pointer; font-size:1rem; padding:0.2rem 0.4rem; border-radius:4px; }
+    .btn-del:hover { background:var(--red-bg); }
+    .btn-edit { background:none; border:none; color:var(--blue); cursor:pointer; font-size:1rem; padding:0.2rem 0.4rem; border-radius:4px; }
+    .btn-edit:hover { background:var(--blue-bg); }
+
+    .admin-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:0.8rem; margin-bottom:1.5rem; }
+    .admin-tab-bar { display:flex; gap:0.3rem; margin-bottom:1.5rem; border-bottom:2px solid var(--border); padding-bottom:0; }
+    .admin-tab-btn { background:none; border:none; color:var(--text-muted); padding:0.7rem 1.2rem; cursor:pointer; font-size:0.88rem; font-weight:500; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.2s; }
+    .admin-tab-btn:hover { color:var(--text); }
+    .admin-tab-btn.active { color:var(--green); border-bottom-color:var(--green); font-weight:600; }
+    .admin-subtab { display:none; }
+    .admin-subtab.active { display:block; }
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-bottom:1.5rem; }
+    .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem; }
+    .panel-header h2 { font-size:1rem; font-weight:600; }
+    .badge { padding:0.2rem 0.6rem; border-radius:20px; font-size:0.72rem; font-weight:600; }
+    .badge-yes { background:rgba(0,255,136,0.12); color:var(--green); }
+    .badge-no { background:rgba(239,68,68,0.12); color:var(--red); }
+    .code-box { font-family:monospace; font-size:0.82rem; background:var(--bg); padding:0.3rem 0.6rem; border-radius:6px; border:1px solid var(--border); }
+    .btn { border:none; border-radius:8px; padding:0.5rem 1rem; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-green { background:var(--green); color:#000; }
+    .btn-green:hover { opacity:0.8; }
+    .btn-red { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+    .btn-red:hover { background:rgba(239,68,68,0.25); }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-blue:hover { opacity:0.8; }
+    .gen-form { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+    .gen-form input { background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:0.5rem 0.8rem; width:80px; font-size:0.85rem; text-align:center; }
+    .admin-empty { text-align:center; padding:2rem; color:var(--text-muted); font-size:0.9rem; }
+
+    .month-tabs { display:flex; gap:0; margin-bottom:1.5rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:0.3rem; overflow-x:auto; }
+    .month-tab { background:none; border:none; color:var(--text-muted); padding:0.6rem 1rem; cursor:pointer; font-size:0.8rem; font-weight:500; border-radius:8px; transition:all 0.2s; white-space:nowrap; flex-shrink:0; }
+    .month-tab:hover { color:var(--text); background:var(--bg-hover); }
+    .month-tab.active { color:#fff; background:var(--blue); font-weight:600; }
+
+    .user-data-section { background:var(--bg-card); border:1px solid var(--green); border-left:4px solid var(--green); border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem; }
+    .user-data-section h3 { font-size:0.9rem; color:var(--green); margin-bottom:0.8rem; }
+
+    body:not(.premium) .admin-fab { display:none !important; }
+    body:not(.premium) .btn-edit { display:none !important; }
+    body:not(.premium) .btn-del { display:none !important; }
+    body:not(.premium) .demo-download { display:none !important; }
+    body.premium #downloadsLocked { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    Finance Dashboard &mdash; Modo Demo | Dados de exemplo para demonstracao
+    <a href="/index.html" class="demo-back-btn">Voltar ao Site</a>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Finance Dashboard</h1>
+        <span class="admin-badge" id="adminBadge">ADMIN</span>
+        <span class="subtitle" id="userDisplay">Controle financeiro completo</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.8rem">
+        <button class="menu-fab" id="menuFab" onclick="toggleMenu()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <div class="menu-popup" id="menuPopup">
+    <button class="menu-item active" onclick="switchTab('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="menu-item" onclick="switchTab('commercial', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+      Comercial
+    </button>
+    <button class="menu-item" onclick="switchTab('investments', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Investimentos
+    </button>
+    <button class="menu-item nav-updates" onclick="switchTab('updates', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      Atualizacoes
+    </button>
+    <button class="menu-item nav-subscribe" onclick="switchTab('subscribe', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Assinar
+    </button>
+    <div class="menu-divider"></div>
+    <button class="menu-item" id="menuAdmin" style="display:none" onclick="switchTab('admin', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Painel Admin
+    </button>
+    <button class="menu-item" onclick="switchTab('redeem', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Resgatar Codigo
+    </button>
+    <button class="menu-item" onclick="switchTab('downloads', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Downloads
+    </button>
+    <button class="menu-item" onclick="switchTab('ai', this)" id="menuAiTab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.95-1.4 3.58-3.25 3.93L12 22"/><path d="M12 2a4 4 0 00-4 4c0 1.95 1.4 3.58 3.25 3.93"/><circle cx="12" cy="6" r="1"/></svg>
+      Assistente IA
+    </button>
+    <button class="menu-item" onclick="switchTab('options', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      Opcoes
+    </button>
+  </div>
+
+  <main>
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <section class="cards">
+        <div class="card card-balance">
+          <span class="card-label">Saldo</span>
+          <span class="card-value amount-positive" id="card-balance">R$ 3.780,00</span>
+        </div>
+        <div class="card card-income">
+          <span class="card-label">Receitas</span>
+          <span class="card-value" id="card-income">R$ 9.500,00</span>
+        </div>
+        <div class="card card-expense">
+          <span class="card-label">Despesas</span>
+          <span class="card-value" id="card-expense">R$ 5.720,00</span>
+        </div>
+        <div class="card card-count">
+          <span class="card-label">Transacoes</span>
+          <span class="card-value" id="card-count">8</span>
+        </div>
+      </section>
+      <section class="charts-row">
+        <div class="chart-container">
+          <h3>Receitas vs Despesas por Categoria</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Evolucao Mensal</h3>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </section>
+      <div class="month-tabs" id="monthTabs">
+        <button class="month-tab active" onclick="switchMonth('todos',this)">Todos</button>
+        <button class="month-tab" onclick="switchMonth('01',this)">Jan</button>
+        <button class="month-tab" onclick="switchMonth('02',this)">Fev</button>
+        <button class="month-tab" onclick="switchMonth('03',this)">Mar</button>
+        <button class="month-tab" onclick="switchMonth('04',this)">Abr</button>
+        <button class="month-tab" onclick="switchMonth('05',this)">Mai</button>
+        <button class="month-tab" onclick="switchMonth('06',this)">Jun</button>
+        <button class="month-tab" onclick="switchMonth('07',this)">Jul</button>
+        <button class="month-tab" onclick="switchMonth('08',this)">Ago</button>
+        <button class="month-tab" onclick="switchMonth('09',this)">Set</button>
+        <button class="month-tab" onclick="switchMonth('10',this)">Out</button>
+        <button class="month-tab" onclick="switchMonth('11',this)">Nov</button>
+        <button class="month-tab" onclick="switchMonth('12',this)">Dez</button>
+      </div>
+      <section class="transactions-section">
+        <div class="transactions-header"><h2>Transacoes</h2><span id="monthLabel" style="font-size:0.85rem;color:var(--text-muted)"></span></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-transactions">
+              <tr id="row-tx-1"><td>01/07/2026</td><td>Salario</td><td>Salario</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 5.000,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-1')">&#128465;</button></td></tr>
+              <tr id="row-tx-2"><td>05/07/2026</td><td>Freelance Site</td><td>Projeto</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 2.500,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-2')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-2')">&#128465;</button></td></tr>
+              <tr id="row-tx-3"><td>08/07/2026</td><td>Consultoria TI</td><td>Servico</td><td><span class="type-badge type-income">Receita</span></td><td class="amount-positive">+ R$ 2.000,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-3')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-3')">&#128465;</button></td></tr>
+              <tr id="row-tx-4"><td>02/07/2026</td><td>Aluguel</td><td>Moradia</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 1.800,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-4')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-4')">&#128465;</button></td></tr>
+              <tr id="row-tx-5"><td>03/07/2026</td><td>Supermercado</td><td>Alimentacao</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 420,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-5')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-5')">&#128465;</button></td></tr>
+              <tr id="row-tx-6"><td>04/07/2026</td><td>Internet + TV</td><td>Servicos</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 150,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-6')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-6')">&#128465;</button></td></tr>
+              <tr id="row-tx-7"><td>06/07/2026</td><td>Energia Eletrica</td><td>Moradia</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 280,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-7')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-7')">&#128465;</button></td></tr>
+              <tr id="row-tx-8"><td>10/07/2026</td><td>Academia</td><td>Saude</td><td><span class="type-badge type-expense">Despesa</span></td><td class="amount-negative">- R$ 120,00</td><td><button class="btn-edit" onclick="editItem('transactions','tx-8')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('transactions','tx-8')">&#128465;</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB: COMMERCIAL -->
+    <div class="tab-content" id="tab-commercial">
+      <div class="commercial-subtabs">
+        <button class="subtab-btn active" onclick="switchSubtab('suppliers', this)">Fornecedores</button>
+        <button class="subtab-btn" onclick="switchSubtab('purchases', this)">Compras</button>
+        <button class="subtab-btn" onclick="switchSubtab('sales', this)">Vendas</button>
+      </div>
+      <div class="subtab-content active" id="subtab-suppliers">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Fornecedores</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Nome</th><th>Contato</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th><th>Editar</th><th>Deletar</th></tr></thead>
+              <tbody id="tb-suppliers">
+                <tr id="row-sp-1"><td>Tech Solutions Ltda</td><td>Joao Pereira</td><td>12.345.678/0001-90</td><td>(11) 99999-1234</td><td>contato@techsolutions.com.br</td><td><button class="btn-edit" onclick="editItem('suppliers','sp-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('suppliers','sp-1')">&#128465;</button></td></tr>
+                <tr id="row-sp-2"><td>Distribuidora Central</td><td>Ana Lima</td><td>98.765.432/0001-10</td><td>(11) 98888-5678</td><td>vendas@distcentral.com.br</td><td><button class="btn-edit" onclick="editItem('suppliers','sp-2')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('suppliers','sp-2')">&#128465;</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-purchases">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Compras</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descricao</th><th>Fornecedor</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
+              <tbody id="tb-purchases">
+                <tr id="row-pu-1"><td>01/07/2026</td><td>Compra de material de escritorio</td><td>Tech Solutions Ltda</td><td><span class="payment-badge pay-avista">A Vista</span></td><td class="amount-negative">R$ 1.250,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-1')">&#128465;</button></td></tr>
+                <tr id="row-pu-2"><td>10/07/2026</td><td>Compra de equipamentos</td><td>Distribuidora Central</td><td><span class="payment-badge pay-aprazo">6x</span></td><td class="amount-negative">R$ 8.750,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-2')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-2')">&#128465;</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-sales">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Vendas</h2></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Data</th><th>Descricao</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
+              <tbody id="tb-sales">
+                <tr id="row-sl-1"><td>05/07/2026</td><td>Venda de consultoria</td><td><span class="payment-badge pay-aprazo">3x</span></td><td class="amount-positive">R$ 4.500,00</td><td><button class="btn-edit" onclick="editItem('sales','sl-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('sales','sl-1')">&#128465;</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB: INVESTMENTS -->
+    <div class="tab-content" id="tab-investments">
+      <section class="cards">
+        <div class="card" style="border-left:4px solid var(--blue)"><span class="card-label">Total Investido</span><span class="card-value" id="card-inv-total" style="color:var(--blue)">R$ 37.730,00</span></div>
+        <div class="card" style="border-left:4px solid var(--purple)"><span class="card-label">Valor Atual</span><span class="card-value" id="card-inv-current" style="color:var(--purple)">R$ 48.897,20</span></div>
+        <div class="card" style="border-left:4px solid var(--green)"><span class="card-label">Lucro / Prejuizo</span><span class="card-value amount-profit" id="card-inv-profit">+ R$ 11.167,20</span></div>
+        <div class="card card-count"><span class="card-label">Total Ativos</span><span class="card-value" id="card-inv-count">12</span></div>
+      </section>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:center">
+        <div style="text-align:center"><canvas id="investChart" width="240" height="240"></canvas></div>
+        <div id="investChartLegend" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;justify-content:center"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem">
+        <div class="commercial-subtabs" id="investSubtabs" style="margin-bottom:0">
+          <button class="subtab-btn active" onclick="switchInvestSubtab('acoes', this)">Acoes B3</button>
+          <button class="subtab-btn" onclick="switchInvestSubtab('fiis', this)">FIIs</button>
+          <button class="subtab-btn" onclick="switchInvestSubtab('etfs', this)">ETFs</button>
+          <button class="subtab-btn" onclick="switchInvestSubtab('renda-fixa', this)">Renda Fixa</button>
+          <button class="subtab-btn" onclick="switchInvestSubtab('cripto', this)">Cripto</button>
+          <button class="subtab-btn" onclick="switchInvestSubtab('internacional', this)">Internacional</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span id="stocks-last-update" style="font-size:0.7rem;color:var(--text-muted)"></span>
+          <button onclick="updateStockPrices()" id="btn-update-prices" style="padding:0.4rem 0.8rem;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;gap:0.3rem">&#8635; Atualizar Precos</button>
+        </div>
+      </div>
+      <div class="subtab-content active" id="subtab-acoes">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Acoes B3</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-inv-acoes"></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-fiis">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Fundos Imobiliarios</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-inv-fiis"></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-etfs">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>ETFs</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-inv-etfs"></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-renda-fixa">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Renda Fixa</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Titulo</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-inv-renda-fixa"></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-cripto">
+        <section class="transactions-section">
+          <div class="transactions-header"><h2>Criptomoedas</h2></div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Moeda</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <tbody id="tb-inv-cripto"></tbody></table>
+          </div>
+        </section>
+      </div>
+      <div class="subtab-content" id="subtab-internacional">
+        <div class="invest-intl-subtabs">
+          <button class="intl-subtab-btn active" onclick="switchIntlSubtab('intl-etfs', this)">ETFs</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-rf', this)">ETF Renda Fixa</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-crypto', this)">ETF Cripto</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-acoes', this)">Acoes</button>
+          <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-reits', this)">REITs</button>
+        </div>
+        <div class="intl-content active" id="intl-etfs"><section class="transactions-section"><div class="transactions-header"><h2>ETFs Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etfs"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-rf"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Renda Fixa Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-rf"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-crypto"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Criptomoedas Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-crypto"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-acoes"><section class="transactions-section"><div class="transactions-header"><h2>Acoes Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-acoes"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-reits"><section class="transactions-section"><div class="transactions-header"><h2>REITs</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-reits"></tbody></table></div></section></div>
+      </div>
+    </div>
+
+    <!-- TAB: UPDATES -->
+    <div class="tab-content" id="tab-updates">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Atualizacoes</h2>
+          <span id="currentVersion" style="color:var(--text-muted);font-size:0.85rem">Versao atual: carregando...</span>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Todos os clientes NELCi Tech 3D recebem atualizacoes gratuitas do sistema.
+        </p>
+      </section>
+      <div id="updatesList"></div>
+    </div>
+
+    <!-- TAB: SUBSCRIBE -->
+    <div class="tab-content" id="tab-subscribe">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Planos NELCi Tech 3D</h2>
+          <span style="color:var(--text-muted);font-size:0.85rem">Escolha o plano ideal para voce</span>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Assine e tenha acesso completo ao Finance Dashboard com todas as funcionalidades.
+          Pagamento rapido e seguro via PIX.
+        </p>
+      </section>
+
+      <div style="display:flex;gap:1.5rem;max-width:700px;margin:0 auto;flex-wrap:wrap;justify-content:center">
+        <div class="plan-card" style="text-align:center;flex:1;min-width:280px">
+          <div class="plan-name">Mensal</div>
+          <div class="plan-price" style="color:var(--green)">R$ 49,90<span>/mes</span></div>
+          <div class="plan-period">Pagamento via PIX</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Controle completo de receitas e despesas</li>
+            <li><span class="check">✓</span> Gestao de investimentos</li>
+            <li><span class="check">✓</span> Controle comercial</li>
+            <li><span class="check">✓</span> Relatorios em PDF</li>
+          </ul>
+          <button class="plan-btn plan-btn-primary" onclick="selectPlan('mensal', 49.90)">Assinar Agora</button>
+        </div>
+        <div class="plan-card plan-featured" style="text-align:center;flex:1;min-width:280px">
+          <div style="background:var(--green);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.8rem;border-radius:20px;display:inline-block;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px">Economia de 2 meses</div>
+          <div class="plan-name">Anual</div>
+          <div class="plan-price" style="color:var(--green)">R$ 299,90<span>/ano</span></div>
+          <div class="plan-period">R$ 24,99/mes &bull; Economize R$ 298,90</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Tudo do plano Mensal</li>
+            <li><span class="check">✓</span> 12 meses de acesso</li>
+            <li><span class="check">✓</span> Suporte prioritario</li>
+            <li><span class="check">✓</span> Atualizacoes gratuitas</li>
+          </ul>
+          <button class="plan-btn plan-btn-primary" onclick="selectPlan('anual', 299.90)">Assinar Agora</button>
+        </div>
+      </div>
+
+        <div class="pix-box" id="pixSection" style="display:none">
+          <h4>Pague via PIX</h4>
+          <div id="pixPlanInfo" style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-muted)"></div>
+          <div class="pix-key-row">
+            <span class="pix-key" id="pixKey">nelcitech3d@gmail.com</span>
+            <button class="copy-btn" onclick="copyPixKey()">Copiar Chave</button>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.8rem">Apos o pagamento, envie o comprovante para <strong style="color:var(--green)">nelcitech3d@gmail.com</strong> para ativar sua assinatura.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: REDEEM CODE -->
+    <div class="tab-content" id="tab-redeem">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Resgatar Codigo de Ativacao</h2>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Se voce possui um codigo de ativacao, insira abaixo para ativar seu plano Premium.
+        </p>
+      </section>
+
+      <div style="max-width:450px;margin:0 auto">
+        <div id="redeemForm">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+            <label style="display:block;font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;font-weight:600">Codigo de Ativacao</label>
+            <div style="display:flex;gap:0.5rem">
+              <input type="text" id="redeemInput" placeholder="NELC-XXXXXXXX-XXXXXXXX" style="flex:1;padding:0.8rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:monospace;font-size:0.9rem;letter-spacing:1px">
+              <button class="plan-btn plan-btn-primary" style="width:auto;padding:0.8rem 1.5rem" onclick="redeemCode()">Resgatar</button>
+            </div>
+          </div>
+          <div id="redeemStatus" style="margin-top:1rem"></div>
+        </div>
+        <div id="premiumActive" style="display:none">
+          <div style="background:var(--green-bg);border:1px solid rgba(34,197,94,0.3);border-radius:var(--radius);padding:1.5rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:0.5rem">✓</div>
+            <h3 style="color:var(--green);margin-bottom:0.3rem">Plano Premium Ativo</h3>
+            <p style="color:var(--text-muted);font-size:0.9rem">Voce tem acesso a todas as funcionalidades.</p>
+            <div id="expireCounter" style="margin-top:1rem;padding:0.8rem 1.2rem;background:var(--bg);border-radius:10px;display:inline-block">
+              <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem">Validade do plano</div>
+              <div id="expireDate" style="font-size:1.1rem;font-weight:700;color:var(--green)">--</div>
+              <div id="expireDays" style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DOWNLOADS -->
+    <div class="tab-content" id="tab-downloads">
+      <section class="transactions-section" id="downloadsContent" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Downloads</h2>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:1.5rem">
+          Baixe seus relatorios e dados em formato PDF.
+        </p>
+        <div id="downloadsLocked" style="text-align:center;padding:2rem;border:1px dashed var(--border);border-radius:var(--radius)">
+          <div style="font-size:2rem;margin-bottom:0.8rem">🔒</div>
+          <h3 style="color:var(--text-muted);margin-bottom:0.5rem">Recurso exclusivo para assinantes</h3>
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem">Assine para baixar relatorios em PDF.</p>
+          <a href="#tab-subscribe" class="update-btn" style="text-decoration:none;display:inline-block" onclick="switchTab('subscribe',document.querySelector('[onclick*=subscribe]'))">Ver Planos</a>
+        </div>
+      </section>
+
+      <div id="downloadsGrid" class="demo-download" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem">
+        <div class="update-card" style="cursor:pointer" onclick="downloadPDF('dashboard')">
+          <div style="display:flex;align-items:center;gap:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Relatorio Dashboard</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Saldo, receitas, despesas e graficos</div>
+            </div>
+          </div>
+          <button class="update-btn" style="margin-top:1rem;width:100%">Baixar PDF</button>
+        </div>
+
+        <div class="update-card" style="cursor:pointer" onclick="downloadPDF('transactions')">
+          <div style="display:flex;align-items:center;gap:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--green-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Extrato de Transacoes</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Lista completa de receitas e despesas</div>
+            </div>
+          </div>
+          <button class="update-btn" style="margin-top:1rem;width:100%">Baixar PDF</button>
+        </div>
+
+        <div class="update-card" style="cursor:pointer" onclick="downloadPDF('investments')">
+          <div style="display:flex;align-items:center;gap:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Carteira de Investimentos</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Acoes, FIIs, cripto e internacionais</div>
+            </div>
+          </div>
+          <button class="update-btn" style="margin-top:1rem;width:100%">Baixar PDF</button>
+        </div>
+
+        <div class="update-card" style="cursor:pointer" onclick="downloadPDF('commercial')">
+          <div style="display:flex;align-items:center;gap:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--yellow-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Relatorio Comercial</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Fornecedores, compras e vendas</div>
+            </div>
+          </div>
+          <button class="update-btn" style="margin-top:1rem;width:100%">Baixar PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AI ASSISTANT -->
+    <div class="tab-content" id="tab-ai">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Assistente IA Financeira</h2>
+          <span style="font-size:0.75rem;color:var(--text-muted)">Powered by DeepSeek</span>
+        </div>
+      </section>
+
+      <div id="aiSetupPanel" style="display:none">
+        <div class="update-card" style="max-width:500px">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Configurar API Key</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Cole sua chave da DeepSeek API</div>
+            </div>
+          </div>
+          <div class="form-group"><label>API Key</label><div class="pass-wrap"><input type="password" id="aiApiKeyInput" placeholder="sk-..." style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;box-sizing:border-box"><button type="button" class="pass-toggle" onclick="var p=document.getElementById('aiApiKeyInput');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'\u{1F441}':'\u{1F648}'">&#128065;</button></div></div>
+          <div id="aiKeyStatus" style="display:none;margin-bottom:0.8rem;padding:0.6rem;border-radius:8px;font-size:0.85rem;text-align:center"></div>
+          <button class="update-btn" style="width:100%;background:var(--purple);color:#fff" onclick="saveAiKey()">Salvar Chave</button>
+        </div>
+      </div>
+
+      <div id="aiChatPanel" style="display:none">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;max-height:55vh;display:flex;flex-direction:column">
+          <div id="aiChatMessages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.8rem;min-height:200px">
+            <div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:2rem">Pergunte algo sobre seus dados financeiros</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;padding:0.8rem;border-top:1px solid var(--border)">
+            <input type="text" id="aiChatInput" placeholder="Ex: Qual meu lucro este mes?" style="flex:1;padding:0.6rem 0.8rem;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem" onkeydown="if(event.key==='Enter')sendAiChat()">
+            <button onclick="sendAiChat()" style="padding:0.6rem 1.2rem;background:var(--purple);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem">Enviar</button>
+          </div>
+        </div>
+        <div style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+          <button onclick="aiQuickAsk('Qual e meu lucro total?')" style="padding:0.4rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;cursor:pointer">Lucro total</button>
+          <button onclick="aiQuickAsk('Quais sao minhas maiores despesas?')" style="padding:0.4rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;cursor:pointer">Maiores despesas</button>
+          <button onclick="aiQuickAsk('Resumo dos investimentos')" style="padding:0.4rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;cursor:pointer">Investimentos</button>
+          <button onclick="aiQuickAsk('Sugira economias para melhorar o fluxo de caixa')" style="padding:0.4rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.75rem;cursor:pointer">Sugestoes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: OPTIONS -->
+    <div class="tab-content" id="tab-options">
+      <section class="transactions-section" style="margin-bottom:1.5rem">
+        <div class="transactions-header">
+          <h2>Opcoes</h2>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
+          Configuracoes e acoes do sistema.
+        </p>
+      </section>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem">
+        <div class="update-card">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--yellow-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Trocar Senha</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Altere sua senha de acesso</div>
+            </div>
+          </div>
+          <div class="form-group"><label>Senha Atual</label><div class="pass-wrap"><input type="password" id="currentPass" placeholder="Sua senha atual" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;box-sizing:border-box"><button type="button" class="pass-toggle" onclick="var p=document.getElementById('currentPass');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'\u{1F441}':'\u{1F648}'">&#128065;</button></div></div>
+          <div class="form-group"><label>Nova Senha</label><div class="pass-wrap"><input type="password" id="newPass" placeholder="Minimo 6 caracteres" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;box-sizing:border-box"><button type="button" class="pass-toggle" onclick="var p=document.getElementById('newPass');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'\u{1F441}':'\u{1F648}'">&#128065;</button></div></div>
+          <div id="changePassStatus" style="display:none;margin-bottom:0.8rem;padding:0.6rem;border-radius:8px;font-size:0.85rem;text-align:center"></div>
+          <button class="update-btn" style="width:100%;background:var(--yellow);color:#000" onclick="changePassword()">Alterar Senha</button>
+        </div>
+
+        <div class="update-card">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--green-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Reiniciar Sistema</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Recarrega todos os dados do servidor</div>
+            </div>
+          </div>
+          <button class="update-btn" style="width:100%" onclick="restartApp()">Reiniciar Agora</button>
+        </div>
+
+        <div class="update-card">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Instalar App (PWA)</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Instale como aplicativo no seu celular</div>
+            </div>
+          </div>
+          <button class="update-btn" style="width:100%" onclick="installPWA()">Instalar</button>
+        </div>
+
+        <div class="update-card">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Sair da Conta</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Encerrar sessao e voltar ao login</div>
+            </div>
+          </div>
+          <button class="update-btn" style="width:100%;background:var(--red);color:#fff" onclick="localStorage.removeItem('nelci_token');fetch('/api/logout',{method:'POST'}).then(()=>window.location.href='/login.html')">Sair</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ADMIN -->
+    <div class="tab-content" id="tab-admin">
+      <div class="admin-stats">
+        <div class="stat-card"><div class="stat-label">Usuarios</div><div class="stat-value blue" id="totalUsers">0</div></div>
+        <div class="stat-card"><div class="stat-label">Premium</div><div class="stat-value green" id="totalPremium">0</div></div>
+        <div class="stat-card"><div class="stat-label">Codigos Disponiveis</div><div class="stat-value yellow" id="totalCodes">0</div></div>
+        <div class="stat-card"><div class="stat-label">Codigos Usados</div><div class="stat-value red" id="totalUsed">0</div></div>
+      </div>
+
+      <div class="admin-tab-bar">
+        <button class="admin-tab-btn active" onclick="showAdminSubTab('users',this)">Usuarios</button>
+        <button class="admin-tab-btn" onclick="showAdminSubTab('codes',this)">Codigos</button>
+        <button class="admin-tab-btn" onclick="showAdminSubTab('version',this)">Versoes</button>
+      </div>
+
+      <div class="admin-subtab active" id="atp-users">
+        <div class="panel"><div class="panel-header"><h2>Todos os Usuarios</h2><button class="btn btn-blue" onclick="loadAdminPanelData()">Atualizar</button></div><div id="usersTable"></div></div>
+      </div>
+
+      <div class="admin-subtab" id="atp-codes">
+        <div class="panel"><div class="panel-header"><h2>Gerar Codigos de Ativacao</h2></div>
+        <div class="gen-form" style="margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap"><span style="font-size:0.85rem;color:var(--text-muted)">Tipo:</span><select id="codeType" style="padding:0.5rem 0.8rem;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem"><option value="monthly">Mensal (30 dias) - R$49,90</option><option value="annual">Anual (365 dias) - R$299,90</option></select><span style="font-size:0.85rem;color:var(--text-muted)">Qtd:</span><input type="number" id="codeCount" value="5" min="1" max="50"><button class="btn btn-green" onclick="adminGenerateCodes()">Gerar Codigos</button></div>
+        <div id="newCodes" style="display:none;margin-bottom:1rem"></div></div>
+        <div class="panel"><div class="panel-header"><h2>Todos os Codigos</h2></div><div id="codesTable"></div></div>
+      </div>
+
+      <div class="admin-subtab" id="atp-version">
+        <div class="panel"><div class="panel-header"><h2>Versao Atual</h2></div><div id="versionInfo"></div></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ADMIN FAB -->
+  <button class="admin-fab" id="adminFab" onclick="openAddModal()">+</button>
+
+  <!-- MODAL: NOVA TRANSACAO -->
+  <div class="modal-add" id="modalTransaction">
+    <div class="modal-add-card">
+      <div class="modal-add-title">Nova Transacao <button class="modal-add-close" onclick="closeModal('modalTransaction')">&times;</button></div>
+      <form onsubmit="saveItem(event, 'transactions', 'modalTransaction')">
+        <div class="form-row">
+          <div class="form-group"><label>Data</label><input type="date" name="date" required></div>
+          <div class="form-group"><label>Tipo</label><select name="type"><option value="Receita">Receita</option><option value="Despesa">Despesa</option></select></div>
+        </div>
+        <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Ex: Salario, Freelance..."></div>
+        <div class="form-row">
+          <div class="form-group"><label>Categoria</label><select name="category"><option>Salario</option><option>Projeto</option><option>Servico</option><option>Moradia</option><option>Alimentacao</option><option>Servicos</option><option>Saude</option><option>Transporte</option><option>Lazer</option><option>Outros</option></select></div>
+          <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        </div>
+        <button type="submit" class="form-submit">Salvar Transacao</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO FORNECEDOR -->
+  <div class="modal-add" id="modalSupplier">
+    <div class="modal-add-card">
+      <div class="modal-add-title">Novo Fornecedor <button class="modal-add-close" onclick="closeModal('modalSupplier')">&times;</button></div>
+      <form onsubmit="saveItem(event, 'suppliers', 'modalSupplier')">
+        <div class="form-group"><label>Nome</label><input type="text" name="name" required placeholder="Nome do fornecedor"></div>
+        <div class="form-group"><label>Contato</label><input type="text" name="contact" placeholder="Nome do contato"></div>
+        <div class="form-row">
+          <div class="form-group"><label>CNPJ</label><input type="text" name="cnpj" placeholder="00.000.000/0001-00"></div>
+          <div class="form-group"><label>Telefone</label><input type="text" name="phone" placeholder="(00) 00000-0000"></div>
+        </div>
+        <div class="form-group"><label>E-mail</label><input type="email" name="email" placeholder="contato@empresa.com.br"></div>
+        <button type="submit" class="form-submit">Salvar Fornecedor</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA COMPRA -->
+  <div class="modal-add" id="modalPurchase">
+    <div class="modal-add-card">
+      <div class="modal-add-title">Nova Compra <button class="modal-add-close" onclick="closeModal('modalPurchase')">&times;</button></div>
+      <form onsubmit="saveItem(event, 'purchases', 'modalPurchase')">
+        <div class="form-row">
+          <div class="form-group"><label>Data</label><input type="date" name="date" required></div>
+          <div class="form-group"><label>Pagamento</label><select name="payment"><option value="A Vista">A Vista</option><option value="2x">2x</option><option value="3x">3x</option><option value="6x">6x</option><option value="12x">12x</option></select></div>
+        </div>
+        <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Descricao da compra"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Fornecedor</label><input type="text" name="supplier" placeholder="Nome do fornecedor"></div>
+          <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        </div>
+        <button type="submit" class="form-submit">Salvar Compra</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA VENDA -->
+  <div class="modal-add" id="modalSale">
+    <div class="modal-add-card">
+      <div class="modal-add-title">Nova Venda <button class="modal-add-close" onclick="closeModal('modalSale')">&times;</button></div>
+      <form onsubmit="saveItem(event, 'sales', 'modalSale')">
+        <div class="form-row">
+          <div class="form-group"><label>Data</label><input type="date" name="date" required></div>
+          <div class="form-group"><label>Pagamento</label><select name="payment"><option value="A Vista">A Vista</option><option value="2x">2x</option><option value="3x">3x</option><option value="6x">6x</option><option value="12x">12x</option></select></div>
+        </div>
+        <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Descricao da venda"></div>
+        <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        <button type="submit" class="form-submit">Salvar Venda</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO INVESTIMENTO -->
+  <div class="modal-add" id="modalInvestment">
+    <div class="modal-add-card">
+      <div class="modal-add-title">Novo Investimento <button class="modal-add-close" onclick="closeModal('modalInvestment')">&times;</button></div>
+      <form onsubmit="saveItem(event, 'investments', 'modalInvestment')">
+        <div class="form-row">
+          <div class="form-group"><label>Categoria</label><select name="category"><option value="Acoes B3">Acoes B3</option><option value="FIIs">FIIs</option><option value="ETFs">ETFs</option><option value="Renda Fixa">Renda Fixa</option><option value="Cripto">Cripto</option><option value="Internacional">Internacional</option></select></div>
+          <div class="form-group"><label>Ticker</label><input type="text" name="ticker" required placeholder="Ex: PETR4"></div>
+        </div>
+        <div class="form-group"><label>Nome</label><input type="text" name="name" required placeholder="Nome do ativo"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Quantidade</label><input type="text" name="qty" required placeholder="0" oninput="this.value=this.value.replace(',','.')"></div>
+          <div class="form-group"><label>Preco Medio</label><input type="text" name="avg_price" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Preco Atual</label><input type="text" name="current_price" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+          <div class="form-group"><label>Data</label><input type="date" name="date" required"></div>
+        </div>
+        <button type="submit" class="form-submit">Salvar Investimento</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ESCOLHER ACAO -->
+  <div class="modal-add" id="modalChooser" onclick="closeModal('modalChooser')">
+    <div class="modal-add-card" onclick="event.stopPropagation()">
+      <div class="modal-add-title">Adicionar Dados <button class="modal-add-close" onclick="closeModal('modalChooser')">&times;</button></div>
+      <div id="chooserOptions" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR ITEM -->
+  <div class="modal-add" id="modalEdit" onclick="closeModal('modalEdit')">
+    <div class="modal-add-card" onclick="event.stopPropagation()">
+      <div class="modal-add-title">Editar Item <button class="modal-add-close" onclick="closeModal('modalEdit')">&times;</button></div>
+      <form id="editForm" onsubmit="saveEdit(event)"></form>
+    </div>
+  </div>
+
+  <script>
+    let isAdmin = false;
+    let isPremium = false;
+    let currentTab = 'dashboard';
+    const _tk = localStorage.getItem('nelci_token');
+    const _ah = _tk ? {'Authorization':'Bearer '+_tk} : {};
+
+    async function apiPost(url, body) {
+      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(body)});
+      return r.json();
+    }
+
+    fetch('/api/visit',{method:'POST'}).then(r=>r.json()).then(d=>{if(d.count!==undefined){var el=document.getElementById('visitCount');if(el)el.textContent=d.count}}).catch(()=>{});
+
+    fetch('/api/me', {headers:_ah}).then(r=>r.json()).then(d=>{
+      if(!d.logged_in){ window.location.href='/login.html'; return; }
+      document.getElementById('userDisplay').textContent = d.name + ' - Controle financeiro';
+      if(d.is_admin){
+        isAdmin = true;
+        document.getElementById('adminBadge').classList.add('visible');
+        document.getElementById('adminFab').classList.add('visible');
+        document.getElementById('menuAdmin').style.display = 'flex';
+      } else {
+        var adminTab = document.getElementById('tab-admin');
+        if(adminTab) adminTab.remove();
+        var adminMenuBtn = document.getElementById('menuAdmin');
+        if(adminMenuBtn) adminMenuBtn.remove();
+      }
+      if(d.premium){
+        isPremium = true;
+        document.body.classList.add('premium');
+        document.getElementById('redeemForm').style.display='none';
+        document.getElementById('premiumActive').style.display='block';
+        if(d.expire_at){
+          const expParts = d.expire_at.split('-');
+          const expDate = new Date(parseInt(expParts[0]), parseInt(expParts[1])-1, parseInt(expParts[2]));
+          const now = new Date();
+          const diffMs = expDate.getTime() - now.getTime();
+          const diffDays = Math.ceil(diffMs / (1000*60*60*24));
+          const dayStr = expParts[2]+'/'+expParts[1]+'/'+expParts[0];
+          document.getElementById('expireDate').textContent = dayStr;
+          if(diffDays > 30){
+            document.getElementById('expireDays').textContent = diffDays + ' dias restantes';
+            document.getElementById('expireDays').style.color = 'var(--green)';
+          } else if(diffDays > 0){
+            document.getElementById('expireDays').textContent = diffDays + ' dias restantes';
+            document.getElementById('expireDays').style.color = '#f59e0b';
+            document.getElementById('expireDays').style.fontWeight = '700';
+          } else {
+            document.getElementById('expireDays').textContent = 'Plano expirado!';
+            document.getElementById('expireDays').style.color = 'var(--red)';
+            document.getElementById('expireDays').style.fontWeight = '700';
+            document.getElementById('expireDate').style.color = 'var(--red)';
+            showLockScreen(d.expire_at);
+          }
+        }
+      }
+      loadAdminData();
+      if(!isPremium) applyDemoRestrictions();
+    }).catch(()=>{ window.location.href='/login.html'; });
+
+    function applyDemoRestrictions() {
+      document.querySelectorAll('th').forEach(th => {
+        if(th.textContent.trim() === 'Editar' || th.textContent.trim() === 'Deletar') th.style.display = 'none';
+      });
+      document.getElementById('adminFab').style.display = 'none';
+      document.querySelectorAll('.demo-download').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.menu-item[onclick*="downloads"]').forEach(el => el.style.display = 'none');
+    }
+
+    function switchTab(tab, btn) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+      closeMenu();
+      loadAdminData();
+      if(tab === 'admin') loadAdminPanelData();
+      if(tab === 'ai') loadAiKey();
+    }
+
+    function openAddModal() {
+      if(!isPremium){ alert('Apenas assinantes podem adicionar dados. Assine para ter acesso completo.'); return; }
+      const tabs = {
+        dashboard: [{id:'modalTransaction', label:'Nova Transacao', icon:'💰'}],
+        commercial: [{id:'modalSupplier', label:'Novo Fornecedor', icon:'🏪'},{id:'modalPurchase', label:'Nova Compra', icon:'🛒'},{id:'modalSale', label:'Nova Venda', icon:'💵'}],
+        investments: [{id:'modalInvestment', label:'Novo Investimento', icon:'📈'}]
+      };
+      const opts = tabs[currentTab] || [{id:'modalTransaction', label:'Nova Transacao', icon:'💰'}];
+      if(opts.length === 1) { document.getElementById(opts[0].id).classList.add('active'); return; }
+      const container = document.getElementById('chooserOptions');
+      container.innerHTML = '';
+      opts.forEach(o => {
+        const b = document.createElement('button');
+        b.style.cssText = 'display:flex;align-items:center;gap:0.8rem;padding:1rem;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.15s;text-align:left';
+        b.onmouseover = () => b.style.borderColor = 'var(--green)';
+        b.onmouseout = () => b.style.borderColor = 'var(--border)';
+        b.innerHTML = '<span style="font-size:1.5rem">' + o.icon + '</span>' + o.label;
+        b.onclick = () => { closeModal('modalChooser'); document.getElementById(o.id).classList.add('active'); };
+        container.appendChild(b);
+      });
+      document.getElementById('modalChooser').classList.add('active');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function saveItem(event, collection, modalId) {
+      if(!isPremium){ alert('Apenas assinantes podem salvar dados. Assine para ter acesso completo.'); return; }
+      event.preventDefault();
+      const form = event.target;
+      const data = {};
+      new FormData(form).forEach((v, k) => data[k] = v);
+      fetch('/api/data/' + collection, { method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(data) })
+      .then(r => r.json()).then(d => {
+        if(d.ok) { closeModal(modalId); form.reset(); loadAdminData(); alert('Salvo com sucesso!'); }
+        else { alert('Erro: ' + (d.error || 'Desconhecido')); }
+      }).catch(() => alert('Erro de conexao'));
+    }
+
+    function deleteItem(collection, id) {
+      if(!isPremium){ alert('Apenas assinantes podem excluir dados.'); return; }
+      if(!confirm('Excluir este item?')) return;
+      const isDemo = String(id).match(/^(tx|sp|pu|sl|inv)-\d+$/);
+      const row = document.getElementById('row-' + id);
+      if(row) { row.remove(); delete _itemMap[id]; }
+      if(collection === 'investments') recalcInvestCards();
+      if(isDemo) {
+        fetch('/api/data/' + collection, {
+          method:'POST', headers:{'Content-Type':'application/json',..._ah},
+          body:JSON.stringify({demo_id: id, _delete: true})
+        }).catch(()=>{});
+        return;
+      }
+      fetch('/api/data/' + collection + '/' + id, { method:'DELETE', headers:_ah })
+      .then(r => r.json()).then(() => loadAdminData());
+    }
+
+    const _fieldSchemas = {
+      transactions: [
+        {name:'date',label:'Data',type:'date'},
+        {name:'type',label:'Tipo',type:'select',options:['Receita','Despesa']},
+        {name:'description',label:'Descricao',type:'text'},
+        {name:'category',label:'Categoria',type:'select',options:['Salario','Projeto','Servico','Moradia','Alimentacao','Servicos','Saude','Transporte','Lazer','Outros']},
+        {name:'value',label:'Valor',type:'number'}
+      ],
+      suppliers: [
+        {name:'name',label:'Nome',type:'text'},
+        {name:'contact',label:'Contato',type:'text'},
+        {name:'cnpj',label:'CNPJ',type:'text'},
+        {name:'phone',label:'Telefone',type:'text'},
+        {name:'email',label:'E-mail',type:'email'}
+      ],
+      purchases: [
+        {name:'date',label:'Data',type:'date'},
+        {name:'description',label:'Descricao',type:'text'},
+        {name:'supplier',label:'Fornecedor',type:'text'},
+        {name:'payment',label:'Pagamento',type:'select',options:['A Vista','2x','3x','6x','12x']},
+        {name:'value',label:'Valor',type:'number'}
+      ],
+      sales: [
+        {name:'date',label:'Data',type:'date'},
+        {name:'description',label:'Descricao',type:'text'},
+        {name:'payment',label:'Pagamento',type:'select',options:['A Vista','2x','3x','6x','12x']},
+        {name:'value',label:'Valor',type:'number'}
+      ],
+      investments: [
+        {name:'category',label:'Categoria',type:'select',options:['Acoes B3','FIIs','ETFs','Renda Fixa','Cripto','Internacional']},
+        {name:'ticker',label:'Ticker',type:'text'},
+        {name:'name',label:'Nome',type:'text'},
+        {name:'qty',label:'Quantidade',type:'number'},
+        {name:'avg_price',label:'Preco Medio',type:'number'},
+        {name:'current_price',label:'Preco Atual',type:'number'},
+        {name:'date',label:'Data',type:'date'}
+      ]
+    };
+
+    let _editCollection = '', _editId = '';
+    let _itemMap = {};
+    let _usdBrl = 5.7;
+    let _selectedMonth = 'todos';
+    let _allTransactions = [];
+
+    function switchMonth(month, btn) {
+      _selectedMonth = month;
+      document.querySelectorAll('.month-tab').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      renderTransactions(_allTransactions);
+    }
+
+    fetch('/api/forex/usdbrl', {headers:_ah}).then(r=>r.json()).then(d=>{ if(d.rate) _usdBrl = d.rate; }).catch(()=>{});
+
+    function toBRL(item, usdPrice) {
+      if(item && item.category === 'Internacional') return Number(usdPrice||0) * _usdBrl;
+      return Number(usdPrice||0);
+    }
+
+    function initDemoData() {
+      _itemMap['tx-1'] = {date:'2026-07-01',type:'Receita',description:'Salario',category:'Salario',value:'5000'};
+      _itemMap['tx-2'] = {date:'2026-07-05',type:'Receita',description:'Freelance Site',category:'Projeto',value:'2500'};
+      _itemMap['tx-3'] = {date:'2026-07-08',type:'Receita',description:'Consultoria TI',category:'Servico',value:'2000'};
+      _itemMap['tx-4'] = {date:'2026-07-02',type:'Despesa',description:'Aluguel',category:'Moradia',value:'1800'};
+      _itemMap['tx-5'] = {date:'2026-07-03',type:'Despesa',description:'Supermercado',category:'Alimentacao',value:'420'};
+      _itemMap['tx-6'] = {date:'2026-07-04',type:'Despesa',description:'Internet + TV',category:'Servicos',value:'150'};
+      _itemMap['tx-7'] = {date:'2026-07-06',type:'Despesa',description:'Energia Eletrica',category:'Moradia',value:'280'};
+      _itemMap['tx-8'] = {date:'2026-07-10',type:'Despesa',description:'Academia',category:'Saude',value:'120'};
+      _itemMap['sp-1'] = {name:'Tech Solutions Ltda',contact:'Joao Pereira',cnpj:'12.345.678/0001-90',phone:'(11) 99999-1234',email:'contato@techsolutions.com.br'};
+      _itemMap['sp-2'] = {name:'Distribuidora Central',contact:'Ana Lima',cnpj:'98.765.432/0001-10',phone:'(11) 98888-5678',email:'vendas@distcentral.com.br'};
+      _itemMap['pu-1'] = {date:'2026-07-01',description:'Compra de material de escritorio',supplier:'Tech Solutions Ltda',payment:'A Vista',value:'1250'};
+      _itemMap['pu-2'] = {date:'2026-07-10',description:'Compra de equipamentos',supplier:'Distribuidora Central',payment:'6x',value:'8750'};
+      _itemMap['sl-1'] = {date:'2026-07-05',description:'Venda de consultoria',payment:'3x',value:'4500'};
+      _itemMap['inv-1'] = {category:'Acoes B3',ticker:'PETR4',name:'Petrobras PN',qty:'100',avg_price:'28.50',current_price:'36.80',date:'2026-01-15'};
+      _itemMap['inv-2'] = {category:'Acoes B3',ticker:'VALE5',name:'Vale ON',qty:'50',avg_price:'62.00',current_price:'58.90',date:'2026-02-20'};
+      _itemMap['inv-3'] = {category:'Acoes B3',ticker:'ITUB4',name:'Itau Unibanco PN',qty:'80',avg_price:'25.30',current_price:'31.50',date:'2026-03-10'};
+      _itemMap['inv-4'] = {category:'Acoes B3',ticker:'BBDC4',name:'Bradesco PN',qty:'60',avg_price:'14.80',current_price:'15.20',date:'2026-04-05'};
+      _itemMap['inv-5'] = {category:'FIIs',ticker:'HGLG11',name:'CSHG Logistica FII',qty:'20',avg_price:'160.00',current_price:'175.30',date:'2026-03-10'};
+      _itemMap['inv-6'] = {category:'FIIs',ticker:'XPML11',name:'XP Malls FII',qty:'15',avg_price:'105.00',current_price:'112.80',date:'2026-04-15'};
+      _itemMap['inv-7'] = {category:'FIIs',ticker:'KNRI11',name:'Kinea Renda Imob FII',qty:'10',avg_price:'135.00',current_price:'142.60',date:'2026-05-01'};
+      _itemMap['inv-8'] = {category:'ETFs',ticker:'BOVA11',name:'iShares Ibovespa ETF',qty:'30',avg_price:'110.00',current_price:'118.50',date:'2026-02-01'};
+      _itemMap['inv-9'] = {category:'ETFs',ticker:'HASH11',name:'Hashdex Crypto ETF',qty:'25',avg_price:'45.00',current_price:'52.30',date:'2026-03-15'};
+      _itemMap['inv-10'] = {category:'Renda Fixa',ticker:'CDB',name:'Banco XP CDB 140%',qty:'1',avg_price:'5000.00',current_price:'5350.00',date:'2026-01-01'};
+      _itemMap['inv-11'] = {category:'Renda Fixa',ticker:'LCI',name:'Banco Inter LCI 115%',qty:'1',avg_price:'3000.00',current_price:'3120.00',date:'2026-06-01'};
+      _itemMap['inv-12'] = {category:'Cripto',ticker:'BTC',name:'Bitcoin',qty:'0.05',avg_price:'350000.00',current_price:'520000.00',date:'2025-11-20'};
+      _itemMap['inv-13'] = {category:'Internacional',intl_sub:'ETFs',ticker:'VT',name:'Vanguard Total World Stock ETF',qty:'10',avg_price:'280.00',current_price:'310.50',date:'2026-02-10'};
+      _itemMap['inv-14'] = {category:'Internacional',intl_sub:'ETFs',ticker:'QQQ',name:'Invesco QQQ Trust',qty:'5',avg_price:'450.00',current_price:'510.20',date:'2026-01-20'};
+      _itemMap['inv-15'] = {category:'Internacional',intl_sub:'ETF Renda Fixa',ticker:'TLT',name:'iShares 20+ Year Treasury Bond ETF',qty:'20',avg_price:'95.00',current_price:'88.50',date:'2026-04-05'};
+      _itemMap['inv-16'] = {category:'Internacional',intl_sub:'ETF Cripto',ticker:'IBIT',name:'iShares Bitcoin Trust ETF',qty:'15',avg_price:'52.00',current_price:'68.30',date:'2026-03-15'};
+      _itemMap['inv-17'] = {category:'Internacional',intl_sub:'ETF Cripto',ticker:'BITO',name:'ProShares Bitcoin Strategy ETF',qty:'25',avg_price:'28.00',current_price:'35.70',date:'2026-05-01'};
+      _itemMap['inv-18'] = {category:'Internacional',intl_sub:'Acoes',ticker:'AAPL',name:'Apple Inc.',qty:'8',avg_price:'185.00',current_price:'210.40',date:'2026-02-25'};
+      _itemMap['inv-19'] = {category:'Internacional',intl_sub:'Acoes',ticker:'MSFT',name:'Microsoft Corp.',qty:'5',avg_price:'410.00',current_price:'455.80',date:'2026-03-20'};
+      _itemMap['inv-20'] = {category:'Internacional',intl_sub:'REITs',ticker:'XLRE',name:'Real Estate Select Sector SPDR Fund',qty:'30',avg_price:'40.00',current_price:'43.20',date:'2026-04-10'};
+      _itemMap['inv-21'] = {category:'Internacional',intl_sub:'REITs',ticker:'VNQ',name:'Vanguard Real Estate ETF',qty:'12',avg_price:'85.00',current_price:'92.50',date:'2026-05-15'};
+      seedDemoToServer();
+    }
+
+    function seedDemoToServer() {
+      const collections = {transactions:['tx-1','tx-2','tx-3','tx-4','tx-5','tx-6','tx-7','tx-8'], suppliers:['sp-1','sp-2'], purchases:['pu-1','pu-2'], sales:['sl-1'], investments:['inv-1','inv-2','inv-3','inv-4','inv-5','inv-6','inv-7','inv-8','inv-9','inv-10','inv-11','inv-12','inv-13','inv-14','inv-15','inv-16','inv-17','inv-18','inv-19','inv-20','inv-21']};
+      Object.keys(collections).forEach(col => {
+        fetch('/api/data?t='+Date.now(), {headers:_ah}).then(r=>r.json()).then(d=>{
+          const serverItems = d[col] || [];
+          const hasSeeded = serverItems.some(i => i.demo_id);
+          if(!hasSeeded && serverItems.length === 0) {
+            const ids = collections[col];
+            ids.forEach(id => {
+              const item = {..._itemMap[id], demo_id: id};
+              fetch('/api/data/'+col, {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(item)}).catch(()=>{});
+            });
+          }
+        }).catch(()=>{});
+      });
+    }
+    initDemoData();
+    setTimeout(updateStockPrices, 500);
+
+    function editItem(collection, id) {
+      if(!isPremium){ alert('Apenas assinantes podem editar dados. Assine para ter acesso completo.'); return; }
+      _editCollection = collection;
+      _editId = id;
+      const data = _itemMap[id];
+      if(!data) return;
+      const schema = _fieldSchemas[collection] || [];
+      let html = '';
+      schema.forEach(f => {
+        const val = data[f.name] || '';
+        html += '<div class="form-group"><label>' + f.label + '</label>';
+        if(f.type === 'select') {
+          html += '<select name="' + f.name + '">';
+          f.options.forEach(o => { html += '<option value="' + o + '"' + (val===o?' selected':'') + '>' + o + '</option>'; });
+          html += '</select>';
+        } else {
+          html += '<input type="text" name="' + f.name + '" value="' + String(val).replace(/"/g,'&quot;') + '"' + (f.type==='number'?' oninput="this.value=this.replace(\',\',\'.\')"':'') + '>';
+        }
+        html += '</div>';
+        if(f.name === 'category' && collection === 'investments') {
+          const curCat = data.category || '';
+          if(curCat === 'Internacional') {
+            const intlVal = data.intl_sub || '';
+            const intlOpts = ['ETFs','ETF Renda Fixa','ETF Cripto','Acoes','REITs'];
+            html += '<div class="form-group"><label>Sub-Categoria Intl</label><select name="intl_sub">';
+            intlOpts.forEach(o => { html += '<option value="' + o + '"' + (intlVal===o?' selected':'') + '>' + o + '</option>'; });
+            html += '</select></div>';
+          }
+        }
+      });
+      html += '<button type="submit" class="form-submit">Salvar Alteracoes</button>';
+      document.getElementById('editForm').innerHTML = html;
+      document.getElementById('modalEdit').classList.add('active');
+    }
+
+    function saveEdit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const data = {};
+      new FormData(form).forEach((v, k) => data[k] = v);
+      const isDemo = String(_editId).match(/^(tx|sp|pu|sl|inv)-\d+$/);
+      if(isDemo) {
+        Object.assign(_itemMap[_editId], data);
+        const row = document.getElementById('row-' + _editId);
+        if(row) {
+          const schema = _fieldSchemas[_editCollection] || [];
+          const tds = row.querySelectorAll('td');
+          let col = 0;
+          schema.forEach(f => {
+            if(col < tds.length - 2) {
+              const v = data[f.name] || '';
+              if(f.name === 'type') {
+                const isIncome = v === 'Receita';
+                tds[col].innerHTML = '<span class="type-badge '+(isIncome?'type-income':'type-expense')+'">'+v+'</span>';
+              } else if(f.name === 'payment') {
+                const payClass = v === 'A Vista' ? 'pay-avista' : 'pay-aprazo';
+                tds[col].innerHTML = '<span class="payment-badge '+payClass+'">'+v+'</span>';
+              } else if(f.name === 'value' && _editCollection !== 'suppliers') {
+                const isPos = (_editCollection === 'sales') || (_editCollection === 'transactions' && _itemMap[_editId].type === 'Receita');
+                const num = Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                tds[col].className = isPos ? 'amount-positive' : 'amount-negative';
+                tds[col].textContent = (isPos?'+ R$ ':'- R$ ') + num;
+              } else {
+                tds[col].textContent = v;
+              }
+              col++;
+            }
+          });
+        }
+        fetch('/api/data/' + _editCollection, {
+          method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify({...data, demo_id: _editId})
+        }).then(r => r.json()).then(d => {
+          if(d.ok && d.item) { _itemMap[_editId].server_id = d.item.id; }
+        }).catch(()=>{});
+        closeModal('modalEdit');
+        return;
+      }
+      fetch('/api/data/' + _editCollection + '/' + _editId, {
+        method:'PUT', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(data)
+      }).then(r => r.json()).then(d => {
+        if(d.ok) { closeModal('modalEdit'); loadAdminData(); }
+        else { alert('Erro: ' + (d.error || 'Desconhecido')); }
+      }).catch(() => alert('Erro de conexao'));
+    }
+
+    function loadAdminData() {
+      fetch('/api/data?t=' + Date.now(), {headers:_ah}).then(r => r.json()).then(d => {
+        if(d.error) return;
+        renderTransactions(d.transactions || []);
+        renderSuppliers(d.suppliers || []);
+        renderPurchases(d.purchases || []);
+        renderSales(d.sales || []);
+        renderInvestments(d.investments || []);
+      }).catch(()=>{});
+    }
+
+    function renderTransactions(items) {
+      const el = document.getElementById('tb-transactions');
+      const cBal = document.getElementById('card-balance');
+      const cInc = document.getElementById('card-income');
+      const cExp = document.getElementById('card-expense');
+      const cCnt = document.getElementById('card-count');
+      const mLabel = document.getElementById('monthLabel');
+      if(!el) return;
+      _allTransactions = items;
+      const monthNames = {'todos':'Todos os meses','01':'Janeiro','02':'Fevereiro','03':'Marco','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
+      if(mLabel) mLabel.textContent = monthNames[_selectedMonth] || '';
+      _itemMap = {};
+      const filtered = _selectedMonth === 'todos' ? items : items.filter(i => {
+        const d = i.date || '';
+        return d.length >= 7 && d.substring(5,7) === _selectedMonth;
+      });
+      if(!filtered.length) { el.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhuma transacao encontrada para este mes</td></tr>'; if(cBal) cBal.textContent = 'R$ 0,00'; if(cInc) cInc.textContent = 'R$ 0,00'; if(cExp) cExp.textContent = 'R$ 0,00'; if(cCnt) cCnt.textContent = '0'; return; }
+      let inc=0, exp=0;
+      let html = '';
+      filtered.forEach(i => {
+        _itemMap[i.id] = i;
+        const isIncome = i.type === 'Receita';
+        const val = Number(i.value||0);
+        if(isIncome) inc+=val; else exp+=val;
+        html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td><span class="type-badge '+(isIncome?'type-income':'type-expense')+'">'+(isIncome?'Receita':'Despesa')+'</span></td><td class="'+(isIncome?'amount-positive':'amount-negative')+'">'+(isIncome?'+':'-')+' R$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'transactions\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'transactions\',\''+i.id+'\')">&#128465;</button></td></tr>';
+      });
+      el.innerHTML = html;
+      const balance = inc - exp;
+      if(cBal){ cBal.textContent = (balance < 0 ? '- ' : '+ ') + 'R$ ' + Math.abs(balance).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); cBal.className = 'card-value ' + (balance < 0 ? 'amount-negative' : 'amount-positive'); }
+      if(cInc) cInc.textContent = 'R$ '+inc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cExp) cExp.textContent = 'R$ '+exp.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cCnt) cCnt.textContent = filtered.length;
+    }
+
+    function renderSuppliers(items) {
+      const el = document.getElementById('tb-suppliers');
+      if(!el) return;
+      if(!items.length) return;
+      let html = '';
+      items.forEach(i => { _itemMap[i.id] = i; html += '<tr><td>'+(i.name||'')+'</td><td>'+(i.contact||'')+'</td><td>'+(i.cnpj||'')+'</td><td>'+(i.phone||'')+'</td><td>'+(i.email||'')+'</td><td><button class="btn-edit" onclick="editItem(\'suppliers\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'suppliers\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
+      el.innerHTML = html;
+    }
+
+    function renderPurchases(items) {
+      const el = document.getElementById('tb-purchases');
+      if(!el) return;
+      if(!items.length) return;
+      let html = '';
+      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.supplier||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-negative">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'purchases\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'purchases\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
+      el.innerHTML = html;
+    }
+
+    function renderSales(items) {
+      const el = document.getElementById('tb-sales');
+      if(!el) return;
+      if(!items.length) return;
+      let html = '';
+      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-positive">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'sales\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'sales\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
+      el.innerHTML = html;
+    }
+
+    function renderInvestments(items) {
+      const cTotal = document.getElementById('card-inv-total');
+      const cCurrent = document.getElementById('card-inv-current');
+      const cProfit = document.getElementById('card-inv-profit');
+      const cCount = document.getElementById('card-inv-count');
+      const catMap = { 'Acoes B3':'acoes', 'Acao':'acoes', 'FII':'fiis', 'FIIs':'fiis', 'ETF':'etfs', 'ETFs':'etfs', 'Renda Fixa':'renda-fixa', 'Cripto':'cripto', 'Criptomoeda':'cripto', 'Internacional':'internacional', 'Acao Internacional':'internacional' };
+      const intlSubMap = {'ETFs':'intl-etfs','ETF Renda Fixa':'intl-etf-rf','ETF Cripto':'intl-etf-crypto','Acoes':'intl-acoes','REITs':'intl-reits'};
+      const tbls = {};
+      ['acoes','fiis','etfs','renda-fixa','cripto','intl-etfs','intl-etf-rf','intl-etf-crypto','intl-acoes','intl-reits'].forEach(k => { const el = document.getElementById('tb-inv-'+k); if(el) { tbls[k] = ''; el.innerHTML = ''; } });
+      let totalInvested=0, totalCurrent=0;
+      items.forEach(i => {
+        _itemMap[i.id] = i;
+        const isIntl = i.category === 'Internacional';
+        const qty = Number(i.qty||0);
+        const avgRaw = Number(i.avg_price||0);
+        const curRaw = Number(i.current_price||0);
+        const inv = isIntl ? avgRaw*qty : toBRL(i, avgRaw)*qty;
+        const cur = isIntl ? curRaw*qty : toBRL(i, curRaw)*qty;
+        totalInvested += isIntl ? avgRaw*qty*_usdBrl : inv;
+        totalCurrent += isIntl ? curRaw*qty*_usdBrl : cur;
+        const cat = catMap[i.category] || 'acoes';
+        let tblKey = cat;
+        if(cat === 'internacional') {
+          tblKey = intlSubMap[i.intl_sub] || 'intl-etfs';
+        }
+        const prof = cur-inv;
+        const profClass = prof>=0?'amount-profit':'amount-loss';
+        const profSign = prof>=0?'+ ':'- ';
+        const curSym = isIntl ? 'US$' : 'R$';
+        const dispAvg = isIntl ? Number(i.avg_price||0) : toBRL(i, i.avg_price);
+        const dispCur = isIntl ? Number(i.current_price||0) : toBRL(i, i.current_price);
+        const row = '<tr id="row-'+i.id+'"><td><span class="ticker-badge">'+(i.ticker||'')+'</span></td><td>'+(i.name||'')+'</td><td>'+(i.qty||'')+'</td><td>'+curSym+' '+Number(dispAvg).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+Number(dispCur).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+inv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+cur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td class="'+profClass+'">'+profSign+curSym+' '+Math.abs(prof).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+(i.date||'')+'</td><td><button class="btn-edit" onclick="editItem(\'investments\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'investments\',\''+i.id+'\')">&#128465;</button></td></tr>';
+        if(tbls[tblKey] !== undefined) tbls[tblKey] += row;
+      });
+      Object.keys(tbls).forEach(k => { const el = document.getElementById('tb-inv-'+k); if(el) el.innerHTML = tbls[k]; });
+      if(cTotal) cTotal.textContent = 'R$ '+totalInvested.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cCurrent) cCurrent.textContent = 'R$ '+totalCurrent.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cProfit){const p=totalCurrent-totalInvested; cProfit.textContent=(p>=0?'+ ':'- ')+'R$ '+Math.abs(p).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); cProfit.className='card-value '+(p>=0?'amount-profit':'amount-loss');}
+      if(cCount) cCount.textContent = items.length;
+      renderInvestChart(items);
+    }
+
+    function updateStockPrices() {
+      const btn = document.getElementById('btn-update-prices');
+      if(btn) { btn.disabled=true; btn.innerHTML='&#8635; Atualizando...'; }
+      const b3Tickers = [];
+      const cryptoMap = {};
+      const intlMap = {};
+      const b3Categories = ['Acoes B3','Acao','FIIs','FII','ETFs','ETF'];
+      Object.keys(_itemMap).forEach(k => {
+        const it = _itemMap[k];
+        if(!it) return;
+        const t = (it.ticker||'').toUpperCase();
+        if(b3Categories.includes(it.category) && t && !['CDB','LCI','LCA','Tesouro','Debenture'].includes(t)) {
+          b3Tickers.push(t);
+        } else if(it.category === 'Cripto') {
+          if(t === 'BTC') { b3Tickers.push('BTC-USD'); cryptoMap['BTC-USD'] = k; }
+          else if(t === 'ETH') { b3Tickers.push('ETH-USD'); cryptoMap['ETH-USD'] = k; }
+          else { b3Tickers.push(t); cryptoMap[t] = k; }
+        } else if(it.category === 'Internacional') {
+          b3Tickers.push(t);
+          intlMap[t] = k;
+        }
+      });
+      if(!b3Tickers.length) { if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos'; alert('Nenhum ticker encontrado para atualizar.');} return; }
+      const unique = [...new Set(b3Tickers)];
+      fetch('/api/stocks/'+unique.join(','), {headers:_ah})
+        .then(r=>r.json())
+        .then(data => {
+          if(data.results) {
+            data.results.forEach(q => {
+              const sym = q.symbol;
+              const price = q.regularMarketPrice;
+              if(price == null) return;
+              let key = null;
+              if(cryptoMap[sym]) key = cryptoMap[sym];
+              else if(intlMap[sym]) key = intlMap[sym];
+              else {
+                Object.keys(_itemMap).forEach(k => {
+                  if(_itemMap[k] && (_itemMap[k].ticker||'').toUpperCase() === sym) key = k;
+                });
+              }
+              if(key && _itemMap[key]) {
+                _itemMap[key].current_price = String(price);
+                const row = document.getElementById('row-'+key);
+                if(row) {
+                  const cells = row.querySelectorAll('td');
+                  if(cells.length >= 8) {
+                    const it = _itemMap[key];
+                    const isIntl = it.category === 'Internacional';
+                    const avg = Number(it.avg_price||0);
+                    const qty = Number(it.qty||0);
+                    const curDisp = isIntl ? price * qty : toBRL(it, price) * qty;
+                    const invDisp = isIntl ? avg * qty : toBRL(it, avg) * qty;
+                    const prof = curDisp - invDisp;
+                    const cls = prof>=0?'amount-profit':'amount-loss';
+                    const sign = prof>=0?'+ ':'- ';
+                    const curSym = isIntl ? 'US$' : 'R$';
+                    const dispPrice = isIntl ? price : toBRL(it, price);
+                    cells[4].textContent = curSym+' '+dispPrice.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                    cells[6].textContent = curSym+' '+curDisp.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                    cells[7].className = cls;
+                    cells[7].textContent = sign+curSym+' '+Math.abs(prof).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                  }
+                }
+                const isDemo = String(key).match(/^(inv)-\d+$/);
+                const payload = {current_price: String(price)};
+                if(isDemo) {
+                  payload.demo_id = key;
+                  fetch('/api/data/investments', {
+                    method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(payload)
+                  }).catch(()=>{});
+                } else {
+                  fetch('/api/data/investments/' + key, {
+                    method:'PUT', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(payload)
+                  }).catch(()=>{});
+                }
+              }
+            });
+          }
+          recalcInvestCards();
+          const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+          const lbl = document.getElementById('stocks-last-update');
+          if(lbl) lbl.textContent = 'Atualizado: '+now;
+          if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
+        })
+        .catch(err => {
+          console.error('Erro ao atualizar precos:', err);
+          if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
+        });
+    }
+
+    let _investChart = null;
+
+    function renderInvestChart(items) {
+      const canvas = document.getElementById('investChart');
+      const legend = document.getElementById('investChartLegend');
+      if(!canvas || !legend) return;
+      const catTotals = {};
+      items.forEach(i => {
+        const isIntl = i.category === 'Internacional';
+        const qty = Number(i.qty||0);
+        const cur = Number(i.current_price||0);
+        const val = isIntl ? cur*qty*_usdBrl : toBRL(i, cur)*qty;
+        const cat = i.category || 'Outros';
+        catTotals[cat] = (catTotals[cat]||0) + val;
+      });
+      const labels = Object.keys(catTotals);
+      const data = labels.map(l => catTotals[l]);
+      const total = data.reduce((a,b)=>a+b,0);
+      if(!total) { if(canvas.getContext) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height); legend.innerHTML = ''; return; }
+      const palette = ['#3b82f6','#22c55e','#a855f7','#eab308','#ef4444','#f97316','#06b6d4','#ec4899','#84cc16','#14b8a6'];
+      if(_investChart) { _investChart.destroy(); }
+      _investChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: palette.slice(0, labels.length), borderWidth: 2, borderColor: '#1a1d27', hoverBorderColor: '#fff', hoverBorderWidth: 2 }] },
+        options: { responsive: false, cutout: '55%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { const v = ctx.parsed; const pct = ((v/total)*100).toFixed(1); return ctx.label+': R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ('+pct+'%)'; } } } } }
+      });
+      legend.innerHTML = labels.map((l,i) => {
+        const pct = ((data[i]/total)*100).toFixed(1);
+        return '<div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem"><span style="width:12px;height:12px;border-radius:3px;background:'+palette[i]+';flex-shrink:0"></span><span style="color:var(--text-muted)">'+l+'</span><span style="color:var(--text);font-weight:600">'+pct+'%</span></div>';
+      }).join('');
+    }
+
+    function recalcInvestCards() {
+      const cTotal = document.getElementById('card-inv-total');
+      const cCurrent = document.getElementById('card-inv-current');
+      const cProfit = document.getElementById('card-inv-profit');
+      const cCount = document.getElementById('card-inv-count');
+      let totalInv = 0, totalCur = 0, count = 0;
+      Object.keys(_itemMap).forEach(k => {
+        const it = _itemMap[k];
+        if(!it || it.ticker == null) return;
+        const avg = Number(it.avg_price||0);
+        const qty = Number(it.qty||0);
+        const cur = Number(it.current_price||0);
+        const isIntl = it.category === 'Internacional';
+        totalInv += (isIntl ? avg * _usdBrl : avg) * qty;
+        totalCur += (isIntl ? cur * _usdBrl : cur) * qty;
+        count++;
+      });
+      if(cTotal) cTotal.textContent = 'R$ '+totalInv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cCurrent) cCurrent.textContent = 'R$ '+totalCur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+      if(cProfit){const p=totalCur-totalInv; cProfit.textContent=(p>=0?'+ ':'- ')+'R$ '+Math.abs(p).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); cProfit.className='card-value '+(p>=0?'amount-profit':'amount-loss');}
+      if(cCount) cCount.textContent = count;
+      renderInvestChart(Object.values(_itemMap).filter(i => i && i.ticker != null));
+    }
+
+    function toggleMenu() {
+      const popup = document.getElementById('menuPopup');
+      const overlay = document.getElementById('menuOverlay');
+      const fab = document.getElementById('menuFab');
+      const isOpen = popup.classList.contains('active');
+      if (isOpen) { closeMenu(); } else { popup.classList.add('active'); overlay.classList.add('active'); fab.classList.add('open'); }
+    }
+
+    function closeMenu() {
+      document.getElementById('menuPopup').classList.remove('active');
+      document.getElementById('menuOverlay').classList.remove('active');
+      document.getElementById('menuFab').classList.remove('open');
+    }
+
+    function switchSubtab(subtab, btn) {
+      document.querySelectorAll('#tab-commercial .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-commercial .subtab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchInvestSubtab(subtab, btn) {
+      document.querySelectorAll('#investSubtabs .subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#tab-investments .subtab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('subtab-' + subtab).classList.add('active');
+    }
+
+    function switchIntlSubtab(subtab, btn) {
+      document.querySelectorAll('.invest-intl-subtabs .intl-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#subtab-internacional .intl-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(subtab).classList.add('active');
+    }
+
+    function checkPremium() {
+      fetch('/api/me', {headers:_ah}).then(r=>r.json()).then(d=>{
+        if (d.premium) {
+          document.getElementById('redeemForm').style.display = 'none';
+          document.getElementById('premiumActive').style.display = 'block';
+        }
+      });
+    }
+
+    function redeemCode() {
+      const code = document.getElementById('redeemInput').value.trim();
+      const status = document.getElementById('redeemStatus');
+      if (!code) { status.innerHTML = '<div class="update-card" style="border-color:var(--yellow);text-align:center"><h3 style="color:var(--yellow);margin-bottom:0.3rem">⚠ Insira um codigo valido</h3></div>'; status.style.display = 'block'; return; }
+      status.innerHTML = '<div class="update-card" style="border-color:var(--blue);text-align:center"><h3 style="color:var(--blue)">Processando...</h3></div>';
+      status.style.display = 'block';
+      fetch('/api/redeem-code', { method: 'POST', headers: {'Content-Type': 'application/json',..._ah}, body: JSON.stringify({code: code}) })
+      .then(r => r.json()).then(d => {
+        if (d.ok) {
+          status.innerHTML = '<div class="update-card" style="border-color:var(--green);text-align:center"><h3 style="color:var(--green);margin-bottom:0.3rem">✅ ' + d.message + '</h3><p style="color:var(--text-muted);font-size:0.85rem">Recarregando...</p></div>';
+          document.getElementById('redeemForm').style.display = 'none';
+          document.getElementById('premiumActive').style.display = 'block';
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          status.style.display = 'block';
+          status.innerHTML = '<div class="update-card" style="border-color:var(--red);text-align:center"><h3 style="color:var(--red);margin-bottom:0.3rem">❌ ' + (d.error || 'Erro ao resgatar') + '</h3></div>';
+        }
+      }).catch(() => {
+        status.style.display = 'block';
+        status.innerHTML = '<div class="update-card" style="border-color:var(--red);text-align:center"><h3 style="color:var(--red)">❌ Erro de conexao</h3></div>';
+      });
+    }
+
+    function selectPlan(name, price) {
+      document.getElementById('pixSection').style.display = 'block';
+      const label = name === 'anual' ? 'Plano Anual (12 meses)' : 'Plano Mensal';
+      const val = name === 'anual' ? 'R$ ' + price.toFixed(2).replace('.',',') + ' (12 meses)' : 'R$ ' + price.toFixed(2).replace('.',',') + '/mes';
+      document.getElementById('pixPlanInfo').innerHTML = '<strong>' + label + '</strong> | Valor: <strong>' + val + '</strong>';
+      document.getElementById('pixSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyPixKey() {
+      const input = document.getElementById('pixKey');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = input.nextElementSibling;
+        const orig = btn.textContent;
+        btn.textContent = 'Copiado!';
+        setTimeout(() => btn.textContent = orig, 2000);
+      }).catch(() => {
+        document.execCommand('copy');
+      });
+    }
+
+    function copyCode(code) {
+      var ta = document.createElement('textarea');
+      ta.value = code;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); alert('Codigo copiado: ' + code); } catch(e) { prompt('Copie o codigo:', code); }
+      document.body.removeChild(ta);
+    }
+
+    function loadUpdates() {
+      fetch('/api/version').then(r => r.json()).then(data => {
+        document.getElementById('currentVersion').textContent = 'Versao atual: v' + data.current_version;
+        const list = document.getElementById('updatesList');
+        list.innerHTML = '';
+        data.updates.forEach(u => {
+          const isInstalled = u.status === 'installed';
+          const features = u.features.map(f => '<li>' + f + '</li>').join('');
+          list.innerHTML += '<div class="update-card"><div class="update-header"><div><div class="update-version">v' + u.version + '</div><div class="update-date">Lancado em ' + u.date + '</div></div><span class="update-status ' + (isInstalled ? 'status-installed' : 'status-available') + '">' + (isInstalled ? 'Instalado' : 'Disponivel') + '</span></div><div class="update-desc">' + u.description + '</div><ul class="update-features">' + features + '</ul>' + (isInstalled ? '<button class="update-btn" disabled>Ja Instalado</button>' : '<button class="update-btn" onclick="installUpdate(this, \'' + u.version + '\', \'' + u.date + '\')">Instalar Atualizacao</button>') + '</div>';
+        });
+      });
+    }
+
+    function installUpdate(btn, version, date) {
+      btn.disabled = true;
+      btn.textContent = 'Instalando...';
+      fetch('/api/version/install', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({version: version, date: date})
+      }).then(r => r.json()).then(data => {
+        loadUpdates();
+      });
+    }
+
+    function downloadPDF(type) {
+      if(!isPremium){ alert('Apenas assinantes podem baixar relatorios PDF.'); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const titles = {dashboard:'Relatorio Dashboard', transactions:'Extrato de Transacoes', investments:'Carteira de Investimentos', commercial:'Relatorio Comercial'};
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+      doc.setFontSize(18);
+      doc.setTextColor(59,130,246);
+      doc.text('NELCi Tech 3D', 14, 18);
+      doc.setFontSize(11);
+      doc.setTextColor(100,100,100);
+      doc.text(titles[type] || 'Relatorio', 14, 26);
+      doc.setFontSize(8);
+      doc.text('Gerado em: ' + dateStr, 14, 32);
+      doc.setDrawColor(200,200,200);
+      doc.line(14, 35, 196, 35);
+      let y = 42;
+
+      fetch('/api/data?t=' + Date.now(), {headers:_ah}).then(r=>r.json()).then(data => {
+        if(type === 'dashboard' || type === 'transactions') {
+          const txs = data.transactions || [];
+          if(txs.length) {
+            let inc = 0, exp = 0;
+            txs.forEach(t => { const v = Number(t.value||0); if(t.type==='Receita') inc+=v; else exp+=v; });
+            doc.setFontSize(10);
+            doc.setTextColor(0,0,0);
+            doc.setFont(undefined,'bold');
+            doc.text('Resumo Financeiro', 14, y); y += 8;
+            doc.setFont(undefined,'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(34,197,94);
+            doc.text('Receitas: R$ ' + inc.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}), 14, y);
+            doc.setTextColor(239,68,68);
+            doc.text('Despesas: R$ ' + exp.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}), 100, y);
+            doc.setTextColor(59,130,246);
+            doc.setFont(undefined,'bold');
+            doc.text('Saldo: R$ ' + (inc-exp).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}), 150, y);
+            y += 10;
+          }
+          if(type === 'dashboard' && txs.length === 0) {
+            doc.setFontSize(10); doc.setTextColor(150,150,150);
+            doc.text('Nenhuma transacao encontrada.', 14, y); y += 8;
+          }
+          if(type === 'transactions' || (type === 'dashboard' && txs.length)) {
+            if(txs.length) {
+              doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
+              doc.text('Transacoes', 14, y); y += 2;
+              doc.autoTable({
+                startY: y,
+                head: [['Data','Descricao','Categoria','Tipo','Valor']],
+                body: txs.map(t => {
+                  const v = Number(t.value||0);
+                  return [t.date||'',t.description||'',t.category||'',t.type||'',
+                    (t.type==='Receita'?'+ ':'- ') + 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})];
+                }),
+                styles: { fontSize:8, cellPadding:2 },
+                headStyles: { fillColor:[59,130,246], textColor:255 },
+                alternateRowStyles: { fillColor:[245,245,250] }
+              });
+              y = doc.lastAutoTable.finalY + 10;
+            }
+          }
+        }
+        if(type === 'dashboard' || type === 'investments') {
+          const invs = data.investments || [];
+          if(invs.length && type === 'investments') {
+            doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
+            doc.text('Investimentos', 14, y); y += 2;
+            doc.autoTable({
+              startY: y,
+              head: [['Ticker','Nome','Categoria','Qtd','Preco Medio','Preco Atual']],
+              body: invs.map(i => [i.ticker||'',i.name||'',i.category||'',i.qty||'',i.avg_price||'',i.current_price||'']),
+              styles: { fontSize:8, cellPadding:2 },
+              headStyles: { fillColor:[139,92,246], textColor:255 },
+              alternateRowStyles: { fillColor:[245,245,250] }
+            });
+            y = doc.lastAutoTable.finalY + 10;
+          }
+        }
+        if(type === 'commercial') {
+          const sups = data.suppliers || [];
+          const pubs = data.purchases || [];
+          const sals = data.sales || [];
+          if(sups.length) {
+            doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
+            doc.text('Fornecedores', 14, y); y += 2;
+            doc.autoTable({
+              startY: y,
+              head: [['Nome','Contato','CNPJ','Telefone','E-mail']],
+              body: sups.map(s => [s.name||'',s.contact||'',s.cnpj||'',s.phone||'',s.email||'']),
+              styles: { fontSize:8, cellPadding:2 },
+              headStyles: { fillColor:[234,179,8], textColor:0 },
+              alternateRowStyles: { fillColor:[245,245,250] }
+            });
+            y = doc.lastAutoTable.finalY + 10;
+          }
+          if(pubs.length) {
+            doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
+            doc.text('Compras', 14, y); y += 2;
+            doc.autoTable({
+              startY: y,
+              head: [['Data','Descricao','Fornecedor','Pagamento','Valor']],
+              body: pubs.map(p => [p.date||'',p.description||'',p.supplier||'',p.payment||'','R$ '+Number(p.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})]),
+              styles: { fontSize:8, cellPadding:2 },
+              headStyles: { fillColor:[239,68,68], textColor:255 },
+              alternateRowStyles: { fillColor:[245,245,250] }
+            });
+            y = doc.lastAutoTable.finalY + 10;
+          }
+          if(sals.length) {
+            doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
+            doc.text('Vendas', 14, y); y += 2;
+            doc.autoTable({
+              startY: y,
+              head: [['Data','Descricao','Pagamento','Valor']],
+              body: sals.map(s => [s.date||'',s.description||'',s.payment||'','R$ '+Number(s.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})]),
+              styles: { fontSize:8, cellPadding:2 },
+              headStyles: { fillColor:[34,197,94], textColor:255 },
+              alternateRowStyles: { fillColor:[245,245,250] }
+            });
+            y = doc.lastAutoTable.finalY + 10;
+          }
+          if(!sups.length && !pubs.length && !sals.length) {
+            doc.setFontSize(10); doc.setTextColor(150,150,150);
+            doc.text('Nenhum dado comercial encontrado.', 14, y); y += 8;
+          }
+        }
+        doc.setFontSize(7);
+        doc.setTextColor(180,180,180);
+        doc.text('NELCi Tech 3D - Controle Financeiro', 14, 285);
+        doc.text(dateStr, 170, 285);
+        doc.save('nelci-' + type + '-' + now.toISOString().slice(0,10) + '.pdf');
+      }).catch(() => alert('Erro ao gerar PDF. Tente novamente.'));
+    }
+
+    function restartApp() {
+      const btn = event.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Reiniciando...';
+      setTimeout(() => { window.location.reload(); }, 1500);
+    }
+
+    let aiHistory = [];
+    async function loadAiKey() {
+      if (!isAdmin) { document.getElementById('aiSetupPanel').style.display='none'; document.getElementById('aiChatPanel').style.display='block'; return; }
+      try {
+        const r = await apiPost('/api/ai/get-key', {});
+        if (r.hasKey) { document.getElementById('aiSetupPanel').style.display='none'; document.getElementById('aiChatPanel').style.display='block'; }
+        else { document.getElementById('aiSetupPanel').style.display='block'; document.getElementById('aiChatPanel').style.display='none'; }
+      } catch(e) { document.getElementById('aiSetupPanel').style.display='block'; document.getElementById('aiChatPanel').style.display='none'; }
+    }
+    async function saveAiKey() {
+      const key = document.getElementById('aiApiKeyInput').value.trim();
+      const st = document.getElementById('aiKeyStatus');
+      if (!key) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent='Insira uma chave valida'; return; }
+      try {
+        const r = await apiPost('/api/ai/save-key', {apiKey: key});
+        if (r.ok) { st.style.display='block'; st.style.background='rgba(34,197,94,0.1)'; st.style.color='#22c55e'; st.textContent='Chave salva!'; loadAiKey(); }
+        else { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent=r.error||'Erro'; }
+      } catch(e) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent='Erro de conexao'; }
+    }
+    async function sendAiChat() {
+      const input = document.getElementById('aiChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const box = document.getElementById('aiChatMessages');
+      if (aiHistory.length === 0) box.innerHTML = '';
+      aiHistory.push({ role: 'user', content: text });
+      box.innerHTML += '<div style="align-self:flex-end;background:var(--purple-bg);color:var(--text);padding:0.6rem 1rem;border-radius:12px 12px 0 12px;max-width:80%;font-size:0.88rem">'+text+'</div>';
+      box.innerHTML += '<div id="aiLoading" style="align-self:flex-start;color:var(--text-muted);font-size:0.85rem;padding:0.6rem 1rem">Pensando...</div>';
+      box.scrollTop = box.scrollHeight;
+      try {
+        const r = await apiPost('/api/ai/chat', {messages: aiHistory});
+        const ld = document.getElementById('aiLoading'); if(ld) ld.remove();
+        if (r.ok) {
+          aiHistory.push({ role: 'assistant', content: r.reply });
+          box.innerHTML += '<div style="align-self:flex-start;background:var(--bg-hover);color:var(--text);padding:0.6rem 1rem;border-radius:0 12px 12px 12px;max-width:80%;font-size:0.88rem;line-height:1.5;white-space:pre-wrap">'+r.reply+'</div>';
+        } else {
+          box.innerHTML += '<div style="align-self:flex-start;color:#f87171;font-size:0.85rem;padding:0.6rem 1rem">'+(r.error||'Erro')+'</div>';
+        }
+      } catch(e) {
+        const ld = document.getElementById('aiLoading'); if(ld) ld.remove();
+        box.innerHTML += '<div style="align-self:flex-start;color:#f87171;font-size:0.85rem">Erro de conexao</div>';
+      }
+      box.scrollTop = box.scrollHeight;
+    }
+    function aiQuickAsk(q) { document.getElementById('aiChatInput').value = q; sendAiChat(); }
+
+    function installPWA() {
+      if (window.deferredPrompt) { window.deferredPrompt.prompt(); } else { alert('Para instalar, use o menu do navegador e selecione "Adicionar a tela inicial".'); }
+    }
+
+    function changePassword() {
+      const cur = document.getElementById('currentPass').value;
+      const newP = document.getElementById('newPass').value;
+      const status = document.getElementById('changePassStatus');
+      if(!cur || !newP) { status.textContent = 'Preencha todos os campos'; status.style.display = 'block'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; return; }
+      if(newP.length < 6) { status.textContent = 'Nova senha deve ter no minimo 6 caracteres'; status.style.display = 'block'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; return; }
+      status.textContent = 'Alterando...'; status.style.display = 'block'; status.style.background = '#1b2d3b'; status.style.color = '#3b82f6';
+      fetch('/api/change-password', {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify({currentPassword:cur, newPassword:newP})})
+      .then(r=>r.json()).then(d => {
+        if(d.ok) { status.textContent = d.message; status.style.background = '#1b2d1b'; status.style.color = '#22c55e'; document.getElementById('currentPass').value = ''; document.getElementById('newPass').value = ''; }
+        else { status.textContent = d.error || 'Erro'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; }
+      }).catch(function() { status.textContent = 'Erro de conexao'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; });
+    }
+
+    function initCharts() {
+      const muted = '#8b8fa3';
+      new Chart(document.getElementById('categoryChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Salario', 'Projeto', 'Servico', 'Moradia', 'Alimentacao', 'Servicos', 'Saude'],
+          datasets: [
+            { label: 'Receitas', data: [5000, 2500, 2000, 0, 0, 0, 0], backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4 },
+            { label: 'Despesas', data: [0, 0, 0, 2080, 420, 150, 120], backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4 }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+      });
+      new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26'],
+          datasets: [
+            { label: 'Saldo', data: [1200, 2100, 1800, 3200, 2900, 3500, 3780], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b82f6' },
+            { label: 'Receitas', data: [5000, 6500, 7200, 8000, 8500, 9000, 9500], borderColor: 'rgba(34,197,94,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] },
+            { label: 'Despesas', data: [3800, 4400, 5400, 4800, 5600, 5500, 5720], borderColor: 'rgba(239,68,68,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+      });
+    }
+    initCharts();
+    loadUpdates();
+    checkPremium();
+
+    // ADMIN PANEL FUNCTIONS
+    let adminData = {users:[], licenses:{codes:[]}};
+
+    function showAdminSubTab(tab, btn) {
+      document.querySelectorAll('.admin-subtab').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('atp-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function loadAdminPanelData() {
+      if(!isAdmin) return;
+      fetch('/api/users',{headers:_ah}).then(r=>r.json()).then(d=>{
+        adminData.users = d.users || [];
+        document.getElementById('totalUsers').textContent = adminData.users.length;
+        document.getElementById('totalPremium').textContent = adminData.users.filter(u=>u.premium).length;
+        let html = '<table><thead><tr><th>Nome</th><th>Email</th><th>Premium</th><th>Licenca</th><th>Criado em</th></tr></thead><tbody>';
+        if(adminData.users.length===0) html+='<tr><td colspan="5" class="admin-empty">Nenhum usuario cadastrado</td></tr>';
+        adminData.users.forEach(u=>{
+          html+='<tr><td>'+u.name+'</td><td>'+u.email+'</td><td><span class="badge '+(u.premium?'badge-yes':'badge-no')+'">'+(u.premium?'SIM':'NAO')+'</span></td><td>'+(u.license?'<span class="code-box">'+u.license+'</span>':'--')+'</td><td>'+u.created+'</td></tr>';
+        });
+        html+='</tbody></table>';
+        document.getElementById('usersTable').innerHTML = html;
+      });
+      fetch('/api/licenses',{headers:_ah}).then(r=>r.json()).then(d=>{
+        adminData.licenses = d;
+        const codes = d.codes || [];
+        document.getElementById('totalCodes').textContent = codes.filter(c=>!c.used).length;
+        document.getElementById('totalUsed').textContent = codes.filter(c=>c.used).length;
+        let html = '<table><thead><tr><th>Codigo</th><th>Tipo</th><th>Status</th><th>Usado por</th><th>Data</th><th>Acao</th></tr></thead><tbody>';
+        if(codes.length===0) html+='<tr><td colspan="6" class="admin-empty">Nenhum codigo gerado</td></tr>';
+        codes.forEach(c=>{
+          const typeBadge = c.type==='monthly' ? '<span style="font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:10px;background:var(--yellow-bg);color:var(--yellow);font-weight:600">MENSAL</span>' : '<span style="font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:10px;background:var(--blue-bg);color:var(--blue);font-weight:600">ANUAL</span>';
+          html+='<tr><td><span class="code-box">'+c.code+'</span></td><td>'+typeBadge+'</td><td><span class="badge '+(c.used?'badge-no':'badge-yes')+'">'+(c.used?'USADO':'DISPONIVEL')+'</span></td><td>'+(c.used_by||'--')+'</td><td>'+c.created+'</td><td>'+(c.used?'':'<button class="btn btn-red" onclick="adminDeleteCode(\''+c.code+'\')">Excluir</button>')+'</td></tr>';
+        });
+        html+='</tbody></table>';
+        document.getElementById('codesTable').innerHTML = html;
+      });
+      fetch('/api/version',{headers:_ah}).then(r=>r.json()).then(d=>{
+        let html = '<p style="margin-bottom:0.5rem;font-size:0.9rem">Versao atual: <strong style="color:var(--green)">v'+d.current_version+'</strong></p>';
+        html+='<table><thead><tr><th>Versao</th><th>Data</th><th>Status</th></tr></thead><tbody>';
+        (d.updates||[]).forEach(u=>{
+          html+='<tr><td>v'+u.version+'</td><td>'+u.date+'</td><td><span class="badge '+(u.status==='installed'?'badge-yes':'badge-no')+'">'+u.status+'</span></td></tr>';
+        });
+        html+='</tbody></table>';
+        document.getElementById('versionInfo').innerHTML = html;
+      });
+    }
+
+    function adminGenerateCodes() {
+      const count = document.getElementById('codeCount').value;
+      const type = document.getElementById('codeType').value;
+      const typeLabel = type === 'monthly' ? 'MENSAL (30d)' : 'ANUAL (365d)';
+      fetch('/api/admin/generate-code',{
+        method:'POST',headers:{'Content-Type':'application/json',..._ah},body:JSON.stringify({count:parseInt(count), type:type})
+      }).then(r=>r.json()).then(d=>{
+        if(d.ok){
+          let html = '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem"><p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.8rem">Codigos gerados <strong>'+typeLabel+'</strong> (clique para copiar):</p>';
+          d.codes.forEach(c=>{
+            html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border)"><span class="code-box" style="cursor:pointer" onclick="copyCode(\''+c+'\')">'+c+'</span><span style="font-size:0.75rem;color:var(--text-muted)">clique p/ copiar</span></div>';
+          });
+          html+='</div>';
+          document.getElementById('newCodes').innerHTML = html;
+          document.getElementById('newCodes').style.display = 'block';
+          loadAdminPanelData();
+        }
+      });
+    }
+
+    function adminDeleteCode(code) {
+      if(!confirm('Excluir codigo '+code+'?')) return;
+      fetch('/api/admin/delete-code',{method:'POST',headers:{'Content-Type':'application/json',..._ah},body:JSON.stringify({code:code})}).then(()=>loadAdminPanelData());
+    }
+
+    function showLockScreen(expireAt) {
+      const parts = expireAt.split('-');
+      document.getElementById('lockExpireDate').textContent = parts[2]+'/'+parts[1]+'/'+parts[0];
+      document.getElementById('lockScreen').classList.add('active');
+    }
+
+    function unlockToRenew() {
+      document.getElementById('lockScreen').classList.remove('active');
+      switchTab('redeem', document.querySelector('[onclick*=redeem]'));
+    }
+  </script>
+  <!-- LOCK SCREEN: Plano Expirado -->
+  <div id="lockScreen">
+    <div style="font-size:4rem;margin-bottom:1rem">🔒</div>
+    <h2 style="color:var(--red);margin-bottom:0.5rem">Plano Expirado</h2>
+    <p style="color:var(--text-muted);font-size:0.95rem;max-width:400px;margin-bottom:0.5rem">Seu acesso expirou em <strong id="lockExpireDate">--</strong>.</p>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem">Renove seu plano para continuar usando o sistema.</p>
+    <button class="plan-btn plan-btn-primary" onclick="unlockToRenew()" style="margin-bottom:0.8rem">Renovar Agora</button>
+    <br>
+    <button onclick="localStorage.removeItem('nelci_token');window.location.href='/login.html'" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:0.6rem 1.5rem;border-radius:10px;cursor:pointer;font-size:0.85rem">Sair</button>
+  </div>
+
+  <div style="position:fixed;bottom:1rem;right:1rem;z-index:5000;background:rgba(13,16,23,0.92);border:1px solid #2a2e3a;border-radius:20px;padding:0.35rem 0.75rem;font-size:0.72rem;color:#94a3b8;display:flex;align-items:center;gap:0.3rem;backdrop-filter:blur(6px)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> <span id="visitCount">0</span> visitas</div>
+
+</body>
+</html>

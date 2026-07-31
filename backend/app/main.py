@@ -156,6 +156,18 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="NelciTech3D API", version="1.0")
 
+@app.middleware("http")
+async def add_cache_headers(request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith("/assets/"):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+    else:
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

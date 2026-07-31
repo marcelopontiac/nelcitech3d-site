@@ -1,0 +1,196 @@
+{
+  "transactions": [
+    {
+      "date": "2026-07-01",
+      "type": "Receita",
+      "description": "Salario",
+      "category": "Salario",
+      "value": "5000",
+      "id": "tx-1",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-04",
+      "type": "Despesa",
+      "description": "Internet + TV",
+      "category": "Servicos",
+      "value": "150",
+      "id": "tx-6",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-08",
+      "type": "Receita",
+      "description": "Consultoria TI",
+      "category": "Servico",
+      "value": "2000",
+      "id": "tx-3",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-02",
+      "type": "Despesa",
+      "description": "Aluguel",
+      "category": "Moradia",
+      "value": "1800",
+      "id": "tx-4",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-05",
+      "type": "Receita",
+      "description": "Freelance Site",
+      "category": "Projeto",
+      "value": "2500",
+      "id": "tx-2",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-03",
+      "type": "Despesa",
+      "description": "Supermercado",
+      "category": "Alimentacao",
+      "value": "420",
+      "id": "tx-5",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-06",
+      "type": "Despesa",
+      "description": "Energia Eletrica",
+      "category": "Moradia",
+      "value": "280",
+      "id": "tx-7",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Academia",
+      "category": "Saude",
+      "value": "120",
+      "id": "tx-8",
+      "created": "2026-07-22 16:44:28"
+    }
+  ],
+  "investments": [
+    {
+      "id": "inv-1",
+      "created": "2026-07-22 16:44:28",
+      "category": "Acoes B3",
+      "ticker": "PETR4",
+      "name": "PETR4",
+      "qty": "10",
+      "avg_price": "45",
+      "current_price": "41.01",
+      "date": "02/07/2026",
+      "updated": "2026-07-27 21:34:40"
+    },
+    {
+      "id": "inv-2",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-3",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-5",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-7",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-6",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-4",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-8",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-9",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-15",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-16",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-10",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-11",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-17",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-21",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-19",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-18",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-14",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-20",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-13",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "inv-12",
+      "created": "2026-07-22 16:44:28"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "sp-2",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "sp-1",
+      "created": "2026-07-22 16:44:28"
+    }
+  ],
+  "purchases": [
+    {
+      "id": "pu-2",
+      "created": "2026-07-22 16:44:28"
+    },
+    {
+      "id": "pu-1",
+      "created": "2026-07-22 16:44:28"
+    }
+  ],
+  "sales": [
+    {
+      "id": "sl-1",
+      "created": "2026-07-22 16:44:28"
+    }
+  ]
+}

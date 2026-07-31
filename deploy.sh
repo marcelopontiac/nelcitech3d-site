@@ -1,19 +1,27 @@
 #!/bin/bash
-# Deploy NELCi Tech 3D para servidor
-# Rode no seu PC local
+set -e
 
-SERVER="root@192.168.1.183"
-REMOTE_DIR="/var/www/nelcitech3d"
-LOCAL_DIR="/home/marcelotech/nelcitech3d-site"
+echo "=== NelciTech3D Deploy ==="
 
-echo "Copiando arquivos para o servidor..."
-scp -r "$LOCAL_DIR/index.html" "$LOCAL_DIR/demo.html" "$LOCAL_DIR/projeto-fotos/" "$SERVER:$REMOTE_DIR/"
+# Build frontend
+echo "Building frontend..."
+cd "$(dirname "$0")/frontend"
+npm install --silent
+npm run build
 
-echo "Reiniciando web server no servidor..."
-ssh "$SERVER" "cd $REMOTE_DIR && pkill -f 'python3 -m http.server 8080'; nohup python3 -m http.server 8080 > /dev/null 2>&1 &"
+# Copy to web root
+echo "Copying frontend to /var/www/nelcitech3d/..."
+sudo cp -r dist/* /var/www/nelcitech3d/
 
-echo "Reiniciando cloudflared..."
-ssh "$SERVER" "pkill cloudflared; sleep 1; nohup cloudflared tunnel --config /etc/cloudflared/config.yml > /dev/null 2>&1 &"
+# Stop old server
+echo "Stopping old server..."
+sudo pkill -f nelcitech3d-server.py 2>/dev/null || true
+sudo pkill -f "uvicorn app.main" 2>/dev/null || true
 
-echo "Deploy concluído!"
-echo "Acesse: https://nelcitech3d.com.br"
+# Start new backend
+echo "Starting backend..."
+cd "$(dirname "$0")/backend"
+sudo -u marcelotech nohup python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8080 > /tmp/nelci-api.log 2>&1 &
+
+echo "Done! API running on port 8080"
+echo "Frontend at /var/www/nelcitech3d/"

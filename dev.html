@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NELCi Tech 3D - Editor de Desenvolvimento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--primary:#3b82f6;--primary-dark:#2563eb;--accent:#06b6d4;--bg:#0a0e1a;--bg-card:#111827;--bg-input:#0d1117;--border:#1e293b;--text:#e2e8f0;--text-muted:#94a3b8;--green:#22c55e;--red:#ef4444;--orange:#f97316;--sidebar-w:420px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+    .topbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100}
+    .topbar-left{display:flex;align-items:center;gap:1rem}
+    .topbar-title{font-weight:700;font-size:1rem}.topbar-title span{color:var(--primary)}
+    .topbar-badge{background:var(--orange);color:#000;padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;font-weight:700}
+    .topbar-right{display:flex;gap:0.5rem}
+    .btn{padding:0.5rem 1.2rem;border-radius:8px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit;display:flex;align-items:center;gap:0.4rem}
+    .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
+    .btn-green{background:var(--green);color:#000}.btn-green:hover{background:#16a34a}
+    .btn-outline{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--text);color:var(--text)}
+    .container{display:flex;height:calc(100vh - 56px);margin-top:56px}
+    .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--bg-card);border-right:1px solid var(--border);overflow-y:auto;padding:1rem}
+    .sidebar::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .page-selector{display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:1rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border)}
+    .page-btn{padding:0.4rem 0.8rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:0.75rem;font-weight:600;font-family:inherit;transition:all 0.2s}
+    .page-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+    .page-btn:hover:not(.active){border-color:var(--text-muted);color:var(--text)}
+    .section-group{background:var(--bg);border:1px solid var(--border);border-radius:12px;margin-bottom:0.8rem;overflow:hidden}
+    .section-header{padding:0.8rem 1rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:0.9rem;transition:background 0.2s}
+    .section-header:hover{background:rgba(255,255,255,0.03)}
+    .section-header .arrow{transition:transform 0.2s;font-size:0.8rem;color:var(--text-muted)}
+    .section-header.open .arrow{transform:rotate(90deg)}
+    .section-body{padding:0 1rem 1rem;display:none}.section-body.open{display:block}
+    .form-group{margin-bottom:0.8rem}
+    .form-group label{display:block;font-size:0.72rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem}
+    .form-group input,.form-group textarea,.form-group select{width:100%;padding:0.6rem 0.8rem;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-family:inherit;transition:border-color 0.2s}
+    .form-group input:focus,.form-group textarea:focus{border-color:var(--primary);outline:none}
+    .form-group textarea{resize:vertical;min-height:60px}
+    .item-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:0.8rem;margin-bottom:0.6rem;position:relative}
+    .item-card .remove-item{position:absolute;top:0.5rem;right:0.5rem;background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0.2rem}
+    .add-item-btn{width:100%;padding:0.5rem;background:transparent;border:1.5px dashed var(--border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all 0.2s}
+    .add-item-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .preview-area{flex:1;overflow-y:auto;background:var(--bg)}
+    .preview-frame{width:100%;height:100%;border:none}
+    .toast{position:fixed;bottom:2rem;right:2rem;padding:0.8rem 1.5rem;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:10000;animation:slideUp 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+    .toast-success{background:var(--green);color:#000}.toast-error{background:var(--red);color:white}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @media(max-width:900px){.container{flex-direction:column}.sidebar{width:100%;min-width:100%;height:50vh}.preview-area{height:50vh}}
+    #statusBar{padding:0.2rem 1rem;font-size:0.75rem;font-weight:600;text-align:center}
+    #statusBar.ok{background:#22c55e;color:#000}
+    #statusBar.err{background:#ef4444;color:white}
+    #statusBar.loading{background:#f97316;color:#000}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title"><span>NELCi</span> Editor</div>
+      <div class="topbar-badge">DEV</div>
+      <div id="statusBar" class="loading">Carregando...</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="loadCurrent()">Recarregar</button>
+      <button class="btn btn-outline" onclick="previewTab()">Preview</button>
+      <button class="btn btn-green" onclick="publish()" id="btnPublish">Publicar no Site</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <div class="page-selector" id="pageSelector">
+        <button class="page-btn active" data-page="index" onclick="switchPage('index')">Index</button>
+        <button class="page-btn" data-page="servicos" onclick="switchPage('servicos')">Servicos</button>
+        <button class="page-btn" data-page="projetos" onclick="switchPage('projetos')">Projetos</button>
+        <button class="page-btn" data-page="galeria" onclick="switchPage('galeria')">Galeria</button>
+        <button class="page-btn" data-page="sobre" onclick="switchPage('sobre')">Sobre</button>
+        <button class="page-btn" data-page="contato" onclick="switchPage('contato')">Contato</button>
+      </div>
+
+      <!-- INDEX FIELDS -->
+      <div id="fields-index">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Hero <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Badge</label><input type="text" id="heroBadge" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo (use &lt;span&gt; para gradiente)</label><input type="text" id="heroTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="heroDesc" rows="2" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Botao 1 Texto</label><input type="text" id="heroBtn1Text" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Botao 1 Link</label><input type="text" id="heroBtn1Link" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Botao 2 Texto</label><input type="text" id="heroBtn2Text" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Botao 2 Link</label><input type="text" id="heroBtn2Link" oninput="updatePreview()"></div>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header" onclick="toggleSection(this)">Cards Resumo <span class="arrow">&#9654;</span></div>
+          <div class="section-body">
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.8rem">Cards que aparecem na pagina inicial链接 para cada secao</p>
+            <div id="indexCards"></div>
+            <button class="add-item-btn" onclick="addIndexCard()">+ Adicionar Card</button>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header" onclick="toggleSection(this)">Footer <span class="arrow">&#9654;</span></div>
+          <div class="section-body">
+            <div class="form-group"><label>Texto</label><input type="text" id="footerText" oninput="updatePreview()"></div>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header" onclick="toggleSection(this)">Navegacao <span class="arrow">&#9654;</span></div>
+          <div class="section-body">
+            <div class="form-group"><label>Logo Texto</label><input type="text" id="navLogo" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Links (texto|link por linha)</label><textarea id="navLinks" rows="4" oninput="updatePreview()" placeholder="Servicos|servicos.html&#10;Projetos 3D|projetos.html"></textarea></div>
+            <div class="form-group"><label>CTA Texto</label><input type="text" id="navCtaText" oninput="updatePreview()"></div>
+            <div class="form-group"><label>CTA Link</label><input type="text" id="navCtaLink" oninput="updatePreview()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICOS FIELDS -->
+      <div id="fields-servicos" style="display:none">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Cabecalho <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Tag</label><input type="text" id="servTag" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo</label><input type="text" id="servTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="servDesc" rows="2" oninput="updatePreview()"></textarea></div>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Servicos <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div id="servList"></div>
+            <button class="add-item-btn" onclick="addService()">+ Adicionar Servico</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJETOS FIELDS -->
+      <div id="fields-projetos" style="display:none">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Cabecalho <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Tag</label><input type="text" id="projTag" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo</label><input type="text" id="projTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="projDesc" rows="2" oninput="updatePreview()"></textarea></div>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Projeto Destaque <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Nome</label><input type="text" id="projName" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="projDesc2" rows="2" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Features (1 por linha)</label><textarea id="projFeatures" rows="4" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Botao Texto</label><input type="text" id="projBtnText" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Botao Link</label><input type="text" id="projBtnLink" oninput="updatePreview()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GALERIA FIELDS -->
+      <div id="fields-galeria" style="display:none">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Cabecalho <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Tag</label><input type="text" id="galTag" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo</label><input type="text" id="galTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="galDesc" rows="2" oninput="updatePreview()"></textarea></div>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Projetos <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div id="galList"></div>
+            <div class="upload-area" id="uploadArea" style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;margin-top:0.5rem;margin-bottom:0.5rem;cursor:pointer;transition:all 0.2s" onclick="document.getElementById('uploadInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--primary)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';handleUploadDrop(event)">
+              <div style="font-size:2rem;margin-bottom:0.5rem">&#128228;</div>
+              <div style="color:var(--text-muted);font-size:0.85rem">Arraste imagens aqui ou clique para selecionar</div>
+              <div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.3rem">JPG, PNG, WEBP</div>
+            </div>
+            <input type="file" id="uploadInput" accept="image/*" multiple style="display:none" onchange="handleUploadSelect(this.files)">
+            <button class="add-item-btn" onclick="addGalItem()">+ Adicionar Projeto Manual</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOBRE FIELDS -->
+      <div id="fields-sobre" style="display:none">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Sobre <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Tag</label><input type="text" id="aboutTag" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo</label><input type="text" id="aboutTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="aboutDesc" rows="3" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Texto Secundario</label><textarea id="aboutDesc2" rows="2" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Stat 1 Valor</label><input type="text" id="aboutStat1Val" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Stat 1 Label</label><input type="text" id="aboutStat1Label" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Stat 2 Valor</label><input type="text" id="aboutStat2Val" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Stat 2 Label</label><input type="text" id="aboutStat2Label" oninput="updatePreview()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTATO FIELDS -->
+      <div id="fields-contato" style="display:none">
+        <div class="section-group">
+          <div class="section-header open" onclick="toggleSection(this)">Contato <span class="arrow">&#9654;</span></div>
+          <div class="section-body open">
+            <div class="form-group"><label>Tag</label><input type="text" id="contTag" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Titulo</label><input type="text" id="contTitle" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Descricao</label><textarea id="contDesc" rows="2" oninput="updatePreview()"></textarea></div>
+            <div class="form-group"><label>Endereco</label><input type="text" id="contAddress" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Email</label><input type="text" id="contEmail" oninput="updatePreview()"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="preview-area" style="position:relative">
+      <div id="errorOverlay" style="display:none;position:absolute;top:0;left:0;right:0;background:var(--red);color:white;padding:1rem;font-size:0.85rem;z-index:50;word-break:break-all"></div>
+      <iframe id="previewFrame" class="preview-frame"></iframe>
+    </div>
+  </div>
+
+<script id="editorScript">
+var currentPage='index';
+var pagesData={index:'',servicos:'',projetos:'',galeria:'',sobre:'',contato:''};
+var services=[];
+var galleryItems=[];
+var indexCards=[];
+var updateTimer=null;
+
+function toggleSection(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open')}
+function showToast(m,t){var d=document.createElement('div');d.className='toast toast-'+t;d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove()},3000)}
+function setVal(id,v){var e=document.getElementById(id);if(e)e.value=v||''}
+function getVal(id){return(document.getElementById(id)?document.getElementById(id).value:'').trim()}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function switchPage(page){
+  currentPage=page;
+  document.querySelectorAll('.page-btn').forEach(function(b){b.classList.toggle('active',b.dataset.page===page)});
+  ['index','servicos','projetos','galeria','sobre','contato'].forEach(function(p){
+    var el=document.getElementById('fields-'+p);
+    if(el)el.style.display=p===page?'block':'none';
+  });
+  updatePreview();
+}
+
+// --- INDEX ---
+function renderIndexCards(){
+  var c=document.getElementById('indexCards');
+  c.innerHTML=indexCards.map(function(card,i){
+    return '<div class="item-card"><button class="remove-item" onclick="removeIndexCard('+i+')">&times;</button><div class="form-group"><label>Icone (emoji)</label><input type="text" value="'+esc(card.icon)+'" oninput="indexCards['+i+'].icon=this.value;updatePreview()"></div><div class="form-group"><label>Titulo</label><input type="text" value="'+esc(card.title)+'" oninput="indexCards['+i+'].title=this.value;updatePreview()"></div><div class="form-group"><label>Descricao</label><input type="text" value="'+esc(card.desc)+'" oninput="indexCards['+i+'].desc=this.value;updatePreview()"></div><div class="form-group"><label>Link (ex: servicos.html)</label><input type="text" value="'+esc(card.link)+'" oninput="indexCards['+i+'].link=this.value;updatePreview()"></div></div>';
+  }).join('');
+}
+function addIndexCard(){indexCards.push({icon:'',title:'',desc:'',link:''});renderIndexCards();updatePreview()}
+function removeIndexCard(i){indexCards.splice(i,1);renderIndexCards();updatePreview()}
+
+// --- SERVICOS ---
+function renderServices(){
+  var c=document.getElementById('servList');
+  c.innerHTML=services.map(function(s,i){
+    return '<div class="item-card"><button class="remove-item" onclick="removeService('+i+')">&times;</button><div class="form-group"><label>Cor</label><select onchange="services['+i+'].color=this.value;updatePreview()"><option value="blue"'+(s.color==='blue'?' selected':'')+'>Azul</option><option value="cyan"'+(s.color==='cyan'?' selected':'')+'>Ciano</option><option value="green"'+(s.color==='green'?' selected':'')+'>Verde</option><option value="purple"'+(s.color==='purple'?' selected':'')+'>Roxo</option><option value="orange"'+(s.color==='orange'?' selected':'')+'>Laranja</option><option value="red"'+(s.color==='red'?' selected':'')+'>Vermelho</option></select></div><div class="form-group"><label>Icone (emoji)</label><input type="text" value="'+esc(s.icon)+'" oninput="services['+i+'].icon=this.value;updatePreview()"></div><div class="form-group"><label>Titulo</label><input type="text" value="'+esc(s.title)+'" oninput="services['+i+'].title=this.value;updatePreview()"></div><div class="form-group"><label>Descricao</label><textarea rows="2" oninput="services['+i+'].desc=this.value;updatePreview()">'+esc(s.desc)+'</textarea></div></div>';
+  }).join('');
+}
+function addService(){services.push({icon:'',color:'blue',title:'',desc:''});renderServices();updatePreview()}
+function removeService(i){services.splice(i,1);renderServices();updatePreview()}
+
+// --- GALERIA ---
+function renderGallery(){
+  var c=document.getElementById('galList');
+  c.innerHTML=galleryItems.map(function(g,i){
+    return '<div class="item-card"><button class="remove-item" onclick="removeGalItem('+i+')">&times;</button><div class="form-group"><label>Arquivo</label><input type="text" value="'+esc(g.file)+'" oninput="galleryItems['+i+'].file=this.value;updatePreview()"></div><div class="form-group"><label>Titulo</label><input type="text" value="'+esc(g.title)+'" oninput="galleryItems['+i+'].title=this.value;updatePreview()"></div><div class="form-group"><label>Descricao</label><input type="text" value="'+esc(g.desc)+'" oninput="galleryItems['+i+'].desc=this.value;updatePreview()"></div></div>';
+  }).join('');
+}
+function addGalItem(){galleryItems.push({id:galleryItems.length+1,file:'',title:'Projeto 3D',desc:''});renderGallery();updatePreview()}
+function removeGalItem(i){galleryItems.splice(i,1);renderGallery();updatePreview()}
+
+function handleUploadDrop(e){
+  var files=e.dataTransfer.files;
+  handleUploadSelect(files);
+}
+function handleUploadSelect(files){
+  if(!files||!files.length)return;
+  for(var i=0;i<files.length;i++){
+    uploadFile(files[i]);
+  }
+}
+function uploadFile(file){
+  if(!file.type.match(/^image\//))return;
+  var area=document.getElementById('uploadArea');
+  area.innerHTML='<div style="color:var(--primary);font-size:0.85rem">Enviando '+esc(file.name)+'...</div>';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,data:e.target.result})})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(d.ok){
+        galleryItems.push({id:galleryItems.length+1,file:d.filename,title:d.filename.replace(/\.[^.]+$/,'').replace(/_/g,' '),desc:''});
+        renderGallery();updatePreview();
+        showToast(d.filename+' enviado!','success');
+      } else{showToast('Erro: '+(d.error||''),'error')}
+      area.innerHTML='<div style="font-size:2rem;margin-bottom:0.5rem">&#128228;</div><div style="color:var(--text-muted);font-size:0.85rem">Arraste imagens aqui ou clique para selecionar</div><div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.3rem">JPG, PNG, WEBP</div>';
+    })
+    .catch(function(){showToast('Erro de conexao','error');
+      area.innerHTML='<div style="font-size:2rem;margin-bottom:0.5rem">&#128228;</div><div style="color:var(--text-muted);font-size:0.85rem">Arraste imagens aqui ou clique para selecionar</div><div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.3rem">JPG, PNG, WEBP</div>';
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- COMMON CSS ---
+function getCSS(){
+  return '*{margin:0;padding:0;box-sizing:border-box}:root{--primary:#3b82f6;--primary-dark:#2563eb;--accent:#06b6d4;--bg:#0a0e1a;--bg-card:#111827;--bg-card-hover:#1a2332;--border:#1e293b;--text:#e2e8f0;--text-muted:#94a3b8;--green:#22c55e}html{scroll-behavior:smooth}body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}nav{position:fixed;top:0;width:100%;background:rgba(10,14,26,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;padding:0.8rem 0}.nav-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;justify-content:space-between;align-items:center}.logo{display:flex;align-items:center;gap:0.6rem;font-size:1.2rem;font-weight:700;color:var(--text);text-decoration:none}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:800;color:white}.nav-links{display:flex;gap:2rem;list-style:none}.nav-links a{color:var(--text-muted);text-decoration:none;font-size:0.9rem;font-weight:500;transition:color 0.2s}.nav-links a:hover{color:var(--text)}.nav-cta{background:var(--primary);color:white!important;padding:0.5rem 1.2rem;border-radius:8px;font-weight:600;transition:background 0.2s}.nav-cta:hover{background:var(--primary-dark)}section{padding:3rem 2rem}.section-inner{max-width:1200px;margin:0 auto}.section-tag{display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem}.section-title{font-size:2.2rem;font-weight:700;margin-bottom:1rem}.section-desc{color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem}footer{border-top:1px solid var(--border);padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem}@media(max-width:768px){.nav-links{display:none}section{padding:2rem 1rem}}';
+}
+
+function getNavHtml(page){
+  var navLines=getVal('navLinks').split('\n').filter(function(l){return l.trim()});
+  var pageMap={'#servicos':'servicos.html','#galeria-3d':'galeria.html','#sobre':'sobre.html','#contato':'contato.html'};
+  var links=navLines.map(function(line){
+    var p=line.split('|');
+    var href=p[1]||'';
+    if(page!=='index'&&pageMap[href])href=pageMap[href];
+    return '<li><a href="'+esc(href)+'">'+esc(p[0]||'')+'</a></li>';
+  }).join('\n        ');
+  var ctaLink=getVal('navCtaLink');
+  if(page!=='index'&&!ctaLink)ctaLink='index.html';
+  return '<nav><div class="nav-inner"><a href="index.html" class="logo"><div class="logo-icon">N</div>'+esc(getVal('navLogo'))+'</a><ul class="nav-links">\n        '+links+'\n        <li><a href="'+esc(ctaLink)+'" class="nav-cta">'+esc(getVal('navCtaText'))+'</a></li>\n      </ul></div></nav>';
+}
+function getFooterHtml(){return '<footer><p>'+esc(getVal('footerText'))+'</p></footer>'}
+function getPageWrapper(page,bodyHtml){
+  return '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>NELCi Tech 3D</title>\n  <base href="'+window.location.origin+'/" target="_blank">\n  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">\n  <style>'+getCSS()+'</style>\n</head>\n<body>\n'+getNavHtml(page)+'\n'+bodyHtml+'\n'+getFooterHtml()+'\n</body>\n</html>';
+}
+
+// --- BUILD SECTION BODY HELPERS (no nav/footer) ---
+function getServicosSectionBody(){
+  var servHtml=services.map(function(s){return '<div class="service-card"><div class="service-icon '+esc(s.color)+'">'+esc(s.icon)+'</div><h3>'+esc(s.title)+'</h3><p>'+esc(s.desc)+'</p></div>'}).join('\n      ');
+  return '<section id="servicos" style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('servTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('servTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('servDesc'))+'</p><div class="services-grid">\n      '+servHtml+'\n    </div></div></section>';
+}
+function getProjetosSectionBody(){
+  var featLines=getVal('projFeatures').split('\n').filter(function(l){return l.trim()});
+  var featHtml=featLines.map(function(f){return '<li style="color:var(--text-muted);font-size:0.9rem;padding:0.3rem 0;padding-left:1.5rem;position:relative"><span style="color:var(--green);position:absolute;left:0;font-weight:700">&#10003;</span>'+esc(f)+'</li>'}).join('\n            ');
+  return '<section id="projetos" style="padding:6rem 2rem 3rem;background:var(--bg-card)"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('projTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('projTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('projDesc'))+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:2.5rem;transition:all 0.3s"><div><h3 style="font-size:1.5rem;margin-bottom:1rem">'+esc(getVal('projName'))+'</h3><p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:1.5rem">'+esc(getVal('projDesc2'))+'</p><ul style="list-style:none;margin-bottom:1.5rem">\n            '+featHtml+'\n          </ul><a href="'+esc(getVal('projBtnLink'))+'" style="padding:0.8rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;text-decoration:none;background:var(--primary);color:white;display:inline-block;transition:all 0.2s">'+esc(getVal('projBtnText'))+'</a></div><div style="display:flex;align-items:center;justify-content:center"><div style="background:var(--bg-card);border:2px dashed var(--border);border-radius:12px;padding:3rem;text-align:center;width:100%"><span style="font-size:3rem;display:block;margin-bottom:1rem">&#128200;</span><p style="color:var(--text-muted);font-size:0.9rem">Projeto em Destaque</p></div></div></div></div></section>';
+}
+function getGaleriaSectionBody(){
+  var galItemsHtml=galleryItems.map(function(g){
+    return '<div class="gallery-item"><img src="projeto-fotos/'+esc(g.file)+'" alt="'+esc(g.title)+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="gallery-item-info"><h4>'+esc(g.title)+'</h4><p>'+esc(g.desc)+'</p></div></div>';
+  }).join('');
+  return '<section id="galeria-3d" style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('galTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('galTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('galDesc'))+'</p><div class="gallery-grid">'+galItemsHtml+'</div></div></section>';
+}
+function getSobreSectionBody(){
+  return '<section id="sobre" style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center"><div><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('aboutTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('aboutTitle'))+'</h2><p style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:1.5rem">'+esc(getVal('aboutDesc'))+'</p><p style="color:var(--text-muted);font-size:0.95rem">'+esc(getVal('aboutDesc2'))+'</p></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:400px"><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center"><div style="font-size:2rem;font-weight:700;color:var(--primary)">'+esc(getVal('aboutStat1Val'))+'</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">'+esc(getVal('aboutStat1Label'))+'</div></div><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center"><div style="font-size:2rem;font-weight:700;color:var(--green)">'+esc(getVal('aboutStat2Val'))+'</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">'+esc(getVal('aboutStat2Label'))+'</div></div></div></div></div></section>';
+}
+function getContatoSectionBody(){
+  return '<section id="contato" style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('contTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('contTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('contDesc'))+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;justify-items:center"><div><h3 style="font-size:1.3rem;margin-bottom:1.5rem">Informacoes</h3><div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem"><div style="width:40px;height:40px;background:rgba(59,130,246,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">&#128205;</div><div><div style="font-size:0.8rem;color:var(--text-muted)">Endereco</div><div style="font-size:0.95rem;font-weight:500">'+esc(getVal('contAddress'))+'</div></div></div><div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem"><div style="width:40px;height:40px;background:rgba(59,130,246,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">&#128231;</div><div><div style="font-size:0.8rem;color:var(--text-muted)">E-mail</div><div style="font-size:0.95rem;font-weight:500"><a href="mailto:'+esc(getVal('contEmail'))+'" style="color:var(--text);text-decoration:none">'+esc(getVal('contEmail'))+'</a></div></div></div></div><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:550px;width:100%"><h3 style="font-size:1.1rem;margin-bottom:1.5rem">Envie uma mensagem</h3><form onsubmit="event.preventDefault();alert(\'Mensagem enviada!\')"><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Nome</label><input type="text" placeholder="Seu nome" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">E-mail</label><input type="email" placeholder="seu@email.com" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Telefone</label><input type="text" placeholder="(00) 00000-0000" style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit;outline:none"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Mensagem</label><textarea placeholder="Como podemos ajudar?" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit;outline:none;resize:vertical;min-height:100px"></textarea></div><button type="submit" style="width:100%;padding:0.8rem;background:var(--primary);color:white;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer">Enviar Mensagem</button></form></div></div></div></section>';
+}
+
+// --- BUILD INDEX ---
+function buildIndexPage(){
+  var cardsHtml=indexCards.map(function(c){
+    return '<a href="'+esc(c.link)+'" class="service-card" style="text-decoration:none"><div class="service-icon blue">'+esc(c.icon)+'</div><h3>'+esc(c.title)+'</h3><p>'+esc(c.desc)+'</p></a>';
+  }).join('\n      ');
+  var titleHtml=getVal('heroTitle').replace(/<span>/g,'<span style="background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">');
+  var body='<section class="hero" style="min-height:50vh;display:flex;align-items:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden"><div style="position:absolute;top:-50%;right:-30%;width:800px;height:800px;background:radial-gradient(circle,rgba(59,130,246,0.08),transparent 70%);pointer-events:none"></div><div style="max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center"><div><div class="hero-badge" style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--primary);padding:0.4rem 1rem;border-radius:20px;font-size:0.8rem;font-weight:600;margin-bottom:1.5rem">'+esc(getVal('heroBadge'))+'</div><h1 style="font-size:3.2rem;font-weight:800;line-height:1.15;margin-bottom:1.2rem">'+titleHtml+'</h1><p style="font-size:1.1rem;color:var(--text-muted);margin-bottom:2rem;max-width:500px">'+esc(getVal('heroDesc'))+'</p><div style="display:flex;gap:1rem"><a href="'+esc(getVal('heroBtn1Link'))+'" class="btn-hero btn-primary-hero" style="padding:0.8rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;text-decoration:none;background:var(--primary);color:white;transition:all 0.2s">'+esc(getVal('heroBtn1Text'))+'</a><a href="'+esc(getVal('heroBtn2Link'))+'" class="btn-hero btn-outline-hero" style="padding:0.8rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;text-decoration:none;background:transparent;color:var(--text);border:1px solid var(--border);transition:all 0.2s">'+esc(getVal('heroBtn2Text'))+'</a></div></div><div style="display:flex;justify-content:center;align-items:center"><div style="width:280px;height:280px;position:relative;perspective:600px"><div style="position:absolute;width:180px;height:180px;border:2px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.05);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:3rem;animation:float 6s ease-in-out infinite;top:20px;left:50px">&#128736;</div><div style="position:absolute;width:180px;height:180px;border:2px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.05);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:3rem;animation:float 6s ease-in-out infinite 0.5s;top:60px;left:80px">&#128300;</div><div style="position:absolute;width:180px;height:180px;border:2px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:3rem;animation:float 6s ease-in-out infinite 1s;top:100px;left:30px">&#9881;</div></div></div></div></section>';
+  if(indexCards.length>0){
+    body+='<section style="padding:3rem 2rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><div class="services-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">\n      '+cardsHtml+'\n    </div></div></section>';
+  }
+  body+=getServicosSectionBody();
+  body+=getProjetosSectionBody();
+  body+=getGaleriaSectionBody();
+  body+=getSobreSectionBody();
+  body+=getContatoSectionBody();
+  body+='<style>.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}.service-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all 0.3s}.service-card:hover{border-color:var(--primary);transform:translateY(-4px);background:var(--bg-card-hover)}.service-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem}.service-icon.blue{background:rgba(59,130,246,0.1)}.service-icon.cyan{background:rgba(6,182,212,0.1)}.service-icon.green{background:rgba(34,197,94,0.1)}.service-icon.purple{background:rgba(168,85,247,0.1)}.service-icon.orange{background:rgba(249,115,22,0.1)}.service-icon.red{background:rgba(239,68,68,0.1)}.service-card h3{font-size:1.1rem;font-weight:600;margin-bottom:0.6rem}.service-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.5}.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}.gallery-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all 0.3s;cursor:pointer}.gallery-item:hover{border-color:var(--primary);transform:translateY(-4px)}.gallery-item img{width:100%;height:200px;object-fit:cover;display:block}.gallery-item-info{padding:1rem}.gallery-item-info h4{font-size:0.95rem;font-weight:600;margin-bottom:0.3rem}.gallery-item-info p{font-size:0.8rem;color:var(--text-muted)}@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-15px) rotate(2deg)}}@media(max-width:768px){.services-grid{grid-template-columns:1fr!important}.gallery-grid{grid-template-columns:1fr!important}div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}}';
+  return getPageWrapper('index',body);
+}
+
+// --- BUILD SERVICOS ---
+function buildServicosPage(){
+  var servCss='.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}.service-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all 0.3s}.service-card:hover{border-color:var(--primary);transform:translateY(-4px);background:var(--bg-card-hover)}.service-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem}.service-icon.blue{background:rgba(59,130,246,0.1)}.service-icon.cyan{background:rgba(6,182,212,0.1)}.service-icon.green{background:rgba(34,197,94,0.1)}.service-icon.purple{background:rgba(168,85,247,0.1)}.service-icon.orange{background:rgba(249,115,22,0.1)}.service-icon.red{background:rgba(239,68,68,0.1)}.service-card h3{font-size:1.1rem;font-weight:600;margin-bottom:0.6rem}.service-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.5}';
+  var servHtml=services.map(function(s){return '<div class="service-card"><div class="service-icon '+esc(s.color)+'">'+esc(s.icon)+'</div><h3>'+esc(s.title)+'</h3><p>'+esc(s.desc)+'</p></div>'}).join('\n      ');
+  var body='<section style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('servTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('servTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('servDesc'))+'</p><div class="services-grid">\n      '+servHtml+'\n    </div></div></section>';
+  return getPageWrapper('servicos',body+'<style>'+servCss+'</style>');
+}
+
+// --- BUILD PROJETOS ---
+function buildProjetosPage(){
+  var featLines=getVal('projFeatures').split('\n').filter(function(l){return l.trim()});
+  var featHtml=featLines.map(function(f){return '<li style="color:var(--text-muted);font-size:0.9rem;padding:0.3rem 0;padding-left:1.5rem;position:relative"><span style="color:var(--green);position:absolute;left:0;font-weight:700">&#10003;</span>'+esc(f)+'</li>'}).join('\n            ');
+  var body='<section style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('projTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('projTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('projDesc'))+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:2.5rem;transition:all 0.3s"><div><h3 style="font-size:1.5rem;margin-bottom:1rem">'+esc(getVal('projName'))+'</h3><p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:1.5rem">'+esc(getVal('projDesc2'))+'</p><ul style="list-style:none;margin-bottom:1.5rem">\n            '+featHtml+'\n          </ul><a href="'+esc(getVal('projBtnLink'))+'" style="padding:0.8rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;text-decoration:none;background:var(--primary);color:white;display:inline-block;transition:all 0.2s">'+esc(getVal('projBtnText'))+'</a></div><div style="display:flex;align-items:center;justify-content:center"><div style="background:var(--bg-card);border:2px dashed var(--border);border-radius:12px;padding:3rem;text-align:center;width:100%"><span style="font-size:3rem;display:block;margin-bottom:1rem">&#128200;</span><p style="color:var(--text-muted);font-size:0.9rem">Projeto em Destaque</p></div></div></div></div></section>';
+  return getPageWrapper('projetos',body);
+}
+
+// --- BUILD GALERIA ---
+function buildGaleriaPage(){
+  var galCss='.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}.gallery-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all 0.3s;cursor:pointer}.gallery-item:hover{border-color:var(--primary);transform:translateY(-4px)}.gallery-item img{width:100%;height:200px;object-fit:cover;display:block}.gallery-item-info{padding:1rem}.gallery-item-info h4{font-size:0.95rem;font-weight:600;margin-bottom:0.3rem}.gallery-item-info p{font-size:0.8rem;color:var(--text-muted)}.gallery-placeholder{width:100%;height:200px;background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(6,182,212,0.1));display:flex;align-items:center;justify-content:center;font-size:3rem}';
+  var galItemsHtml=galleryItems.map(function(g){
+    return '<div class="gallery-item"><img src="projeto-fotos/'+esc(g.file)+'" alt="'+esc(g.title)+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="gallery-item-info"><h4>'+esc(g.title)+'</h4><p>'+esc(g.desc)+'</p></div></div>';
+  }).join('');
+  var body='<section style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('galTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('galTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('galDesc'))+'</p><div class="gallery-grid">'+galItemsHtml+'</div></div></section>';
+  return getPageWrapper('galeria',body+'<style>'+galCss+'</style>');
+}
+
+// --- BUILD SOBRE ---
+function buildSobrePage(){
+  var body='<section style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center"><div><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('aboutTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('aboutTitle'))+'</h2><p style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:1.5rem">'+esc(getVal('aboutDesc'))+'</p><p style="color:var(--text-muted);font-size:0.95rem">'+esc(getVal('aboutDesc2'))+'</p></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:400px"><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center"><div style="font-size:2rem;font-weight:700;color:var(--primary)">'+esc(getVal('aboutStat1Val'))+'</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">'+esc(getVal('aboutStat1Label'))+'</div></div><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center"><div style="font-size:2rem;font-weight:700;color:var(--green)">'+esc(getVal('aboutStat2Val'))+'</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">'+esc(getVal('aboutStat2Label'))+'</div></div></div></div></div></section>';
+  return getPageWrapper('sobre',body);
+}
+
+// --- BUILD CONTATO ---
+function buildContatoPage(){
+  var body='<section style="padding:6rem 2rem 3rem"><div class="section-inner" style="max-width:1200px;margin:0 auto"><span class="section-tag" style="display:inline-block;color:var(--primary);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">'+esc(getVal('contTag'))+'</span><h2 class="section-title" style="font-size:2.2rem;font-weight:700;margin-bottom:1rem">'+esc(getVal('contTitle'))+'</h2><p class="section-desc" style="color:var(--text-muted);font-size:1.05rem;max-width:600px;margin-bottom:3rem">'+esc(getVal('contDesc'))+'</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;justify-items:center"><div><h3 style="font-size:1.3rem;margin-bottom:1.5rem">Informacoes</h3><div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem"><div style="width:40px;height:40px;background:rgba(59,130,246,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">&#128205;</div><div><div style="font-size:0.8rem;color:var(--text-muted)">Endereco</div><div style="font-size:0.95rem;font-weight:500">'+esc(getVal('contAddress'))+'</div></div></div><div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem"><div style="width:40px;height:40px;background:rgba(59,130,246,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">&#128231;</div><div><div style="font-size:0.8rem;color:var(--text-muted)">E-mail</div><div style="font-size:0.95rem;font-weight:500"><a href="mailto:'+esc(getVal('contEmail'))+'" style="color:var(--text);text-decoration:none">'+esc(getVal('contEmail'))+'</a></div></div></div></div><div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:550px;width:100%"><h3 style="font-size:1.1rem;margin-bottom:1.5rem">Envie uma mensagem</h3><form onsubmit="event.preventDefault();alert(\'Mensagem enviada!\')"><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Nome</label><input type="text" placeholder="Seu nome" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">E-mail</label><input type="email" placeholder="seu@email.com" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Telefone</label><input type="text" placeholder="(00) 00000-0000" style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit"></div><div style="margin-bottom:1rem"><label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;font-weight:500">Mensagem</label><textarea placeholder="Como podemos ajudar?" required style="width:100%;padding:0.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-family:inherit;resize:vertical;min-height:100px"></textarea></div><button type="submit" style="width:100%;padding:0.8rem;background:var(--primary);color:white;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer">Enviar Mensagem</button></form></div></div></div></section>';
+  return getPageWrapper('contato',body);
+}
+
+// --- PARSE ---
+function parseAllPages(allPages){
+  pagesData=allPages;
+  var indexDoc=null;
+  if(allPages.index){
+    indexDoc=new DOMParser().parseFromString(allPages.index,'text/html');
+    var logoEl=indexDoc.querySelector('.logo-icon');
+    setVal('navLogo',logoEl?logoEl.nextSibling.textContent.trim():'NELCi Tech 3D');
+    var navAs=indexDoc.querySelectorAll('.nav-links a:not(.nav-cta)');
+    var lines=[];navAs.forEach(function(a){lines.push(a.textContent.trim()+'|'+(a.getAttribute('href')||''))});
+    setVal('navLinks',lines.join('\n'));
+    var cta=indexDoc.querySelector('.nav-links a.nav-cta');
+    if(cta){setVal('navCtaText',cta.textContent.trim());setVal('navCtaLink',cta.getAttribute('href')||'')}
+    var hb=indexDoc.querySelector('.hero-badge');setVal('heroBadge',hb?hb.textContent.trim():'');
+    var h1=indexDoc.querySelector('.hero h1');setVal('heroTitle',h1?h1.innerHTML.trim():'');
+    var hp=indexDoc.querySelector('.hero p');setVal('heroDesc',hp?hp.textContent.trim():'');
+    var hbtns=indexDoc.querySelectorAll('.hero-buttons a');
+    if(hbtns[0]){setVal('heroBtn1Text',hbtns[0].textContent.trim());setVal('heroBtn1Link',hbtns[0].getAttribute('href')||'')}
+    if(hbtns[1]){setVal('heroBtn2Text',hbtns[1].textContent.trim());setVal('heroBtn2Link',hbtns[1].getAttribute('href')||'')}
+    var ft=indexDoc.querySelector('footer p');setVal('footerText',ft?ft.textContent.trim():'');
+    indexCards=[];
+    indexDoc.querySelectorAll('.services-grid .service-card').forEach(function(c){
+      var ic=c.querySelector('.service-icon'),h3=c.querySelector('h3'),p=c.querySelector('p'),a=c.getAttribute('href')||'';
+      indexCards.push({icon:ic?ic.textContent.trim():'',title:h3?h3.textContent.trim():'',desc:p?p.textContent.trim():'',link:a});
+    });
+    renderIndexCards();
+  }
+  var srcDoc=indexDoc;
+  function parseServicos(doc){
+    var secs=doc.querySelectorAll('section');
+    var ss=null;
+    for(var i=0;i<secs.length;i++){var t=secs[i].querySelector('.section-title');if(t&&t.textContent.toLowerCase().indexOf('o que fazemos')>-1){ss=secs[i];break}}
+    if(!ss)ss=doc.querySelector('#servicos');
+    if(ss){
+      setVal('servTag',(ss.querySelector('.section-tag')||{}).textContent||'');
+      setVal('servTitle',(ss.querySelector('.section-title')||{}).textContent||'');
+      setVal('servDesc',(ss.querySelector('.section-desc')||{}).textContent||'');
+    }
+    services=[];
+    doc.querySelectorAll('.service-card').forEach(function(c){
+      var ic=c.querySelector('.service-icon'),h3=c.querySelector('h3'),p=c.querySelector('p');
+      var cc=ic?(ic.className.replace('service-icon','').trim()):'blue';
+      services.push({icon:ic?ic.textContent.trim():'',color:cc||'blue',title:h3?h3.textContent.trim():'',desc:p?p.textContent.trim():''});
+    });
+    renderServices();
+  }
+  function parseProjetos(doc){
+    var projSec=null;
+    var secs=doc.querySelectorAll('section');
+    for(var i=0;i<secs.length;i++){var id=secs[i].getAttribute('id');if(id==='projetos'){projSec=secs[i];break}}
+    if(projSec){
+      setVal('projTag',(projSec.querySelector('.section-tag')||{}).textContent||'');
+      setVal('projTitle',(projSec.querySelector('.section-title')||{}).textContent||'');
+      setVal('projDesc',(projSec.querySelector('.section-desc')||{}).textContent||'');
+      var pi=projSec.querySelector('.project-info')||projSec.querySelector('.project-card');
+      if(pi){
+        var p3=pi.querySelector('h3'),pp=pi.querySelector('p');
+        setVal('projName',p3?p3.textContent.trim():'');
+        setVal('projDesc2',pp?pp.textContent.trim():'');
+        var feats=[];pi.querySelectorAll('.project-features li,li').forEach(function(l){feats.push(l.textContent.trim())});
+        setVal('projFeatures',feats.join('\n'));
+        var pb=pi.querySelector('a.btn-hero,a[href]');
+        if(pb){setVal('projBtnText',pb.textContent.trim());setVal('projBtnLink',pb.getAttribute('href')||'')}
+      }
+    }
+  }
+  function parseGaleria(doc,rawHtml){
+    var gs=null;
+    var secs=doc.querySelectorAll('section');
+    for(var i=0;i<secs.length;i++){var id=secs[i].getAttribute('id');if(id==='galeria-3d'||id==='galeria'){gs=secs[i];break}}
+    if(gs){
+      setVal('galTag',(gs.querySelector('.section-tag')||{}).textContent||'');
+      setVal('galTitle',(gs.querySelector('.section-title')||{}).textContent||'');
+      setVal('galDesc',(gs.querySelector('.section-desc')||{}).textContent||'');
+    }
+    galleryItems=[];
+    if(rawHtml){
+      var sm=rawHtml.match(/projects3D\s*=\s*(\[[\s\S]*?\]);/);
+      if(sm){try{galleryItems=eval(sm[1])}catch(e){galleryItems=[]}}
+    }
+    if(galleryItems.length===0){
+      var scripts=doc.querySelectorAll('script');
+      for(var s=0;s<scripts.length;s++){
+        var txt=scripts[s].textContent||scripts[s].innerText||'';
+        var sm2=txt.match(/projects3D\s*=\s*(\[[\s\S]*?\]);/);
+        if(sm2){try{galleryItems=eval(sm2[1])}catch(e){galleryItems=[]}break}
+      }
+    }
+    renderGallery();
+  }
+  function parseSobre(doc){
+    var as=null;
+    var secs=doc.querySelectorAll('section');
+    for(var i=0;i<secs.length;i++){var id=secs[i].getAttribute('id');if(id==='sobre'){as=secs[i];break}}
+    if(as){
+      setVal('aboutTag',(as.querySelector('.section-tag')||{}).textContent||'');
+      setVal('aboutTitle',(as.querySelector('.section-title')||{}).textContent||'');
+      var descs=as.querySelectorAll('.section-desc, p');
+      if(descs[0])setVal('aboutDesc',descs[0].textContent.trim());
+      if(descs[1])setVal('aboutDesc2',descs[1].textContent.trim());
+      var sts=as.querySelectorAll('.stat-card');
+      if(sts[0]){var sv0=sts[0].querySelector('.stat-value'),sl0=sts[0].querySelector('.stat-label');setVal('aboutStat1Val',sv0?sv0.textContent.trim():'');setVal('aboutStat1Label',sl0?sl0.textContent.trim():'')}
+      if(sts[1]){var sv1=sts[1].querySelector('.stat-value'),sl1=sts[1].querySelector('.stat-label');setVal('aboutStat2Val',sv1?sv1.textContent.trim():'');setVal('aboutStat2Label',sl1?sl1.textContent.trim():'')}
+    }
+  }
+  function parseContato(doc){
+    var cs=null;
+    var secs=doc.querySelectorAll('section');
+    for(var i=0;i<secs.length;i++){var id=secs[i].getAttribute('id');if(id==='contato'){cs=secs[i];break}}
+    if(cs){
+      setVal('contTag',(cs.querySelector('.section-tag')||{}).textContent||'');
+      setVal('contTitle',(cs.querySelector('.section-title')||{}).textContent||'');
+      setVal('contDesc',(cs.querySelector('.section-desc')||{}).textContent||'');
+      var vals=cs.querySelectorAll('.contact-item-value');
+      if(vals[0])setVal('contAddress',vals[0].textContent.trim());
+      var em=cs.querySelector('a[href^="mailto:"]');
+      setVal('contEmail',em?em.textContent.trim():'');
+    }
+  }
+  if(allPages.servicos&&allPages.servicos.length>100){parseServicos(new DOMParser().parseFromString(allPages.servicos,'text/html'))}
+  else if(srcDoc){parseServicos(srcDoc)}
+  if(allPages.projetos&&allPages.projetos.length>100){parseProjetos(new DOMParser().parseFromString(allPages.projetos,'text/html'))}
+  else if(srcDoc){parseProjetos(srcDoc)}
+  if(allPages.galeria&&allPages.galeria.length>100){parseGaleria(new DOMParser().parseFromString(allPages.galeria,'text/html'),allPages.galeria)}
+  else if(srcDoc){parseGaleria(srcDoc,allPages.index)}
+  if(allPages.sobre&&allPages.sobre.length>100){parseSobre(new DOMParser().parseFromString(allPages.sobre,'text/html'))}
+  else if(srcDoc){parseSobre(srcDoc)}
+  if(allPages.contato&&allPages.contato.length>100){parseContato(new DOMParser().parseFromString(allPages.contato,'text/html'))}
+  else if(srcDoc){parseContato(srcDoc)}
+  updatePreview();
+}
+
+// --- PREVIEW & PUBLISH ---
+function setStatus(msg,type){
+  var el=document.getElementById('statusBar');
+  if(!el)return;
+  el.textContent=msg;
+  el.className=type||'loading';
+  el.style.display='block';
+}
+function updatePreview(){
+  if(updateTimer)clearTimeout(updateTimer);
+  updateTimer=setTimeout(function(){
+    try{
+      var html='';
+      switch(currentPage){
+        case'index':html=buildIndexPage();break;
+        case'servicos':html=buildServicosPage();break;
+        case'projetos':html=buildProjetosPage();break;
+        case'galeria':html=buildGaleriaPage();break;
+        case'sobre':html=buildSobrePage();break;
+        case'contato':html=buildContatoPage();break;
+      }
+      var frame=document.getElementById('previewFrame');
+      if(!frame){setStatus('ERRO: iframe nao encontrado','err');return;}
+      if(window._lastBlobUrl){URL.revokeObjectURL(window._lastBlobUrl);}
+      var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+      var url=URL.createObjectURL(blob);
+      window._lastBlobUrl=url;
+      frame.src=url;
+      setStatus('Preview OK - '+currentPage+' ('+html.length+' chars)','ok');
+    }catch(e){
+      setStatus('ERRO preview: '+e.message,'err');
+      console.error('Preview error:',e);
+    }
+  },300);
+}
+
+function previewTab(){
+  var html=buildIndexPage();
+  var blob=new Blob([html],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+function publish(){
+  if(!confirm('Publicar todas as paginas no site principal?'))return;
+  var btn=document.getElementById('btnPublish');
+  btn.textContent='Publicando...';btn.disabled=true;
+  var pages={
+    index:buildIndexPage(),
+    servicos:buildServicosPage(),
+    projetos:buildProjetosPage(),
+    galeria:buildGaleriaPage(),
+    sobre:buildSobrePage(),
+    contato:buildContatoPage()
+  };
+  fetch('/api/dev/publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pages:pages})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok)showToast(d.message||'Publicado!','success');
+    else showToast('Erro: '+(d.error||'desconhecido'),'error');
+    btn.textContent='Publicar no Site';btn.disabled=false;
+  })
+  .catch(function(){showToast('Erro de conexao','error');btn.textContent='Publicar no Site';btn.disabled=false});
+}
+
+function loadCurrent(){
+  setStatus('Carregando conteudo...','loading');
+  fetch('/api/dev/current')
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status+' - faca login como admin');
+    return r.json();
+  })
+  .then(function(d){
+    parseAllPages(d);
+    setStatus('Conteudo carregado OK - clique nas abas pra ver preview','ok');
+  })
+  .catch(function(e){
+    setStatus('ERRO: '+e.message+' - preview com dados vazios','err');
+    updatePreview();
+  });
+}
+
+loadCurrent();
+</script>
+</body>
+</html>

@@ -258,13 +258,6 @@
     "premium": true,
     "expire_at": "2099-12-31"
   },
-  "e6c0bf09d5311ba2337aa74748d79c0ed2ca47e2e763fe9f534b0ec58d759d12": {
-    "name": "Admin NELCi",
-    "email": "admin@nelcitech3d.com.br",
-    "is_admin": true,
-    "premium": true,
-    "expire_at": "2099-12-31"
-  },
   "f3756a3f643988812b31c8d231ff10cdc973df509d8fe860d84e6aa205c6044c": {
     "name": "Admin NELCi",
     "email": "admin@nelcitech3d.com.br",
@@ -273,6 +266,317 @@
     "expire_at": "2099-12-31"
   },
   "715c504d19a6bfc73b1fdda37437f55309bbaba914b838e85b8627933120c2de": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "c931453a3b725f3cbeb7b74e1734436a58177b0f28e9cebe6cf534e65f145e4a": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "0d9878349097e8d94a659ae1d20671d07b56feec5fc7e08408d98bf680c55201": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "067947e7d64bb8007e2548a2b52f1b288d3152df44638b67963a30c7f36e0b46": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "340085d571c8bd20a4c6cd3728abaed87b6c463a780cc42390f6f0f1019ee4a4": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "1e37de8b1a359f898c628f2cda9f3934d39058e8ff8a3b94cb95dd8ad0b46d46": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "5c51af2d4bdc6efc099aac09a48e3d4b310450e822ca8168c5011ae894ff8928": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "7eb6533155f00a70d0113972f8f898019452392c026658c844d7635c115cc142": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "2fabf74e0b83fd9ddddf1334bbe0338e0c6eed7192cf94e4e98a4f46a3d8c7de": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "cdc9d8b81c2e588d7b04f74671aebe55f33165eede352e54092967867433d87c": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "7653a4f14e27b27f062f8dfc8bd98ed33afa87f2bcbf83083eaa60794dfd8d72": {
+    "name": "Usuario Demo",
+    "email": "demo@nelcitech3d.local",
+    "premium": false,
+    "is_admin": false,
+    "demo": true,
+    "expire_at": "2026-07-23 04:37:09"
+  },
+  "c138835d4f6562a8a51838fa6ea57507733d2611bcb3f67e16c9116be38d860f": {
+    "name": "Teste",
+    "email": "pontiac3d@gmail.com",
+    "premium": false,
+    "is_admin": false
+  },
+  "12e403dac9fb0231c09c2a8723800baaa4777d11691c614bf7b81b9bb69d4266": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "93cc910ed6098659217a2b9a9529c8b6d9ef10d03ebe0465af93a4beb2248f81": {
+    "name": "Teste",
+    "email": "pontiac3d@gmail.com",
+    "premium": false,
+    "is_admin": false
+  },
+  "179361e6bcf0219fc1fc4bf22bd9c2367abb2a3cadb505899efbb45c6e6eb9e8": {
+    "name": "Teste",
+    "email": "pontiac3d@gmail.com",
+    "premium": true,
+    "is_admin": false
+  },
+  "747ef9a6f2c0ab8cae3f10290659a23cd00aac321922e77f78a923c9a7d3dc24": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "3dc3f8c3568e611b8efd5663f246f51bccb69c9b1957c405d57155cfedf93ec5": {
+    "name": "Teste",
+    "email": "pontiac3d@gmail.com",
+    "premium": true,
+    "is_admin": false
+  },
+  "e946409e88f8fb4993d8d393e0a6d460b9287bcd7e691bd1a6a616f9b0a033b1": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "6dfec4304f189c1d52602eae1d441967a8f4ee90dbb9eedcdfe7c2f2b6ef2a5c": {
+    "name": "Teste",
+    "email": "pontiac3d@gmail.com",
+    "premium": true,
+    "is_admin": false
+  },
+  "13b280801e8d9488a09a30cee83d34687e873a074be572e29ef84dfdd3d3e749": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "d26d532139fffeddad457b7cb14015f1e8f38a7f56dfb9662d057493fd252239": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "300139b3c9fd53bacd97a5a09dfee872d2d6a51c04b4443810250e1ca0106442": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "807961ac1c431d0bac1e01cba51ed2cc9abb0878111d22151dad1d8b483ba8e8": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "64b277bbd477ce027184015664dc683be8439ac59fc3f6c902d4796db4991da2": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "70a9f6fc9fb77d5e8a77671c3dcbcca20df62b93879113c929087e4abd165734": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "5f753d7d81dd52a2dbebeb50e896ce6f11cc9fd38ae05785441d1d4e698cbbc3": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "fa8c1148874b7350ff0bc4ecae18be85280eeb9fc804c2429148d57f4095f184": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "5f4d96f8ed94f241bbdb53918ce618f1eb3291620d25db51b1683a00dc38c26c": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "c77f4fa604a3345051bea0fba8ddda2f328c13476de365f278ba5ee9f94f6c20": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "487a59f5384e8b48ae94bb554b5d1079e757054a9316428b28048ee75fa44f00": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "799fdaa2a3c0807c74b49340055d70bf760d4303d1b5a9adb6e21a23d879898c": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "7e63bfa5ede77a04a86db86556054c545a39af0024b5eef15bc0ce55fbcbb2e6": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "73eeae74371108b8d76b2f1ada1e3c0d8e1243617760cca23d6b894eeab1d51d": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "198d86e6f3ade44ba89b8fbbfb78a1ed239ee8d0db6489ad18fe8ffa7dbf2d7b": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "a106e445ae9340833dd0be587d0dc55c93ae60733e84af04eec7bd467214dddc": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "c44fbf1ab1e94152ac98ed06e534b7a1e8769e8ae0222c89d7031d7946d01896": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "6952f3ccbb909eea803a2a6f41501d21a27b00d03c650dd36d3a6943069992c1": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "f87e09a8d77d6102d1e5c76a3a209522591d9805db08ed1e7d92c513f593dfc7": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "a89cdd89b583ea13ffa8f4d432dccb2791daa13194e55e8dedbcea10ce21b372": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "2917ff9601420a5fb021594539cf907985ae0dedd6f97baeaa5769e9321216a4": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "7418ffff4b6ffac31098375eb35ed547f3e0135f7413b7ab59cd3835a44922e5": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "35de16ce0b1654c2ec7112b614a126ddb7fbf4e7bb6b22b4f0ae36c84c6bfc16": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "7f97e6a07c2e3807efee792b8d029af06d3903b8e6c9f761ae55c24bf9954f21": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "6f25b18069754d8d14feddb0eb554119437ea1a21a373f2c05bcd4d5e29b7ff2": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "4a35710df9ba38b319bc7913f896cefebae39e11b7f50de5939bfd580cf8255c": {
+    "name": "Admin NELCi",
+    "email": "admin@nelcitech3d.com.br",
+    "is_admin": true,
+    "premium": true,
+    "expire_at": "2099-12-31"
+  },
+  "d00652192325cb51a5e15ede8ea025d10825c3993a17ecf37e63150e15b07b4d": {
     "name": "Admin NELCi",
     "email": "admin@nelcitech3d.com.br",
     "is_admin": true,

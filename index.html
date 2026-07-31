@@ -23,6 +23,26 @@
       --green: #22c55e;
     }
 
+    [data-theme="light"] {
+      --bg: #f0f2f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f5f7fa;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --text-muted: #64748b;
+      --green: #16a34a;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent: #0891b2;
+    }
+
+    [data-theme="light"] nav { background: rgba(240, 242, 245, 0.85); border-color: #e2e8f0; }
+    [data-theme="light"] .logo-icon { color: white; }
+    [data-theme="light"] .hero { background: linear-gradient(135deg, #eff6ff, #f0fdf4); }
+    [data-theme="light"] .hero-text h1 { color: #1a202c; }
+    [data-theme="light"] .section-title { color: #1a202c; }
+    [data-theme="light"] footer { background: #1a202c; }
+
     html { scroll-behavior: smooth; }
 
     body {
@@ -95,6 +115,9 @@
       transition: background 0.2s;
     }
     .nav-cta:hover { background: var(--primary-dark); }
+
+    .theme-toggle { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; font-size: 1.1rem; color: var(--text); }
+    .theme-toggle:hover { background: var(--bg-card-hover); }
 
     /* HERO */
     .hero {
@@ -624,6 +647,7 @@
         <li><a href="#galeria-3d">Projetos 3D</a></li>
         <li><a href="#sobre">Sobre</a></li>
         <li><a href="#contato">Contato</a></li>
+        <li><button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">&#9790;</button></li>
         <li><a href="demo.html" class="nav-cta">Ver Demo</a></li>
       </ul>
     </div>
@@ -904,6 +928,16 @@
     });
 
     loadGallery();
+
+    var _currentTheme = localStorage.getItem('nelci_theme') || 'dark';
+    function applyTheme(theme) {
+      _currentTheme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('nelci_theme', theme);
+      document.getElementById('themeToggle').innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
+    }
+    function toggleTheme() { applyTheme(_currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(_currentTheme);
   </script>
   <div style="position:fixed;bottom:1rem;right:1rem;z-index:5000;background:rgba(13,16,23,0.92);border:1px solid #2a2e3a;border-radius:20px;padding:0.35rem 0.75rem;font-size:0.72rem;color:#94a3b8;display:flex;align-items:center;gap:0.3rem;backdrop-filter:blur(6px)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> <span id="visitCount">0</span> visitas</div>
   <script>fetch('/api/visit',{method:'POST'}).then(function(r){return r.json()}).then(function(d){if(d&&d.count!==undefined){var el=document.getElementById('visitCount');if(el)el.textContent=d.count}}).catch(function(){})</script>

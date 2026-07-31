@@ -3,12 +3,12 @@
     {
       "date": "2026-07-21",
       "type": "Receita",
-      "description": "Salario ",
+      "description": "Teste edicao 1785253176526",
       "category": "Salario",
-      "value": "4000",
+      "value": "5500",
       "id": "038346f2c5c0cdc5",
       "created": "2026-07-21 09:11:21",
-      "updated": "2026-07-21 15:29:31"
+      "updated": "2026-07-28 12:40:22"
     },
     {
       "date": "2026-07-20",
@@ -181,6 +181,52 @@
       "value": "300",
       "id": "6dc4ffa2d1531051",
       "created": "2026-07-21 15:39:14"
+    },
+    {
+      "date": "2026-07-23",
+      "type": "Receita",
+      "description": "Impressao 3D",
+      "category": "Servicos",
+      "value": "60",
+      "id": "ecbdc8be1054379d",
+      "created": "2026-07-23 22:31:32"
+    },
+    {
+      "date": "2026-07-23",
+      "type": "Receita",
+      "description": "Impressao 3D",
+      "category": "Outros",
+      "value": "110",
+      "id": "9944298f6db567b5",
+      "created": "2026-07-24 09:40:24"
+    },
+    {
+      "date": "2026-08-07",
+      "type": "Receita",
+      "description": "INSS",
+      "category": "Salario",
+      "value": "4.032.00",
+      "id": "2bbf086fa8c2b24b",
+      "created": "2026-07-28 13:12:55",
+      "updated": "2026-07-28 16:12:01"
+    },
+    {
+      "date": "2026-09-07",
+      "type": "Receita",
+      "description": "INSS",
+      "category": "Salario",
+      "value": "4032",
+      "id": "7f2ca72ba6c6f73a",
+      "created": "2026-07-29 11:55:34"
+    },
+    {
+      "date": "2026-08-01",
+      "type": "Receita",
+      "description": "Mae",
+      "category": "Salario",
+      "value": "300.00",
+      "id": "f5bdac4728ec495b",
+      "created": "2026-07-29 12:08:08"
     }
   ],
   "investments": [
@@ -189,12 +235,14 @@
       "ticker": "PETR4",
       "name": "Petrobras PN",
       "qty": "1",
-      "avg_price": "37.52",
-      "current_price": "41.63",
+      "avg_price": "41.23",
+      "current_price": "41.23",
       "date": "2026-05-15",
       "id": "inv-1",
       "created": "2026-07-21 13:02:56",
-      "updated": "2026-07-21 14:54:33"
+      "updated": "2026-07-28 13:13:43",
+      "operation": "compra",
+      "broker": ""
     },
     {
       "category": "Acoes B3",
@@ -262,6 +310,20 @@
       "date": "2026-07-01",
       "id": "5506c4bad64c7e73",
       "created": "2026-07-21 15:59:09"
+    },
+    {
+      "category": "Cripto",
+      "ticker": "BTC",
+      "name": "BTC",
+      "qty": "0,00074784",
+      "avg_price": "334.188,44",
+      "current_price": "330.653,41",
+      "date": "21/07/2026",
+      "id": "d3c17c6cb3be4b4c",
+      "created": "2026-07-22 14:56:38",
+      "updated": "2026-07-23 20:15:07",
+      "broker": "coinex",
+      "operation": "compra"
     }
   ],
   "suppliers": [
@@ -282,9 +344,10 @@
       "description": "Material escrito",
       "supplier": "Tech Solutions",
       "payment": "A Vista",
-      "value": "500",
+      "value": "510",
       "id": "69e9c0cb4222e687",
-      "created": "2026-07-21 09:27:38"
+      "created": "2026-07-21 09:27:38",
+      "updated": "2026-07-22 11:56:45"
     }
   ],
   "sales": [
@@ -292,9 +355,10 @@
       "date": "2026-07-21",
       "description": "Projeto site",
       "payment": "3x",
-      "value": "3000",
+      "value": "3100",
       "id": "2c065e788f5e776f",
-      "created": "2026-07-21 09:27:38"
+      "created": "2026-07-21 09:27:38",
+      "updated": "2026-07-22 11:56:58"
     }
   ]
 }

@@ -13,6 +13,9 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --bg: #0f1117; --bg-card: #1a1d27; --bg-hover: #242836; --border: #2a2e3a; --text: #e4e6f0; --text-muted: #8b8fa3; --green: #22c55e; --green-bg: rgba(34,197,94,0.12); --red: #ef4444; --red-bg: rgba(239,68,68,0.12); --blue: #3b82f6; --blue-bg: rgba(59,130,246,0.12); --purple: #a855f7; --purple-bg: rgba(168,85,247,0.12); --yellow: #eab308; --yellow-bg: rgba(234,179,8,0.12); --radius: 12px; }
+    [data-theme="light"] { --bg: #f0f2f5; --bg-card: #ffffff; --bg-hover: #f5f7fa; --border: #e2e8f0; --text: #1a202c; --text-muted: #64748b; --green: #16a34a; --green-bg: rgba(22,163,74,0.1); --red: #dc2626; --red-bg: rgba(220,38,38,0.1); --blue: #2563eb; --blue-bg: rgba(37,99,235,0.1); --purple: #9333ea; --purple-bg: rgba(147,51,234,0.1); --yellow: #ca8a04; --yellow-bg: rgba(202,138,4,0.1); }
+    [data-theme="light"] .demo-banner { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+    [data-theme="light"] body::before { display:none; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
     .demo-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; text-align: center; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
@@ -31,6 +34,9 @@
     .menu-fab.open svg circle { fill: #000; }
     .menu-fab svg { width: 20px; height: 20px; }
     .menu-fab svg circle { fill: var(--text-muted); transition: fill 0.2s; }
+
+    .theme-toggle { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-hover); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; font-size: 1.1rem; }
+    .theme-toggle:hover { background: var(--border); }
 
     .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 250; }
     .menu-overlay.active { display: block; }
@@ -173,6 +179,11 @@
     .admin-fab:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(34,197,94,0.5); }
     .admin-fab.visible { display:flex; align-items:center; justify-content:center; }
 
+    .demo-activate { display:none; position:fixed; bottom:24px; left:24px; padding:0.7rem 1.2rem; border-radius:12px; background:var(--yellow); color:#000; border:none; font-size:0.85rem; font-weight:700; cursor:pointer; z-index:200; box-shadow:0 4px 20px rgba(234,179,8,0.4); transition:all 0.2s; animation:demoPulse 2s infinite; }
+    .demo-activate:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(234,179,8,0.5); }
+    .demo-activate.visible { display:flex; align-items:center; gap:0.5rem; }
+    @keyframes demoPulse { 0%,100%{box-shadow:0 4px 20px rgba(234,179,8,0.4)} 50%{box-shadow:0 4px 30px rgba(234,179,8,0.7)} }
+
     .modal-add { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:400; align-items:flex-end; justify-content:center; }
     .modal-add.active { display:flex; }
     .modal-add-card { background:var(--bg-card); border:1px solid var(--border); border-radius:20px 20px 0 0; width:100%; max-width:500px; max-height:85vh; overflow-y:auto; padding:1.5rem; animation:slideUp 0.25s ease-out; }
@@ -228,16 +239,20 @@
     .user-data-section h3 { font-size:0.9rem; color:var(--green); margin-bottom:0.8rem; }
 
     body:not(.premium) .admin-fab { display:none !important; }
-    body:not(.premium) .btn-edit { display:none !important; }
-    body:not(.premium) .btn-del { display:none !important; }
+    body:not(.premium):not(.admin) .btn-edit { display:none !important; }
+    body:not(.premium):not(.admin) .btn-del { display:none !important; }
     body:not(.premium) .demo-download { display:none !important; }
     body.premium #downloadsLocked { display:none !important; }
+    .toast { position:fixed; bottom:20px; right:20px; padding:12px 20px; border-radius:10px; font-size:0.9rem; font-weight:600; z-index:9999; animation:toastIn 0.3s ease-out; }
+    .toast-success { background:#22c55e; color:#000; }
+    .toast-error { background:#ef4444; color:#fff; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
 <body>
-  <div class="demo-banner">
+  <div class="demo-banner" id="demoBanner" style="display:none">
     Finance Dashboard &mdash; Modo Demo | Dados de exemplo para demonstracao
-    <a href="/index.html" class="demo-back-btn">Voltar ao Site</a>
+    <a href="login.html" class="demo-back-btn">Voltar ao Site</a>
   </div>
 
   <header>
@@ -247,11 +262,11 @@
         <span class="admin-badge" id="adminBadge">ADMIN</span>
         <span class="subtitle" id="userDisplay">Controle financeiro completo</span>
       </div>
-      <div style="display:flex;align-items:center;gap:0.8rem">
+      <div style="display:flex;align-items:center;gap:0.6rem">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">&#9790;</button>
         <button class="menu-fab" id="menuFab" onclick="toggleMenu()">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>
-        </button>
-      </div>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>
+      </button>
     </div>
   </header>
 
@@ -331,6 +346,10 @@
           <canvas id="monthlyChart"></canvas>
         </div>
       </section>
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+        <select id="yearSelect" onchange="switchYear(this.value)" style="padding:0.5rem 0.8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer"></select>
+        <span style="color:var(--text-muted);font-size:0.8rem" id="monthLabel"></span>
+      </div>
       <div class="month-tabs" id="monthTabs">
         <button class="month-tab active" onclick="switchMonth('todos',this)">Todos</button>
         <button class="month-tab" onclick="switchMonth('01',this)">Jan</button>
@@ -368,6 +387,36 @@
 
     <!-- TAB: COMMERCIAL -->
     <div class="tab-content" id="tab-commercial">
+      <section class="cards">
+        <div class="card" style="border-left:4px solid var(--green)"><span class="card-label">Receitas Totais</span><span class="card-value" id="card-sales-total" style="color:var(--green)">R$ 0,00</span></div>
+        <div class="card" style="border-left:4px solid var(--red)"><span class="card-label">Despesas</span><span class="card-value" id="card-purchases-total" style="color:var(--red)">R$ 0,00</span></div>
+        <div class="card" style="border-left:4px solid var(--blue)"><span class="card-label">Lucro Liquido</span><span class="card-value" id="card-profit-total" style="color:var(--blue)">R$ 0,00</span></div>
+        <div class="card" style="border-left:4px solid #a855f7"><span class="card-label">Margem %</span><span class="card-value" id="card-margin-total" style="color:#a855f7">0%</span></div>
+      </section>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+          <h3 style="margin:0 0 1rem;font-size:0.95rem;color:var(--text-muted)">Evolucao Mensal</h3>
+          <div style="position:relative;width:100%;height:220px"><canvas id="commercialMonthlyChart"></canvas></div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+          <h3 style="margin:0 0 1rem;font-size:0.95rem;color:var(--text-muted)">Vendas vs Meta</h3>
+          <div style="position:relative;width:100%;height:220px"><canvas id="commercialMetaChart"></canvas></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+          <h3 style="margin:0 0 1rem;font-size:0.95rem;color:var(--text-muted)">Compras vs Vendas por Categoria</h3>
+          <div style="position:relative;width:100%;height:220px"><canvas id="commercialCategoryChart"></canvas></div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+          <h3 style="margin:0 0 1rem;font-size:0.95rem;color:var(--text-muted)">Vendas por Categoria</h3>
+          <div style="position:relative;width:100%;height:220px;display:flex;justify-content:center;align-items:center"><canvas id="commercialDonutChart"></canvas></div>
+        </div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem">
+        <h3 style="margin:0 0 1rem;font-size:0.95rem;color:var(--text-muted)">Lucro Mensal</h3>
+        <div style="position:relative;width:100%;height:200px"><canvas id="commercialProfitChart"></canvas></div>
+      </div>
       <div class="commercial-subtabs">
         <button class="subtab-btn active" onclick="switchSubtab('suppliers', this)">Fornecedores</button>
         <button class="subtab-btn" onclick="switchSubtab('purchases', this)">Compras</button>
@@ -392,10 +441,10 @@
           <div class="transactions-header"><h2>Compras</h2></div>
           <div style="overflow-x:auto">
             <table>
-              <thead><tr><th>Data</th><th>Descricao</th><th>Fornecedor</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
+              <thead><tr><th>Data</th><th>Descricao</th><th>Fornecedor</th><th>Categoria</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
               <tbody id="tb-purchases">
-                <tr id="row-pu-1"><td>01/07/2026</td><td>Compra de material de escritorio</td><td>Tech Solutions Ltda</td><td><span class="payment-badge pay-avista">A Vista</span></td><td class="amount-negative">R$ 1.250,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-1')">&#128465;</button></td></tr>
-                <tr id="row-pu-2"><td>10/07/2026</td><td>Compra de equipamentos</td><td>Distribuidora Central</td><td><span class="payment-badge pay-aprazo">6x</span></td><td class="amount-negative">R$ 8.750,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-2')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-2')">&#128465;</button></td></tr>
+                <tr id="row-pu-1"><td>01/07/2026</td><td>Compra de material de escritorio</td><td>Tech Solutions Ltda</td><td>Material</td><td><span class="payment-badge pay-avista">A Vista</span></td><td class="amount-negative">R$ 1.250,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-1')">&#128465;</button></td></tr>
+                <tr id="row-pu-2"><td>10/07/2026</td><td>Compra de equipamentos</td><td>Distribuidora Central</td><td>Equipamentos</td><td><span class="payment-badge pay-aprazo">6x</span></td><td class="amount-negative">R$ 8.750,00</td><td><button class="btn-edit" onclick="editItem('purchases','pu-2')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('purchases','pu-2')">&#128465;</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -406,9 +455,9 @@
           <div class="transactions-header"><h2>Vendas</h2></div>
           <div style="overflow-x:auto">
             <table>
-              <thead><tr><th>Data</th><th>Descricao</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
+              <thead><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Pagamento</th><th>Valor</th><th>Editar</th><th>Deletar</th></tr></thead>
               <tbody id="tb-sales">
-                <tr id="row-sl-1"><td>05/07/2026</td><td>Venda de consultoria</td><td><span class="payment-badge pay-aprazo">3x</span></td><td class="amount-positive">R$ 4.500,00</td><td><button class="btn-edit" onclick="editItem('sales','sl-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('sales','sl-1')">&#128465;</button></td></tr>
+                <tr id="row-sl-1"><td>05/07/2026</td><td>Venda de consultoria</td><td>Consultoria</td><td><span class="payment-badge pay-aprazo">3x</span></td><td class="amount-positive">R$ 4.500,00</td><td><button class="btn-edit" onclick="editItem('sales','sl-1')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem('sales','sl-1')">&#128465;</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -428,6 +477,13 @@
         <div style="text-align:center"><canvas id="investChart" width="240" height="240"></canvas></div>
         <div id="investChartLegend" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;justify-content:center"></div>
       </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <h3 style="margin:0;font-size:1rem">Evolucao da Carteira</h3>
+          <span id="evolutionDateRange" style="font-size:0.75rem;color:var(--text-muted)"></span>
+        </div>
+        <div style="position:relative;width:100%;height:280px"><canvas id="investEvolutionChart"></canvas></div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem">
         <div class="commercial-subtabs" id="investSubtabs" style="margin-bottom:0">
           <button class="subtab-btn active" onclick="switchInvestSubtab('acoes', this)">Acoes B3</button>
@@ -443,51 +499,75 @@
         </div>
       </div>
       <div class="subtab-content active" id="subtab-acoes">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - Acoes B3</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-acoes"></canvas></div>
+        </div>
         <section class="transactions-section">
           <div class="transactions-header"><h2>Acoes B3</h2></div>
           <div style="overflow-x:auto">
-            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-acoes',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-acoes',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Corretora</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
             <tbody id="tb-inv-acoes"></tbody></table>
           </div>
         </section>
       </div>
       <div class="subtab-content" id="subtab-fiis">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - FIIs</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-fiis"></canvas></div>
+        </div>
         <section class="transactions-section">
           <div class="transactions-header"><h2>Fundos Imobiliarios</h2></div>
           <div style="overflow-x:auto">
-            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-fiis',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-fiis',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Corretora</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
             <tbody id="tb-inv-fiis"></tbody></table>
           </div>
         </section>
       </div>
       <div class="subtab-content" id="subtab-etfs">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - ETFs</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-etfs"></canvas></div>
+        </div>
         <section class="transactions-section">
           <div class="transactions-header"><h2>ETFs</h2></div>
           <div style="overflow-x:auto">
-            <table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-etfs',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-etfs',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Corretora</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
             <tbody id="tb-inv-etfs"></tbody></table>
           </div>
         </section>
       </div>
       <div class="subtab-content" id="subtab-renda-fixa">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - Renda Fixa</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-renda-fixa"></canvas></div>
+        </div>
         <section class="transactions-section">
           <div class="transactions-header"><h2>Renda Fixa</h2></div>
           <div style="overflow-x:auto">
-            <table><thead><tr><th>Titulo</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-renda-fixa',0)" style="cursor:pointer">Titulo &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-renda-fixa',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Corretora</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
             <tbody id="tb-inv-renda-fixa"></tbody></table>
           </div>
         </section>
       </div>
       <div class="subtab-content" id="subtab-cripto">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - Criptomoedas</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-cripto"></canvas></div>
+        </div>
         <section class="transactions-section">
           <div class="transactions-header"><h2>Criptomoedas</h2></div>
           <div style="overflow-x:auto">
-            <table><thead><tr><th>Moeda</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
+            <table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-cripto',0)" style="cursor:pointer">Moeda &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-cripto',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Corretora</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead>
             <tbody id="tb-inv-cripto"></tbody></table>
           </div>
         </section>
       </div>
       <div class="subtab-content" id="subtab-internacional">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem">
+          <h3 style="margin:0 0 0.8rem;font-size:0.9rem;color:var(--text-muted)">Evolucao - Internacional</h3>
+          <div style="position:relative;width:100%;height:200px"><canvas id="subtabChart-internacional"></canvas></div>
+        </div>
         <div class="invest-intl-subtabs">
           <button class="intl-subtab-btn active" onclick="switchIntlSubtab('intl-etfs', this)">ETFs</button>
           <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-etf-rf', this)">ETF Renda Fixa</button>
@@ -495,11 +575,11 @@
           <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-acoes', this)">Acoes</button>
           <button class="intl-subtab-btn" onclick="switchIntlSubtab('intl-reits', this)">REITs</button>
         </div>
-        <div class="intl-content active" id="intl-etfs"><section class="transactions-section"><div class="transactions-header"><h2>ETFs Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etfs"></tbody></table></div></section></div>
-        <div class="intl-content" id="intl-etf-rf"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Renda Fixa Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-rf"></tbody></table></div></section></div>
-        <div class="intl-content" id="intl-etf-crypto"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Criptomoedas Internacional</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-crypto"></tbody></table></div></section></div>
-        <div class="intl-content" id="intl-acoes"><section class="transactions-section"><div class="transactions-header"><h2>Acoes Internacionais</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-acoes"></tbody></table></div></section></div>
-        <div class="intl-content" id="intl-reits"><section class="transactions-section"><div class="transactions-header"><h2>REITs</h2></div><div style="overflow-x:auto"><table><thead><tr><th>Ticker</th><th>Nome</th><th>Qtd</th><th>Preco Medio</th><th>Preco Atual</th><th>Investido</th><th>Valor Atual</th><th>Lucro/Prejuizo</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-reits"></tbody></table></div></section></div>
+        <div class="intl-content active" id="intl-etfs"><section class="transactions-section"><div class="transactions-header"><h2>ETFs Internacionais</h2></div><div style="overflow-x:auto"><table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-intl-etfs',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etfs',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etfs"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-rf"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Renda Fixa Internacional</h2></div><div style="overflow-x:auto"><table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-intl-etf-rf',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-rf',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-rf"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-etf-crypto"><section class="transactions-section"><div class="transactions-header"><h2>ETFs de Criptomoedas Internacional</h2></div><div style="overflow-x:auto"><table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-etf-crypto',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-etf-crypto"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-acoes"><section class="transactions-section"><div class="transactions-header"><h2>Acoes Internacionais</h2></div><div style="overflow-x:auto"><table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-intl-acoes',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-acoes',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-acoes"></tbody></table></div></section></div>
+        <div class="intl-content" id="intl-reits"><section class="transactions-section"><div class="transactions-header"><h2>REITs</h2></div><div style="overflow-x:auto"><table class="sortable-table"><thead><tr><th onclick="sortInvestTable('tb-inv-intl-reits',0)" style="cursor:pointer">Ticker &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',1)" style="cursor:pointer">Nome &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',2)" style="cursor:pointer">Qtd &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',3)" style="cursor:pointer">Preco Medio &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',4)" style="cursor:pointer">Preco Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',5)" style="cursor:pointer">Investido &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',6)" style="cursor:pointer">Valor Atual &#8693;</th><th onclick="sortInvestTable('tb-inv-intl-reits',7)" style="cursor:pointer">Lucro/Prejuizo &#8693;</th><th>Data</th><th>Editar</th><th>Deletar</th></tr></thead><tbody id="tb-inv-intl-reits"></tbody></table></div></section></div>
       </div>
     </div>
 
@@ -565,7 +645,7 @@
             <span class="pix-key" id="pixKey">nelcitech3d@gmail.com</span>
             <button class="copy-btn" onclick="copyPixKey()">Copiar Chave</button>
           </div>
-          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.8rem">Apos o pagamento, envie o comprovante para <strong style="color:var(--green)">nelcitech3d@gmail.com</strong> para ativar sua assinatura.</p>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.8rem">Apos o pagamento, envie o comprovante para ativar sua assinatura.</p>
         </div>
       </div>
     </div>
@@ -738,6 +818,37 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem">
         <div class="update-card">
           <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:700;margin-bottom:0.2rem">Baixar Aplicativo</div>
+              <div style="color:var(--text-muted);font-size:0.82rem">Escolha seu sistema operacional</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <button class="update-btn" style="width:100%;background:var(--blue);color:#fff;display:flex;align-items:center;gap:0.6rem" onclick="downloadApp('linux','deb')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Linux (.deb)
+            </button>
+            <button class="update-btn" style="width:100%;background:#1a73e8;color:#fff;display:flex;align-items:center;gap:0.6rem" onclick="downloadApp('linux','appimage')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Linux (.AppImage)
+            </button>
+            <button class="update-btn" style="width:100%;background:#0078d4;color:#fff;display:flex;align-items:center;gap:0.6rem" onclick="downloadApp('windows','exe')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Windows (.exe)
+            </button>
+            <button class="update-btn" style="width:100%;background:#555;color:#fff;display:flex;align-items:center;gap:0.6rem" onclick="downloadApp('mac','zip')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              macOS (.zip)
+            </button>
+          </div>
+          <div id="downloadStatus" style="display:none;margin-top:0.8rem;padding:0.6rem;border-radius:8px;font-size:0.85rem;text-align:center"></div>
+        </div>
+
+        <div class="update-card">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
             <div style="width:48px;height:48px;border-radius:12px;background:var(--yellow-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             </div>
@@ -788,7 +899,7 @@
               <div style="color:var(--text-muted);font-size:0.82rem">Encerrar sessao e voltar ao login</div>
             </div>
           </div>
-          <button class="update-btn" style="width:100%;background:var(--red);color:#fff" onclick="localStorage.removeItem('nelci_token');fetch('/api/logout',{method:'POST'}).then(()=>window.location.href='/login.html')">Sair</button>
+          <button class="update-btn" style="width:100%;background:var(--red);color:#fff" onclick="localStorage.removeItem('nelci_token');window.location.href='login.html'">Sair</button>
         </div>
       </div>
     </div>
@@ -828,6 +939,10 @@
 
   <!-- ADMIN FAB -->
   <button class="admin-fab" id="adminFab" onclick="openAddModal()">+</button>
+  <button class="demo-activate" id="demoActivate" onclick="switchTab('subscribe',document.querySelector('[onclick*=subscribe]'))">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Ativar Licenca
+  </button>
 
   <!-- MODAL: NOVA TRANSACAO -->
   <div class="modal-add" id="modalTransaction">
@@ -840,7 +955,7 @@
         </div>
         <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Ex: Salario, Freelance..."></div>
         <div class="form-row">
-          <div class="form-group"><label>Categoria</label><select name="category"><option>Salario</option><option>Projeto</option><option>Servico</option><option>Moradia</option><option>Alimentacao</option><option>Servicos</option><option>Saude</option><option>Transporte</option><option>Lazer</option><option>Outros</option></select></div>
+          <div class="form-group"><label>Categoria</label><select name="category"><option>Salario</option><option>Projeto</option><option>Servicos</option><option>Moradia</option><option>Alimentacao</option><option>Saude</option><option>Transporte</option><option>Lazer</option><option>Investimentos</option><option>Cartao de Credito</option><option>Farmacia</option><option>Outros</option></select></div>
           <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
         </div>
         <button type="submit" class="form-submit">Salvar Transacao</button>
@@ -877,6 +992,9 @@
         <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Descricao da compra"></div>
         <div class="form-row">
           <div class="form-group"><label>Fornecedor</label><input type="text" name="supplier" placeholder="Nome do fornecedor"></div>
+          <div class="form-group"><label>Categoria</label><select name="category"><option value="Eletronicos">Eletronicos</option><option value="Roupas">Roupas</option><option value="Alimentos">Alimentos</option><option value="Moveis">Moveis</option><option value="Livros">Livros</option><option value="Esportes">Esportes</option><option value="Outros">Outros</option></select></div>
+        </div>
+        <div class="form-row">
           <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
         </div>
         <button type="submit" class="form-submit">Salvar Compra</button>
@@ -894,7 +1012,10 @@
           <div class="form-group"><label>Pagamento</label><select name="payment"><option value="A Vista">A Vista</option><option value="2x">2x</option><option value="3x">3x</option><option value="6x">6x</option><option value="12x">12x</option></select></div>
         </div>
         <div class="form-group"><label>Descricao</label><input type="text" name="description" required placeholder="Descricao da venda"></div>
-        <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Categoria</label><select name="category"><option value="Consultoria">Consultoria</option><option value="Projeto">Projeto</option><option value="Servico">Servico</option><option value="Produto">Produto</option><option value="Licenca">Licenca</option><option value="Suporte">Suporte</option><option value="Treinamento">Treinamento</option><option value="Outros">Outros</option></select></div>
+          <div class="form-group"><label>Valor (R$)</label><input type="text" name="value" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+        </div>
         <button type="submit" class="form-submit">Salvar Venda</button>
       </form>
     </div>
@@ -907,16 +1028,23 @@
       <form onsubmit="saveItem(event, 'investments', 'modalInvestment')">
         <div class="form-row">
           <div class="form-group"><label>Categoria</label><select name="category"><option value="Acoes B3">Acoes B3</option><option value="FIIs">FIIs</option><option value="ETFs">ETFs</option><option value="Renda Fixa">Renda Fixa</option><option value="Cripto">Cripto</option><option value="Internacional">Internacional</option></select></div>
-          <div class="form-group"><label>Ticker</label><input type="text" name="ticker" required placeholder="Ex: PETR4"></div>
+          <div class="form-group"><label>Sub-categoria</label><select name="intl_sub"><option value="">N/A</option><option value="ETFs">ETFs</option><option value="ETF Renda Fixa">ETF Renda Fixa</option><option value="ETF Cripto">ETF Cripto</option><option value="Acoes">Acoes</option><option value="REITs">REITs</option></select></div>
         </div>
-        <div class="form-group"><label>Nome</label><input type="text" name="name" required placeholder="Nome do ativo"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Ticker</label><input type="text" name="ticker" required placeholder="Ex: PETR4"></div>
+          <div class="form-group"><label>Nome</label><input type="text" name="name" required placeholder="Nome do ativo"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Corretora</label><input type="text" name="broker" placeholder="Ex: XP, NuInvest, BTG..."></div>
+          <div class="form-group"><label>Operacao</label><select name="operation"><option value="compra">Compra</option><option value="venda">Venda</option></select></div>
+        </div>
         <div class="form-row">
           <div class="form-group"><label>Quantidade</label><input type="text" name="qty" required placeholder="0" oninput="this.value=this.value.replace(',','.')"></div>
-          <div class="form-group"><label>Preco Medio</label><input type="text" name="avg_price" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+          <div class="form-group"><label>Preco Unitario</label><input type="text" name="avg_price" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Preco Atual</label><input type="text" name="current_price" required placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
-          <div class="form-group"><label>Data</label><input type="date" name="date" required"></div>
+          <div class="form-group"><label>Preco Atual</label><input type="text" name="current_price" placeholder="0.00" oninput="this.value=this.value.replace(',','.')"></div>
+          <div class="form-group"><label>Data</label><input type="date" name="date" required></div>
         </div>
         <button type="submit" class="form-submit">Salvar Investimento</button>
       </form>
@@ -944,20 +1072,86 @@
     let isPremium = false;
     let currentTab = 'dashboard';
     const _tk = localStorage.getItem('nelci_token');
+    const _isElectron = !!window.electronAPI;
     const _ah = _tk ? {'Authorization':'Bearer '+_tk} : {};
 
+    async function apiGet(url) {
+      if(_isElectron) {
+        if(url === '/api/me') return await window.electronAPI.me(_tk);
+        if(url.startsWith('/api/data?t=')) return await window.electronAPI.getData(_tk);
+        if(url === '/api/version') return await window.electronAPI.getVersion();
+        if(url === '/api/users') return await window.electronAPI.getUsers(_tk);
+        if(url === '/api/licenses') return await window.electronAPI.getLicenses(_tk);
+        if(url.startsWith('/api/forex/')) return await window.electronAPI.getForex(_tk);
+        if(url.startsWith('/api/stocks/')) return await window.electronAPI.getStocks(_tk, url.split('/api/stocks/')[1]);
+        return {};
+      }
+      const r = await fetch(url, {headers:_ah});
+      return r.json();
+    }
+
     async function apiPost(url, body) {
+      if(_isElectron) {
+        if(url === '/api/login') return await window.electronAPI.login(body.email, body.password);
+        if(url === '/api/register') return await window.electronAPI.register(body.name, body.email, body.password);
+        if(url === '/api/demo-login') return await window.electronAPI.demoLogin();
+        if(url === '/api/redeem-code') return await window.electronAPI.redeemCode(_tk, body.code);
+        if(url === '/api/admin/generate-code') return await window.electronAPI.generateCodes(_tk, body.count, body.type);
+        if(url === '/api/admin/delete-code') return await window.electronAPI.deleteCode(_tk, body.code);
+        if(url === '/api/version/install') return {};
+        if(url.startsWith('/api/data/')) {
+          const coll = url.replace('/api/data/', '');
+          if(body._delete) return {ok:true};
+          return await window.electronAPI.createItem(_tk, coll, body);
+        }
+        return {};
+      }
       const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(body)});
       return r.json();
     }
 
-    fetch('/api/visit',{method:'POST'}).then(r=>r.json()).then(d=>{if(d.count!==undefined){var el=document.getElementById('visitCount');if(el)el.textContent=d.count}}).catch(()=>{});
+    async function apiPut(url, body) {
+      if(_isElectron) {
+        if(url.startsWith('/api/data/')) {
+          const parts = url.replace('/api/data/', '').split('/');
+          return await window.electronAPI.updateItem(_tk, parts[0], parts[1], body);
+        }
+        return {};
+      }
+      const r = await fetch(url, {method:'PUT', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(body)});
+      return r.json();
+    }
 
-    fetch('/api/me', {headers:_ah}).then(r=>r.json()).then(d=>{
-      if(!d.logged_in){ window.location.href='/login.html'; return; }
+    async function apiDelete(url) {
+      if(_isElectron) {
+        if(url.startsWith('/api/data/')) {
+          const parts = url.replace('/api/data/', '').split('/');
+          return await window.electronAPI.deleteItem(_tk, parts[0], parts[1]);
+        }
+        return {};
+      }
+      const r = await fetch(url, {method:'DELETE', headers:_ah});
+      return r.json();
+    }
+
+    let isDemo = false;
+    let _currentTheme = localStorage.getItem('nelci_theme') || 'dark';
+    function applyTheme(theme) {
+      _currentTheme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('nelci_theme', theme);
+      document.getElementById('themeToggle').innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
+      if(window._chartInstances) { window._chartInstances.forEach(c => c.destroy()); window._chartInstances = []; initCharts(); }
+    }
+    function toggleTheme() { applyTheme(_currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(_currentTheme);
+    apiGet('/api/me').then(d=>{
+      console.log('API /api/me response', d);
+      if(!d.logged_in){ window.location.href=_isElectron?'login.html':'/login.html'; return; }
       document.getElementById('userDisplay').textContent = d.name + ' - Controle financeiro';
       if(d.is_admin){
         isAdmin = true;
+        document.body.classList.add('admin');
         document.getElementById('adminBadge').classList.add('visible');
         document.getElementById('adminFab').classList.add('visible');
         document.getElementById('menuAdmin').style.display = 'flex';
@@ -966,12 +1160,23 @@
         if(adminTab) adminTab.remove();
         var adminMenuBtn = document.getElementById('menuAdmin');
         if(adminMenuBtn) adminMenuBtn.remove();
+        var aiTabBtn = document.getElementById('menuAiTab');
+        if(aiTabBtn) aiTabBtn.style.display = 'none';
+        var aiContent = document.getElementById('tab-ai');
+        if(aiContent) aiContent.style.display = 'none';
+      }
+      if(d.demo){
+        isDemo = true;
+        document.getElementById('demoBanner').style.display = 'flex';
+        document.getElementById('demoActivate').classList.add('visible');
       }
       if(d.premium){
         isPremium = true;
         document.body.classList.add('premium');
+        document.getElementById('adminFab').classList.add('visible');
         document.getElementById('redeemForm').style.display='none';
         document.getElementById('premiumActive').style.display='block';
+        document.getElementById('demoActivate').classList.remove('visible');
         if(d.expire_at){
           const expParts = d.expire_at.split('-');
           const expDate = new Date(parseInt(expParts[0]), parseInt(expParts[1])-1, parseInt(expParts[2]));
@@ -996,15 +1201,15 @@
           }
         }
       }
-      loadAdminData();
-      if(!isPremium) applyDemoRestrictions();
-    }).catch(()=>{ window.location.href='/login.html'; });
+      seedDemoToServer().then(()=>{ loadAdminData(); });
+    }).catch(()=>{ window.location.href=_isElectron?'login.html':'/login.html'; });
 
     function applyDemoRestrictions() {
       document.querySelectorAll('th').forEach(th => {
         if(th.textContent.trim() === 'Editar' || th.textContent.trim() === 'Deletar') th.style.display = 'none';
       });
       document.getElementById('adminFab').style.display = 'none';
+      document.querySelectorAll('.btn-edit, .btn-del').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.demo-download').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.menu-item[onclick*="downloads"]').forEach(el => el.style.display = 'none');
     }
@@ -1019,10 +1224,11 @@
       loadAdminData();
       if(tab === 'admin') loadAdminPanelData();
       if(tab === 'ai') loadAiKey();
+      if(tab === 'updates') loadUpdates();
+      if(tab === 'commercial') renderCommercialCharts();
     }
 
     function openAddModal() {
-      if(!isPremium){ alert('Apenas assinantes podem adicionar dados. Assine para ter acesso completo.'); return; }
       const tabs = {
         dashboard: [{id:'modalTransaction', label:'Nova Transacao', icon:'💰'}],
         commercial: [{id:'modalSupplier', label:'Novo Fornecedor', icon:'🏪'},{id:'modalPurchase', label:'Nova Compra', icon:'🛒'},{id:'modalSale', label:'Nova Venda', icon:'💵'}],
@@ -1047,34 +1253,29 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     function saveItem(event, collection, modalId) {
-      if(!isPremium){ alert('Apenas assinantes podem salvar dados. Assine para ter acesso completo.'); return; }
       event.preventDefault();
       const form = event.target;
       const data = {};
       new FormData(form).forEach((v, k) => data[k] = v);
-      fetch('/api/data/' + collection, { method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(data) })
-      .then(r => r.json()).then(d => {
+      apiPost('/api/data/' + collection, data)
+      .then(d => {
         if(d.ok) { closeModal(modalId); form.reset(); loadAdminData(); alert('Salvo com sucesso!'); }
         else { alert('Erro: ' + (d.error || 'Desconhecido')); }
       }).catch(() => alert('Erro de conexao'));
     }
 
     function deleteItem(collection, id) {
-      if(!isPremium){ alert('Apenas assinantes podem excluir dados.'); return; }
       if(!confirm('Excluir este item?')) return;
       const isDemo = String(id).match(/^(tx|sp|pu|sl|inv)-\d+$/);
       const row = document.getElementById('row-' + id);
       if(row) { row.remove(); delete _itemMap[id]; }
       if(collection === 'investments') recalcInvestCards();
       if(isDemo) {
-        fetch('/api/data/' + collection, {
-          method:'POST', headers:{'Content-Type':'application/json',..._ah},
-          body:JSON.stringify({demo_id: id, _delete: true})
-        }).catch(()=>{});
+        apiPost('/api/data/' + collection, {demo_id: id, _delete: true}).catch(()=>{});
         return;
       }
-      fetch('/api/data/' + collection + '/' + id, { method:'DELETE', headers:_ah })
-      .then(r => r.json()).then(() => loadAdminData());
+      apiDelete('/api/data/' + collection + '/' + id)
+      .then(() => loadAdminData());
     }
 
     const _fieldSchemas = {
@@ -1082,7 +1283,7 @@
         {name:'date',label:'Data',type:'date'},
         {name:'type',label:'Tipo',type:'select',options:['Receita','Despesa']},
         {name:'description',label:'Descricao',type:'text'},
-        {name:'category',label:'Categoria',type:'select',options:['Salario','Projeto','Servico','Moradia','Alimentacao','Servicos','Saude','Transporte','Lazer','Outros']},
+        {name:'category',label:'Categoria',type:'select',options:['Salario','Projeto','Servicos','Moradia','Alimentacao','Saude','Transporte','Lazer','Investimentos','Cartao de Credito','Farmacia','Outros']},
         {name:'value',label:'Valor',type:'number'}
       ],
       suppliers: [
@@ -1096,12 +1297,14 @@
         {name:'date',label:'Data',type:'date'},
         {name:'description',label:'Descricao',type:'text'},
         {name:'supplier',label:'Fornecedor',type:'text'},
+        {name:'category',label:'Categoria',type:'select',options:['Eletronicos','Roupas','Alimentos','Moveis','Livros','Esportes','Outros']},
         {name:'payment',label:'Pagamento',type:'select',options:['A Vista','2x','3x','6x','12x']},
         {name:'value',label:'Valor',type:'number'}
       ],
       sales: [
         {name:'date',label:'Data',type:'date'},
         {name:'description',label:'Descricao',type:'text'},
+        {name:'category',label:'Categoria',type:'select',options:['Consultoria','Projeto','Servico','Produto','Licenca','Suporte','Treinamento','Outros']},
         {name:'payment',label:'Pagamento',type:'select',options:['A Vista','2x','3x','6x','12x']},
         {name:'value',label:'Valor',type:'number'}
       ],
@@ -1109,6 +1312,8 @@
         {name:'category',label:'Categoria',type:'select',options:['Acoes B3','FIIs','ETFs','Renda Fixa','Cripto','Internacional']},
         {name:'ticker',label:'Ticker',type:'text'},
         {name:'name',label:'Nome',type:'text'},
+        {name:'broker',label:'Corretora',type:'text'},
+        {name:'operation',label:'Operacao',type:'select',options:['compra','venda']},
         {name:'qty',label:'Quantidade',type:'number'},
         {name:'avg_price',label:'Preco Medio',type:'number'},
         {name:'current_price',label:'Preco Atual',type:'number'},
@@ -1118,22 +1323,64 @@
 
     let _editCollection = '', _editId = '';
     let _itemMap = {};
+    let _allPurchases = [], _allSales = [], _allSuppliers = [];
+    let _commChartMonthly = null, _commChartMeta = null, _commChartCategory = null, _commChartDonut = null, _commChartProfit = null;
     let _usdBrl = 5.7;
     let _selectedMonth = 'todos';
+    let _selectedYear = new Date().getFullYear().toString();
     let _allTransactions = [];
+
+    function initYearSelect() {
+      const sel = document.getElementById('yearSelect');
+      if(!sel) return;
+      const curYear = new Date().getFullYear();
+      let html = '';
+      for(let y = 2040; y >= 2024; y--) {
+        html += '<option value="'+y+'"'+(y.toString()===_selectedYear?' selected':'')+'>'+y+'</option>';
+      }
+      sel.innerHTML = html;
+    }
+
+    function switchYear(year) {
+      _selectedYear = year;
+      renderTransactions(_allTransactions);
+      initCharts();
+    }
 
     function switchMonth(month, btn) {
       _selectedMonth = month;
       document.querySelectorAll('.month-tab').forEach(b => b.classList.remove('active'));
       if(btn) btn.classList.add('active');
       renderTransactions(_allTransactions);
+      initCharts();
     }
 
-    fetch('/api/forex/usdbrl', {headers:_ah}).then(r=>r.json()).then(d=>{ if(d.rate) _usdBrl = d.rate; }).catch(()=>{});
+    apiGet('/api/forex/usdbrl').then(d=>{ if(d.rate && !isNaN(Number(d.rate))) _usdBrl = Number(d.rate); }).catch(()=>{});
 
     function toBRL(item, usdPrice) {
-      if(item && item.category === 'Internacional') return Number(usdPrice||0) * _usdBrl;
-      return Number(usdPrice||0);
+      const v = Number(usdPrice) || 0;
+      const rate = Number(_usdBrl) || 5.7;
+      if(item && item.category === 'Internacional') return v * rate;
+      return v;
+    }
+
+    function fmtDate(d) {
+      if(!d) return '';
+      if(d.includes('/')) return d;
+      const parts = d.split('-');
+      if(parts.length === 3) return parts[2].replace(/^0/,'') + '/' + parts[1].replace(/^0/,'') + '/' + parts[0];
+      return d;
+    }
+
+    function parseBrNum(v) {
+      if(typeof v === 'number') return v;
+      const s = String(v || '').trim();
+      if(!s) return 0;
+      if(s.includes(',') && s.includes('.')) {
+        return Number(s.replace(/\./g,'').replace(',','.')) || 0;
+      }
+      if(s.includes(',')) return Number(s.replace(',','.')) || 0;
+      return Number(s) || 0;
     }
 
     function initDemoData() {
@@ -1171,34 +1418,41 @@
       _itemMap['inv-19'] = {category:'Internacional',intl_sub:'Acoes',ticker:'MSFT',name:'Microsoft Corp.',qty:'5',avg_price:'410.00',current_price:'455.80',date:'2026-03-20'};
       _itemMap['inv-20'] = {category:'Internacional',intl_sub:'REITs',ticker:'XLRE',name:'Real Estate Select Sector SPDR Fund',qty:'30',avg_price:'40.00',current_price:'43.20',date:'2026-04-10'};
       _itemMap['inv-21'] = {category:'Internacional',intl_sub:'REITs',ticker:'VNQ',name:'Vanguard Real Estate ETF',qty:'12',avg_price:'85.00',current_price:'92.50',date:'2026-05-15'};
-      seedDemoToServer();
     }
 
     function seedDemoToServer() {
       const collections = {transactions:['tx-1','tx-2','tx-3','tx-4','tx-5','tx-6','tx-7','tx-8'], suppliers:['sp-1','sp-2'], purchases:['pu-1','pu-2'], sales:['sl-1'], investments:['inv-1','inv-2','inv-3','inv-4','inv-5','inv-6','inv-7','inv-8','inv-9','inv-10','inv-11','inv-12','inv-13','inv-14','inv-15','inv-16','inv-17','inv-18','inv-19','inv-20','inv-21']};
-      Object.keys(collections).forEach(col => {
-        fetch('/api/data?t='+Date.now(), {headers:_ah}).then(r=>r.json()).then(d=>{
-          const serverItems = d[col] || [];
-          const hasSeeded = serverItems.some(i => i.demo_id);
-          if(!hasSeeded && serverItems.length === 0) {
-            const ids = collections[col];
-            ids.forEach(id => {
-              const item = {..._itemMap[id], demo_id: id};
-              fetch('/api/data/'+col, {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(item)}).catch(()=>{});
-            });
-          }
-        }).catch(()=>{});
-      });
+      return apiGet('/api/data?t='+Date.now()).then(d=>{
+        let needsSeed = false;
+        Object.keys(collections).forEach(col => {
+          if(!d[col] || d[col].length === 0) needsSeed = true;
+        });
+        if(!needsSeed) return;
+        const promises = [];
+        Object.keys(collections).forEach(col => {
+          const ids = collections[col];
+          ids.forEach(id => {
+            const item = {..._itemMap[id], demo_id: id};
+            promises.push(apiPost('/api/data/'+col, item));
+          });
+        });
+        return Promise.all(promises);
+      }).catch(()=>{});
     }
     initDemoData();
     setTimeout(updateStockPrices, 500);
 
     function editItem(collection, id) {
-      if(!isPremium){ alert('Apenas assinantes podem editar dados. Assine para ter acesso completo.'); return; }
+      console.log('editItem called', {collection, id, isPremium, isAdmin, isDemo, hasItemMap: !!_itemMap[id], allTxLen: _allTransactions?.length, modalEdit: !!document.getElementById('modalEdit')});
       _editCollection = collection;
       _editId = id;
-      const data = _itemMap[id];
-      if(!data) return;
+      let data = _itemMap[id];
+      console.log('editItem lookup', {direct: !!data});
+      if(!data && _allTransactions) { const found = _allTransactions.find(i => i.id === id); console.log('editItem fallback allTransactions', {found: !!found}); if(found) { data = found; _itemMap[id] = found; } }
+      if(!data && _allPurchases) { const found = _allPurchases.find(i => i.id === id); if(found) { data = found; _itemMap[id] = found; } }
+      if(!data && _allSales) { const found = _allSales.find(i => i.id === id); if(found) { data = found; _itemMap[id] = found; } }
+      if(!data && _allSuppliers) { const found = _allSuppliers.find(i => i.id === id); if(found) { data = found; _itemMap[id] = found; } }
+      if(!data) { console.warn('editItem: data NOT FOUND for', id); alert('Item nao encontrado. Recarregue a pagina e tente novamente.'); return; }
       const schema = _fieldSchemas[collection] || [];
       let html = '';
       schema.forEach(f => {
@@ -1208,8 +1462,17 @@
           html += '<select name="' + f.name + '">';
           f.options.forEach(o => { html += '<option value="' + o + '"' + (val===o?' selected':'') + '>' + o + '</option>'; });
           html += '</select>';
+        } else if(f.type === 'date') {
+          let dateVal = val;
+          if(val && !val.includes('-') && val.includes('/')) {
+            const p = val.split('/');
+            if(p.length === 3) dateVal = p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+          }
+          html += '<input type="date" name="' + f.name + '" value="' + dateVal + '">';
+        } else if(f.type === 'number') {
+          html += '<input type="text" name="' + f.name + '" value="' + String(val).replace(/"/g,'&quot;') + '" oninput="this.value=this.value.replace(\',\',\'.\')">';
         } else {
-          html += '<input type="text" name="' + f.name + '" value="' + String(val).replace(/"/g,'&quot;') + '"' + (f.type==='number'?' oninput="this.value=this.replace(\',\',\'.\')"':'') + '>';
+          html += '<input type="text" name="' + f.name + '" value="' + String(val).replace(/"/g,'&quot;') + '">';
         }
         html += '</div>';
         if(f.name === 'category' && collection === 'investments') {
@@ -1262,30 +1525,40 @@
             }
           });
         }
-        fetch('/api/data/' + _editCollection, {
-          method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify({...data, demo_id: _editId})
-        }).then(r => r.json()).then(d => {
+        apiPost('/api/data/' + _editCollection, {...data, demo_id: _editId}).then(d => {
           if(d.ok && d.item) { _itemMap[_editId].server_id = d.item.id; }
         }).catch(()=>{});
         closeModal('modalEdit');
         return;
       }
-      fetch('/api/data/' + _editCollection + '/' + _editId, {
-        method:'PUT', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(data)
-      }).then(r => r.json()).then(d => {
+      apiPut('/api/data/' + _editCollection + '/' + _editId, data).then(d => {
         if(d.ok) { closeModal('modalEdit'); loadAdminData(); }
         else { alert('Erro: ' + (d.error || 'Desconhecido')); }
       }).catch(() => alert('Erro de conexao'));
     }
 
     function loadAdminData() {
-      fetch('/api/data?t=' + Date.now(), {headers:_ah}).then(r => r.json()).then(d => {
+      apiGet('/api/data?t=' + Date.now()).then(d => {
         if(d.error) return;
+        if(d.investments) {
+          d.investments.forEach(i => {
+            if(i.avg_price === 'NaN' || i.avg_price === 'undefined' || i.avg_price === 'null' || i.avg_price === '') i.avg_price = '';
+            else if(parseBrNum(i.avg_price) === 0 && i.avg_price !== '0' && i.avg_price !== '0.00') i.avg_price = '';
+            if(i.current_price === 'NaN' || i.current_price === 'undefined' || i.current_price === 'null' || i.current_price === '') i.current_price = '';
+            else if(parseBrNum(i.current_price) === 0 && i.current_price !== '0' && i.current_price !== '0.00') i.current_price = '';
+            if(i.qty === 'NaN' || i.qty === 'undefined' || i.qty === 'null' || i.qty === '') i.qty = '';
+            else if(parseBrNum(i.qty) === 0 && i.qty !== '0' && i.qty !== '0.00') i.qty = '';
+          });
+        }
         renderTransactions(d.transactions || []);
         renderSuppliers(d.suppliers || []);
         renderPurchases(d.purchases || []);
         renderSales(d.sales || []);
         renderInvestments(d.investments || []);
+        _allPurchases = d.purchases || [];
+        _allSales = d.sales || [];
+        _allSuppliers = d.suppliers || [];
+        renderCommercialCharts();
       }).catch(()=>{});
     }
 
@@ -1299,21 +1572,32 @@
       if(!el) return;
       _allTransactions = items;
       const monthNames = {'todos':'Todos os meses','01':'Janeiro','02':'Fevereiro','03':'Marco','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
-      if(mLabel) mLabel.textContent = monthNames[_selectedMonth] || '';
-      _itemMap = {};
-      const filtered = _selectedMonth === 'todos' ? items : items.filter(i => {
+      if(mLabel) mLabel.textContent = _selectedYear + ' | ' + (monthNames[_selectedMonth] || '');
+      const filtered = items.filter(i => {
         const d = i.date || '';
-        return d.length >= 7 && d.substring(5,7) === _selectedMonth;
+        if(d.length < 7) return false;
+        let dateYear, dateMonth;
+        if(d.includes('-')) {
+          dateYear = d.substring(0,4);
+          dateMonth = d.substring(5,7);
+        } else if(d.includes('/')) {
+          const parts = d.split('/');
+          if(parts.length === 3) { dateMonth = parts[1]; dateYear = parts[2]; }
+          else return false;
+        } else return false;
+        const matchYear = dateYear === _selectedYear;
+        const matchMonth = _selectedMonth === 'todos' || dateMonth === _selectedMonth;
+        return matchYear && matchMonth;
       });
+      items.forEach(i => { _itemMap[i.id] = i; });
       if(!filtered.length) { el.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhuma transacao encontrada para este mes</td></tr>'; if(cBal) cBal.textContent = 'R$ 0,00'; if(cInc) cInc.textContent = 'R$ 0,00'; if(cExp) cExp.textContent = 'R$ 0,00'; if(cCnt) cCnt.textContent = '0'; return; }
       let inc=0, exp=0;
       let html = '';
       filtered.forEach(i => {
-        _itemMap[i.id] = i;
         const isIncome = i.type === 'Receita';
         const val = Number(i.value||0);
         if(isIncome) inc+=val; else exp+=val;
-        html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td><span class="type-badge '+(isIncome?'type-income':'type-expense')+'">'+(isIncome?'Receita':'Despesa')+'</span></td><td class="'+(isIncome?'amount-positive':'amount-negative')+'">'+(isIncome?'+':'-')+' R$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'transactions\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'transactions\',\''+i.id+'\')">&#128465;</button></td></tr>';
+        html += '<tr><td>'+fmtDate(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td><span class="type-badge '+(isIncome?'type-income':'type-expense')+'">'+(isIncome?'Receita':'Despesa')+'</span></td><td class="'+(isIncome?'amount-positive':'amount-negative')+'">'+(isIncome?'+':'-')+' R$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'transactions\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'transactions\',\''+i.id+'\')">&#128465;</button></td></tr>';
       });
       el.innerHTML = html;
       const balance = inc - exp;
@@ -1337,7 +1621,7 @@
       if(!el) return;
       if(!items.length) return;
       let html = '';
-      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.supplier||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-negative">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'purchases\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'purchases\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
+      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+fmtDate(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.supplier||'')+'</td><td>'+(i.category||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-negative">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'purchases\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'purchases\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
       el.innerHTML = html;
     }
 
@@ -1346,8 +1630,138 @@
       if(!el) return;
       if(!items.length) return;
       let html = '';
-      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+(i.date||'')+'</td><td>'+(i.description||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-positive">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'sales\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'sales\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
+      items.forEach(i => { _itemMap[i.id] = i; const payClass = i.payment==='A Vista'?'pay-avista':'pay-aprazo'; html += '<tr><td>'+fmtDate(i.date||'')+'</td><td>'+(i.description||'')+'</td><td>'+(i.category||'')+'</td><td><span class="payment-badge '+payClass+'">'+(i.payment||'')+'</span></td><td class="amount-positive">R$ '+Number(i.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td><button class="btn-edit" onclick="editItem(\'sales\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'sales\',\''+i.id+'\')">&#128465;</button></td></tr>'; });
       el.innerHTML = html;
+    }
+
+    function renderCommercialCharts() {
+      const purchases = _allPurchases;
+      const sales = _allSales;
+      const suppliers = _allSuppliers;
+
+      const totalSales = sales.reduce((s,i) => s + Number(i.value||0), 0);
+      const totalPurchases = purchases.reduce((s,i) => s + Number(i.value||0), 0);
+      const profit = totalSales - totalPurchases;
+      const margin = totalSales > 0 ? ((profit / totalSales) * 100) : 0;
+
+      const cST = document.getElementById('card-sales-total');
+      const cPT = document.getElementById('card-purchases-total');
+      const cPF = document.getElementById('card-profit-total');
+      const cMG = document.getElementById('card-margin-total');
+      if(cST) cST.textContent = 'R$ ' + totalSales.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if(cPT) cPT.textContent = 'R$ ' + totalPurchases.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if(cPF){ cPF.textContent = (profit<0?'- ':'+ ') + 'R$ ' + Math.abs(profit).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); cPF.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)'; }
+      if(cMG) cMG.textContent = margin.toFixed(1) + '%';
+
+      const isLight = _currentTheme === 'light';
+      const muted = isLight ? '#64748b' : '#8b8fa3';
+      const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(128,128,128,0.15)';
+      const mNames = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+      const allDates = [...purchases,...sales].map(i => i.date).filter(Boolean).sort();
+      const monthSet = new Set();
+      allDates.forEach(d => { if(d.length >= 7) monthSet.add(d.substring(0,7)); });
+      const months = [...monthSet].sort();
+      const monthLabels = months.map(m => { const [y,mo] = m.split('-'); return (mNames[parseInt(mo)]||mo) + '/' + y.substring(2); });
+
+      const monthlyPurchases = months.map(m => purchases.filter(p => p.date && p.date.startsWith(m)).reduce((s,i) => s + Number(i.value||0), 0));
+      const monthlySales = months.map(m => sales.filter(s => s.date && s.date.startsWith(m)).reduce((s,i) => s + Number(i.value||0), 0));
+
+      if(_commChartMonthly) _commChartMonthly.destroy();
+      const c1 = document.getElementById('commercialMonthlyChart');
+      if(c1) {
+        _commChartMonthly = new Chart(c1.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: monthLabels.length ? monthLabels : ['Sem dados'],
+            datasets: [
+              { label: 'Receitas', data: monthlySales.length ? monthlySales : [0], backgroundColor: isLight ? 'rgba(22,163,74,0.75)' : 'rgba(34,197,94,0.7)', borderRadius: 6 },
+              { label: 'Despesas', data: monthlyPurchases.length ? monthlyPurchases : [0], backgroundColor: isLight ? 'rgba(220,38,38,0.75)' : 'rgba(239,68,68,0.7)', borderRadius: 6 }
+            ]
+          },
+          options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:muted, font:{size:11} } } }, scales:{ x:{ ticks:{color:muted,font:{size:10}}, grid:{display:false} }, y:{ ticks:{color:muted,font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:gridColor} } } }
+        });
+      }
+
+      const metaPerMonth = months.map(() => 8000);
+      if(_commChartMeta) _commChartMeta.destroy();
+      const c2 = document.getElementById('commercialMetaChart');
+      if(c2) {
+        _commChartMeta = new Chart(c2.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: monthLabels.length ? monthLabels : ['Sem dados'],
+            datasets: [
+              { label: 'Vendas Reais', data: monthlySales.length ? monthlySales : [0], borderColor: isLight ? 'rgba(22,163,74,0.85)' : 'rgba(34,197,94,0.8)', backgroundColor: isLight ? 'rgba(22,163,74,0.1)' : 'rgba(34,197,94,0.1)', fill: true, tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: isLight ? '#16a34a' : '#22c55e' },
+              { label: 'Meta', data: metaPerMonth, borderColor: isLight ? 'rgba(168,85,247,0.8)' : 'rgba(168,85,247,0.7)', borderWidth: 2, borderDash: [8,4], tension: 0, pointRadius: 0, fill: false }
+            ]
+          },
+          options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:muted, font:{size:11} } } }, scales:{ x:{ ticks:{color:muted,font:{size:10}}, grid:{display:false} }, y:{ ticks:{color:muted,font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:gridColor} } } }
+        });
+      }
+
+      const defaultCats = ['Eletronicos','Roupas','Alimentos','Moveis','Livros','Esportes'];
+      const purchaseCats = {};
+      const saleCats = {};
+      purchases.forEach(p => { const cat = p.category||'Outros'; purchaseCats[cat] = (purchaseCats[cat]||0) + Number(p.value||0); });
+      sales.forEach(s => { const cat = s.category||'Outros'; saleCats[cat] = (saleCats[cat]||0) + Number(s.value||0); });
+      const allCats = [...new Set([...defaultCats, ...Object.keys(purchaseCats), ...Object.keys(saleCats)])];
+
+      if(_commChartCategory) _commChartCategory.destroy();
+      const c3 = document.getElementById('commercialCategoryChart');
+      if(c3) {
+        _commChartCategory = new Chart(c3.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: allCats,
+            datasets: [
+              { label: 'Compras', data: allCats.map(c => purchaseCats[c]||0), backgroundColor: isLight ? 'rgba(220,38,38,0.75)' : 'rgba(239,68,68,0.7)', borderRadius: 4 },
+              { label: 'Vendas', data: allCats.map(c => saleCats[c]||0), backgroundColor: isLight ? 'rgba(22,163,74,0.75)' : 'rgba(34,197,94,0.7)', borderRadius: 4 }
+            ]
+          },
+          options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:muted, font:{size:11} } } }, scales:{ x:{ ticks:{color:muted,font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:gridColor} }, y:{ ticks:{color:muted,font:{size:10}}, grid:{display:false} } } }
+        });
+      }
+
+      const saleCatData = {};
+      sales.forEach(s => { const cat = s.category||'Outros'; saleCatData[cat] = (saleCatData[cat]||0) + Number(s.value||0); });
+      const saleCatLabels = Object.keys(saleCatData);
+      const saleCatValues = Object.values(saleCatData);
+      const donutColors = ['#16a34a','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316','#6366f1','#84cc16'];
+
+      if(_commChartDonut) _commChartDonut.destroy();
+      const c4 = document.getElementById('commercialDonutChart');
+      if(c4) {
+        _commChartDonut = new Chart(c4.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: saleCatLabels.length ? saleCatLabels : ['Sem dados'],
+            datasets: [{ data: saleCatValues.length ? saleCatValues : [1], backgroundColor: saleCatLabels.length ? saleCatLabels.map((_,i) => donutColors[i % donutColors.length]) : ['#374151'], borderWidth: 2, borderColor: isLight ? '#ffffff' : '#1f2937' }]
+          },
+          options: { responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{ position:'right', labels:{ color:muted, font:{size:11}, padding:10, usePointStyle:true, pointStyleWidth:8 } } } }
+        });
+      }
+
+      const monthlyProfit = months.map((m,i) => monthlySales[i] - monthlyPurchases[i]);
+      const profitColors = monthlyProfit.map(v => {
+        if(v >= 3000) return isLight ? 'rgba(22,163,74,0.8)' : 'rgba(34,197,94,0.8)';
+        if(v >= 1000) return isLight ? 'rgba(234,179,8,0.8)' : 'rgba(234,179,8,0.8)';
+        if(v >= 0) return isLight ? 'rgba(249,115,22,0.8)' : 'rgba(249,115,22,0.8)';
+        return isLight ? 'rgba(220,38,38,0.8)' : 'rgba(239,68,68,0.8)';
+      });
+
+      if(_commChartProfit) _commChartProfit.destroy();
+      const c5 = document.getElementById('commercialProfitChart');
+      if(c5) {
+        _commChartProfit = new Chart(c5.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: monthLabels.length ? monthLabels : ['Sem dados'],
+            datasets: [{ label: 'Lucro', data: monthlyProfit.length ? monthlyProfit : [0], backgroundColor: profitColors, borderRadius: 6 }]
+          },
+          options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{color:muted,font:{size:10}}, grid:{display:false} }, y:{ ticks:{color:muted,font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:gridColor} } } }
+        });
+      }
     }
 
     function renderInvestments(items) {
@@ -1363,13 +1777,15 @@
       items.forEach(i => {
         _itemMap[i.id] = i;
         const isIntl = i.category === 'Internacional';
-        const qty = Number(i.qty||0);
-        const avgRaw = Number(i.avg_price||0);
-        const curRaw = Number(i.current_price||0);
+        const qty = parseBrNum(i.qty);
+        const avgRaw = parseBrNum(i.avg_price);
+        const curRaw = parseBrNum(i.current_price);
         const inv = isIntl ? avgRaw*qty : toBRL(i, avgRaw)*qty;
         const cur = isIntl ? curRaw*qty : toBRL(i, curRaw)*qty;
-        totalInvested += isIntl ? avgRaw*qty*_usdBrl : inv;
-        totalCurrent += isIntl ? curRaw*qty*_usdBrl : cur;
+        const safeInvAdd = isNaN(inv) ? 0 : inv;
+        const safeCurAdd = isNaN(cur) ? 0 : cur;
+        totalInvested += isIntl ? avgRaw*qty*(Number(_usdBrl)||5.7) : safeInvAdd;
+        totalCurrent += isIntl ? curRaw*qty*(Number(_usdBrl)||5.7) : safeCurAdd;
         const cat = catMap[i.category] || 'acoes';
         let tblKey = cat;
         if(cat === 'internacional') {
@@ -1379,9 +1795,14 @@
         const profClass = prof>=0?'amount-profit':'amount-loss';
         const profSign = prof>=0?'+ ':'- ';
         const curSym = isIntl ? 'US$' : 'R$';
-        const dispAvg = isIntl ? Number(i.avg_price||0) : toBRL(i, i.avg_price);
-        const dispCur = isIntl ? Number(i.current_price||0) : toBRL(i, i.current_price);
-        const row = '<tr id="row-'+i.id+'"><td><span class="ticker-badge">'+(i.ticker||'')+'</span></td><td>'+(i.name||'')+'</td><td>'+(i.qty||'')+'</td><td>'+curSym+' '+Number(dispAvg).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+Number(dispCur).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+inv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+cur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td class="'+profClass+'">'+profSign+curSym+' '+Math.abs(prof).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+(i.date||'')+'</td><td><button class="btn-edit" onclick="editItem(\'investments\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'investments\',\''+i.id+'\')">&#128465;</button></td></tr>';
+        const dispAvg = avgRaw;
+        const dispCur = curRaw;
+        const safeDispAvg = isNaN(dispAvg) ? 0 : dispAvg;
+        const safeDispCur = isNaN(dispCur) ? 0 : dispCur;
+        const safeInv = isNaN(inv) ? 0 : inv;
+        const safeCur = isNaN(cur) ? 0 : cur;
+        const safeProf = isNaN(prof) ? 0 : prof;
+        const row = '<tr id="row-'+i.id+'" data-inv="'+safeInv+'" data-cur="'+safeCur+'" data-prof="'+safeProf+'"><td><span class="ticker-badge">'+(i.ticker||'')+'</span></td><td>'+(i.name||'')+'</td><td>'+(i.qty||'')+'</td><td>'+curSym+' '+safeDispAvg.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+safeDispCur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+safeInv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+curSym+' '+safeCur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td class="'+profClass+'">'+profSign+curSym+' '+Math.abs(safeProf).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'</td><td>'+(i.broker||'')+'</td><td>'+fmtDate(i.date)+'</td><td><button class="btn-edit" onclick="editItem(\'investments\',\''+i.id+'\')">&#9998;</button></td><td><button class="btn-del" onclick="deleteItem(\'investments\',\''+i.id+'\')">&#128465;</button></td></tr>';
         if(tbls[tblKey] !== undefined) tbls[tblKey] += row;
       });
       Object.keys(tbls).forEach(k => { const el = document.getElementById('tb-inv-'+k); if(el) el.innerHTML = tbls[k]; });
@@ -1395,91 +1816,102 @@
     function updateStockPrices() {
       const btn = document.getElementById('btn-update-prices');
       if(btn) { btn.disabled=true; btn.innerHTML='&#8635; Atualizando...'; }
-      const b3Tickers = [];
-      const cryptoMap = {};
-      const intlMap = {};
       const b3Categories = ['Acoes B3','Acao','FIIs','FII','ETFs','ETF'];
-      Object.keys(_itemMap).forEach(k => {
-        const it = _itemMap[k];
-        if(!it) return;
-        const t = (it.ticker||'').toUpperCase();
-        if(b3Categories.includes(it.category) && t && !['CDB','LCI','LCA','Tesouro','Debenture'].includes(t)) {
-          b3Tickers.push(t);
-        } else if(it.category === 'Cripto') {
-          if(t === 'BTC') { b3Tickers.push('BTC-USD'); cryptoMap['BTC-USD'] = k; }
-          else if(t === 'ETH') { b3Tickers.push('ETH-USD'); cryptoMap['ETH-USD'] = k; }
-          else { b3Tickers.push(t); cryptoMap[t] = k; }
-        } else if(it.category === 'Internacional') {
-          b3Tickers.push(t);
-          intlMap[t] = k;
-        }
-      });
-      if(!b3Tickers.length) { if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos'; alert('Nenhum ticker encontrado para atualizar.');} return; }
-      const unique = [...new Set(b3Tickers)];
-      fetch('/api/stocks/'+unique.join(','), {headers:_ah})
-        .then(r=>r.json())
-        .then(data => {
-          if(data.results) {
-            data.results.forEach(q => {
-              const sym = q.symbol;
-              const price = q.regularMarketPrice;
-              if(price == null) return;
-              let key = null;
-              if(cryptoMap[sym]) key = cryptoMap[sym];
-              else if(intlMap[sym]) key = intlMap[sym];
-              else {
-                Object.keys(_itemMap).forEach(k => {
-                  if(_itemMap[k] && (_itemMap[k].ticker||'').toUpperCase() === sym) key = k;
-                });
-              }
-              if(key && _itemMap[key]) {
-                _itemMap[key].current_price = String(price);
-                const row = document.getElementById('row-'+key);
-                if(row) {
-                  const cells = row.querySelectorAll('td');
-                  if(cells.length >= 8) {
-                    const it = _itemMap[key];
-                    const isIntl = it.category === 'Internacional';
-                    const avg = Number(it.avg_price||0);
-                    const qty = Number(it.qty||0);
-                    const curDisp = isIntl ? price * qty : toBRL(it, price) * qty;
-                    const invDisp = isIntl ? avg * qty : toBRL(it, avg) * qty;
-                    const prof = curDisp - invDisp;
-                    const cls = prof>=0?'amount-profit':'amount-loss';
-                    const sign = prof>=0?'+ ':'- ';
-                    const curSym = isIntl ? 'US$' : 'R$';
-                    const dispPrice = isIntl ? price : toBRL(it, price);
-                    cells[4].textContent = curSym+' '+dispPrice.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
-                    cells[6].textContent = curSym+' '+curDisp.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
-                    cells[7].className = cls;
-                    cells[7].textContent = sign+curSym+' '+Math.abs(prof).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+
+      function doUpdate() {
+        const b3Tickers = [];
+        const cryptoMap = {};
+        const intlMap = {};
+        Object.keys(_itemMap).forEach(k => {
+          const it = _itemMap[k];
+          if(!it) return;
+          const t = (it.ticker||'').toUpperCase();
+          if(b3Categories.includes(it.category) && t && !['CDB','LCI','LCA','Tesouro','Debenture'].includes(t)) {
+            b3Tickers.push(t);
+          } else if(it.category === 'Cripto') {
+            if(t === 'BTC') { b3Tickers.push('BTC-USD'); cryptoMap['BTC-USD'] = k; }
+            else if(t === 'ETH') { b3Tickers.push('ETH-USD'); cryptoMap['ETH-USD'] = k; }
+            else { b3Tickers.push(t); cryptoMap[t] = k; }
+          } else if(it.category === 'Internacional') {
+            b3Tickers.push(t);
+            intlMap[t] = k;
+          }
+        });
+        if(!b3Tickers.length) { if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';} return; }
+        const unique = [...new Set(b3Tickers)];
+        apiGet('/api/stocks/'+unique.join(','))
+          .then(data => {
+            if(data.results) {
+              data.results.forEach(q => {
+                const sym = q.symbol;
+                const price = Number(q.regularMarketPrice);
+                if(price == null || isNaN(price)) return;
+                let key = null;
+                if(cryptoMap[sym]) key = cryptoMap[sym];
+                else if(intlMap[sym]) key = intlMap[sym];
+                else {
+                  Object.keys(_itemMap).forEach(k => {
+                    if(_itemMap[k] && (_itemMap[k].ticker||'').toUpperCase() === sym) key = k;
+                  });
+                }
+                if(key && _itemMap[key]) {
+                  _itemMap[key].current_price = String(price);
+                  const row = document.getElementById('row-'+key);
+                  if(row) {
+                    const cells = row.querySelectorAll('td');
+                    if(cells.length >= 8) {
+                      const it = _itemMap[key];
+                      const isIntl = it.category === 'Internacional';
+                      const avg = parseBrNum(it.avg_price);
+                      const qty = parseBrNum(it.qty);
+                      const curDisp = isIntl ? price * qty * (Number(_usdBrl)||5.7) : toBRL(it, price) * qty;
+                      const invDisp = isIntl ? avg * qty * (Number(_usdBrl)||5.7) : toBRL(it, avg) * qty;
+                      const prof = curDisp - invDisp;
+                      const cls = prof>=0?'amount-profit':'amount-loss';
+                      const sign = prof>=0?'+ ':'- ';
+                      const curSym = isIntl ? 'US$' : 'R$';
+                      const dispPrice = isIntl ? price : toBRL(it, price);
+                      cells[4].textContent = curSym+' '+dispPrice.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                      cells[6].textContent = curSym+' '+curDisp.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                      cells[7].className = cls;
+                      cells[7].textContent = sign+curSym+' '+Math.abs(prof).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+                    }
+                  }
+                  const isDemoKey = String(key).match(/^(inv)-\d+$/);
+                  const payload = {current_price: String(price)};
+                  if(isDemoKey) {
+                    payload.demo_id = key;
+                    apiPost('/api/data/investments', payload).catch(()=>{});
+                  } else {
+                    apiPut('/api/data/investments/' + key, payload).catch(()=>{});
                   }
                 }
-                const isDemo = String(key).match(/^(inv)-\d+$/);
-                const payload = {current_price: String(price)};
-                if(isDemo) {
-                  payload.demo_id = key;
-                  fetch('/api/data/investments', {
-                    method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(payload)
-                  }).catch(()=>{});
-                } else {
-                  fetch('/api/data/investments/' + key, {
-                    method:'PUT', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify(payload)
-                  }).catch(()=>{});
-                }
-              }
+              });
+            }
+            recalcInvestCards();
+            const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+            const lbl = document.getElementById('stocks-last-update');
+            if(lbl) lbl.textContent = 'Atualizado: '+now;
+            if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
+          })
+          .catch(err => {
+            console.error('Erro ao atualizar precos:', err);
+            if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
+          });
+      }
+
+      if(Object.keys(_itemMap).length > 0) {
+        doUpdate();
+      } else {
+        apiGet('/api/data?t=' + Date.now()).then(d => {
+          if(d.investments) {
+            d.investments.forEach(i => {
+              _itemMap[i.id] = i;
             });
           }
-          recalcInvestCards();
-          const now = new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-          const lbl = document.getElementById('stocks-last-update');
-          if(lbl) lbl.textContent = 'Atualizado: '+now;
-          if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
-        })
-        .catch(err => {
-          console.error('Erro ao atualizar precos:', err);
-          if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';}
-        });
+          doUpdate();
+        }).catch(() => { if(btn){btn.disabled=false;btn.innerHTML='&#8635; Atualizar Precos';} });
+      }
     }
 
     let _investChart = null;
@@ -1491,9 +1923,9 @@
       const catTotals = {};
       items.forEach(i => {
         const isIntl = i.category === 'Internacional';
-        const qty = Number(i.qty||0);
-        const cur = Number(i.current_price||0);
-        const val = isIntl ? cur*qty*_usdBrl : toBRL(i, cur)*qty;
+        const qty = parseBrNum(i.qty);
+        const cur = parseBrNum(i.current_price);
+        const val = isIntl ? cur*qty*(Number(_usdBrl)||5.7) : toBRL(i, cur)*qty;
         const cat = i.category || 'Outros';
         catTotals[cat] = (catTotals[cat]||0) + val;
       });
@@ -1523,19 +1955,94 @@
       Object.keys(_itemMap).forEach(k => {
         const it = _itemMap[k];
         if(!it || it.ticker == null) return;
-        const avg = Number(it.avg_price||0);
-        const qty = Number(it.qty||0);
-        const cur = Number(it.current_price||0);
+        const avg = parseBrNum(it.avg_price);
+        const qty = parseBrNum(it.qty);
+        const cur = parseBrNum(it.current_price);
         const isIntl = it.category === 'Internacional';
-        totalInv += (isIntl ? avg * _usdBrl : avg) * qty;
-        totalCur += (isIntl ? cur * _usdBrl : cur) * qty;
+        totalInv += (isIntl ? avg * (Number(_usdBrl)||5.7) : avg) * qty;
+        totalCur += (isIntl ? cur * (Number(_usdBrl)||5.7) : cur) * qty;
         count++;
       });
       if(cTotal) cTotal.textContent = 'R$ '+totalInv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
       if(cCurrent) cCurrent.textContent = 'R$ '+totalCur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
-      if(cProfit){const p=totalCur-totalInv; cProfit.textContent=(p>=0?'+ ':'- ')+'R$ '+Math.abs(p).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); cProfit.className='card-value '+(p>=0?'amount-profit':'amount-loss');}
+      if(cProfit){
+        const p=totalCur-totalInv;
+        const pct = totalInv > 0 ? ((p/totalInv)*100) : 0;
+        const pctStr = ' ('+(pct>=0?'+':'')+pct.toFixed(1)+'%)';
+        cProfit.innerHTML = (p>=0?'+ ':'- ')+'R$ '+Math.abs(p).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'<span style="font-size:0.8rem;opacity:0.7;margin-left:0.3rem">'+pctStr+'</span>';
+        cProfit.className='card-value '+(p>=0?'amount-profit':'amount-loss');
+      }
       if(cCount) cCount.textContent = count;
-      renderInvestChart(Object.values(_itemMap).filter(i => i && i.ticker != null));
+      const invItems = Object.values(_itemMap).filter(i => i && i.ticker != null);
+      renderInvestChart(invItems);
+      renderInvestEvolution(invItems);
+      renderSubtabEvolution('acoes');
+    }
+
+    const _sortState = {};
+    function sortInvestTable(tableId, colIdx) {
+      const tbody = document.getElementById(tableId);
+      if(!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const key = tableId + '_' + colIdx;
+      _sortState[key] = (_sortState[key] || 'asc') === 'asc' ? 'desc' : 'asc';
+      const dir = _sortState[key] === 'asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        let va = a.cells[colIdx] ? a.cells[colIdx].textContent.trim() : '';
+        let vb = b.cells[colIdx] ? b.cells[colIdx].textContent.trim() : '';
+        const na = parseFloat(va.replace(/[^0-9.,\-]/g, '').replace(',', '.'));
+        const nb = parseFloat(vb.replace(/[^0-9.,\-]/g, '').replace(',', '.'));
+        if(!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
+        return va.localeCompare(vb, 'pt-BR') * dir;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    }
+
+    let _evolutionChart = null;
+    function renderInvestEvolution(items) {
+      const canvas = document.getElementById('investEvolutionChart');
+      const rangeEl = document.getElementById('evolutionDateRange');
+      if(!canvas || !items || !items.length) return;
+      const dateMap = {};
+      items.forEach(i => {
+        const d = i.date || '';
+        if(!d) return;
+        const avg = parseBrNum(i.avg_price);
+        const cur = parseBrNum(i.current_price);
+        const qty = parseBrNum(i.qty);
+        const isIntl = i.category === 'Internacional';
+        const rate = Number(_usdBrl) || 5.7;
+        const invVal = isIntl ? avg*qty*rate : toBRL(i, avg)*qty;
+        const curVal = isIntl ? cur*qty*rate : toBRL(i, cur)*qty;
+        if(!dateMap[d]) dateMap[d] = {invested:0, current:0};
+        dateMap[d].invested += isNaN(invVal)?0:invVal;
+        dateMap[d].current += isNaN(curVal)?0:curVal;
+      });
+      const dates = Object.keys(dateMap).sort();
+      if(!dates.length) return;
+      let cumInv = 0, cumCur = 0;
+      const labels = [];
+      const invData = [], curData = [];
+      dates.forEach(d => {
+        cumInv += dateMap[d].invested;
+        cumCur += dateMap[d].current;
+        labels.push(d.substring(5).split('-').reverse().join('/'));
+        invData.push(cumInv);
+        curData.push(cumCur);
+      });
+      if(rangeEl) rangeEl.textContent = labels[0] + ' - ' + labels[labels.length-1];
+      if(_evolutionChart) _evolutionChart.destroy();
+      _evolutionChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label:'Investido', data:invData, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6', borderWidth:2 },
+            { label:'Valor Atual', data:curData, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#22c55e', borderWidth:2 }
+          ]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#94a3b8',font:{size:11},usePointStyle:true,pointStyle:'circle'}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1a1d27',titleColor:'#94a3b8',bodyColor:'#e2e8f0',borderColor:'#334155',borderWidth:1}}, interaction:{mode:'index',intersect:false}, scales:{x:{ticks:{color:'#64748b',font:{size:10},maxRotation:45},grid:{color:'rgba(100,116,139,0.08)'}},y:{beginAtZero:true,ticks:{color:'#64748b',font:{size:10},callback:v=>'R$ '+v.toLocaleString('pt-BR')},grid:{color:'rgba(100,116,139,0.08)'}}} }
+      });
     }
 
     function toggleMenu() {
@@ -1564,6 +2071,56 @@
       document.querySelectorAll('#tab-investments .subtab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('subtab-' + subtab).classList.add('active');
+      renderSubtabEvolution(subtab);
+    }
+
+    const _subtabCharts = {};
+    function renderSubtabEvolution(subtab) {
+      const canvasId = 'subtabChart-' + subtab;
+      const canvas = document.getElementById(canvasId);
+      if(!canvas) return;
+      if(_subtabCharts[subtab]) { _subtabCharts[subtab].destroy(); _subtabCharts[subtab] = null; }
+      const catMap = {'acoes':'Acoes B3','fiis':'FIIs','etfs':'ETFs','renda-fixa':'Renda Fixa','cripto':'Cripto','internacional':'Internacional'};
+      const targetCat = catMap[subtab];
+      if(!targetCat) return;
+      const items = Object.values(_itemMap).filter(i => i && i.ticker != null && i.category === targetCat);
+      if(!items.length) { canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height); return; }
+      const dateMap = {};
+      items.forEach(i => {
+        const d = i.date || '';
+        if(!d) return;
+        const normDate = d.includes('/') ? (() => { const p = d.split('/'); return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'); })() : d;
+        const avg = parseBrNum(i.avg_price);
+        const cur = parseBrNum(i.current_price);
+        const qty = parseBrNum(i.qty);
+        const invVal = avg * qty;
+        const curVal = cur * qty;
+        if(!dateMap[normDate]) dateMap[normDate] = {invested:0, current:0};
+        dateMap[normDate].invested += isNaN(invVal)?0:invVal;
+        dateMap[normDate].current += isNaN(curVal)?0:curVal;
+      });
+      const dates = Object.keys(dateMap).sort();
+      if(!dates.length) return;
+      let cumInv = 0, cumCur = 0;
+      const labels = [], invData = [], curData = [];
+      dates.forEach(d => {
+        cumInv += dateMap[d].invested;
+        cumCur += dateMap[d].current;
+        labels.push(d.substring(5).split('-').reverse().join('/'));
+        invData.push(cumInv);
+        curData.push(cumCur);
+      });
+      _subtabCharts[subtab] = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label:'Investido', data:invData, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#3b82f6', borderWidth:2 },
+            { label:'Valor Atual', data:curData, borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#22c55e', borderWidth:2 }
+          ]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#94a3b8',font:{size:11},usePointStyle:true,pointStyle:'circle'}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1a1d27',titleColor:'#94a3b8',bodyColor:'#e2e8f0',borderColor:'#334155',borderWidth:1}}, interaction:{mode:'index',intersect:false}, scales:{x:{ticks:{color:'#64748b',font:{size:10},maxRotation:45},grid:{color:'rgba(100,116,139,0.08)'}},y:{beginAtZero:true,ticks:{color:'#64748b',font:{size:10},callback:v=>'R$ '+v.toLocaleString('pt-BR')},grid:{color:'rgba(100,116,139,0.08)'}}} }
+      });
     }
 
     function switchIntlSubtab(subtab, btn) {
@@ -1574,7 +2131,7 @@
     }
 
     function checkPremium() {
-      fetch('/api/me', {headers:_ah}).then(r=>r.json()).then(d=>{
+      apiGet('/api/me').then(d=>{
         if (d.premium) {
           document.getElementById('redeemForm').style.display = 'none';
           document.getElementById('premiumActive').style.display = 'block';
@@ -1588,8 +2145,8 @@
       if (!code) { status.innerHTML = '<div class="update-card" style="border-color:var(--yellow);text-align:center"><h3 style="color:var(--yellow);margin-bottom:0.3rem">⚠ Insira um codigo valido</h3></div>'; status.style.display = 'block'; return; }
       status.innerHTML = '<div class="update-card" style="border-color:var(--blue);text-align:center"><h3 style="color:var(--blue)">Processando...</h3></div>';
       status.style.display = 'block';
-      fetch('/api/redeem-code', { method: 'POST', headers: {'Content-Type': 'application/json',..._ah}, body: JSON.stringify({code: code}) })
-      .then(r => r.json()).then(d => {
+      apiPost('/api/redeem-code', {code: code})
+      .then(d => {
         if (d.ok) {
           status.innerHTML = '<div class="update-card" style="border-color:var(--green);text-align:center"><h3 style="color:var(--green);margin-bottom:0.3rem">✅ ' + d.message + '</h3><p style="color:var(--text-muted);font-size:0.85rem">Recarregando...</p></div>';
           document.getElementById('redeemForm').style.display = 'none';
@@ -1599,9 +2156,10 @@
           status.style.display = 'block';
           status.innerHTML = '<div class="update-card" style="border-color:var(--red);text-align:center"><h3 style="color:var(--red);margin-bottom:0.3rem">❌ ' + (d.error || 'Erro ao resgatar') + '</h3></div>';
         }
-      }).catch(() => {
+      }).catch((err) => {
+        console.error('[REDEEM] Error:', err);
         status.style.display = 'block';
-        status.innerHTML = '<div class="update-card" style="border-color:var(--red);text-align:center"><h3 style="color:var(--red)">❌ Erro de conexao</h3></div>';
+        status.innerHTML = '<div class="update-card" style="border-color:var(--red);text-align:center"><h3 style="color:var(--red)">❌ Erro de conexao</h3><p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.3rem">'+String(err||'')+'</p></div>';
       });
     }
 
@@ -1638,11 +2196,16 @@
     }
 
     function loadUpdates() {
-      fetch('/api/version').then(r => r.json()).then(data => {
+      apiGet('/api/version').then(data => {
         document.getElementById('currentVersion').textContent = 'Versao atual: v' + data.current_version;
         const list = document.getElementById('updatesList');
         list.innerHTML = '';
-        data.updates.forEach(u => {
+        const updates = data.updates || [];
+        if(updates.length === 0) {
+          list.innerHTML = '<div class="update-card"><div class="update-header"><div><div class="update-version">v' + data.current_version + '</div></div><span class="update-status status-installed">Instalado</span></div><div class="update-desc">Voce esta usando a versao mais recente.</div></div>';
+          return;
+        }
+        updates.forEach(u => {
           const isInstalled = u.status === 'installed';
           const features = u.features.map(f => '<li>' + f + '</li>').join('');
           list.innerHTML += '<div class="update-card"><div class="update-header"><div><div class="update-version">v' + u.version + '</div><div class="update-date">Lancado em ' + u.date + '</div></div><span class="update-status ' + (isInstalled ? 'status-installed' : 'status-available') + '">' + (isInstalled ? 'Instalado' : 'Disponivel') + '</span></div><div class="update-desc">' + u.description + '</div><ul class="update-features">' + features + '</ul>' + (isInstalled ? '<button class="update-btn" disabled>Ja Instalado</button>' : '<button class="update-btn" onclick="installUpdate(this, \'' + u.version + '\', \'' + u.date + '\')">Instalar Atualizacao</button>') + '</div>';
@@ -1653,11 +2216,7 @@
     function installUpdate(btn, version, date) {
       btn.disabled = true;
       btn.textContent = 'Instalando...';
-      fetch('/api/version/install', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({version: version, date: date})
-      }).then(r => r.json()).then(data => {
+      apiPost('/api/version/install', {version: version, date: date}).then(data => {
         loadUpdates();
       });
     }
@@ -1681,7 +2240,7 @@
       doc.line(14, 35, 196, 35);
       let y = 42;
 
-      fetch('/api/data?t=' + Date.now(), {headers:_ah}).then(r=>r.json()).then(data => {
+      apiGet('/api/data?t=' + Date.now()).then(data => {
         if(type === 'dashboard' || type === 'transactions') {
           const txs = data.transactions || [];
           if(txs.length) {
@@ -1729,13 +2288,44 @@
         if(type === 'dashboard' || type === 'investments') {
           const invs = data.investments || [];
           if(invs.length && type === 'investments') {
+            let totalInv = 0, totalCur = 0;
+            invs.forEach(i => {
+              const isIntl = i.category === 'Internacional';
+              const qty = parseBrNum(i.qty);
+              const avg = parseBrNum(i.avg_price);
+              const cur = parseBrNum(i.current_price);
+              const rate = Number(_usdBrl)||5.7;
+              totalInv += isIntl ? avg*qty*rate : toBRL(i, avg)*qty;
+              totalCur += isIntl ? cur*qty*rate : toBRL(i, cur)*qty;
+            });
             doc.setFontSize(10); doc.setTextColor(0,0,0); doc.setFont(undefined,'bold');
-            doc.text('Investimentos', 14, y); y += 2;
+            doc.text('Carteira de Investimentos', 14, y); y += 2;
+            doc.setFontSize(9); doc.setFont(undefined,'normal');
+            doc.setTextColor(59,130,246);
+            doc.text('Total Investido: R$ '+totalInv.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}), 14, y); y += 5;
+            const prof = totalCur - totalInv;
+            const pct = totalInv > 0 ? ((prof/totalInv)*100).toFixed(1) : '0.0';
+            doc.setTextColor(prof >= 0 ? 34 : 239, prof >= 0 ? 197 : 68, prof >= 0 ? 94 : 68);
+            doc.text('Valor Atual: R$ '+totalCur.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})+'  |  Lucro: '+(prof>=0?'+':'')+pct+'%', 14, y); y += 7;
             doc.autoTable({
               startY: y,
-              head: [['Ticker','Nome','Categoria','Qtd','Preco Medio','Preco Atual']],
-              body: invs.map(i => [i.ticker||'',i.name||'',i.category||'',i.qty||'',i.avg_price||'',i.current_price||'']),
-              styles: { fontSize:8, cellPadding:2 },
+              head: [['Ticker','Nome','Categoria','Qtd','Preco Medio','Preco Atual','Investido','Valor Atual','Lucro/Prej','Corretora']],
+              body: invs.map(i => {
+                const isIntl = i.category === 'Internacional';
+                const qty = parseBrNum(i.qty);
+                const avg = parseBrNum(i.avg_price);
+                const cur = parseBrNum(i.current_price);
+                const rate = Number(_usdBrl)||5.7;
+                const inv = isIntl ? avg*qty*rate : toBRL(i, avg)*qty;
+                const curV = isIntl ? cur*qty*rate : toBRL(i, cur)*qty;
+                const p = curV - inv;
+                const sym = isIntl ? 'US$' : 'R$';
+                return [i.ticker||'',i.name||'',i.category||'',i.qty||'',
+                  sym+' '+avg.toLocaleString('pt-BR',{minimumFractionDigits:2}),sym+' '+cur.toLocaleString('pt-BR',{minimumFractionDigits:2}),
+                  sym+' '+inv.toLocaleString('pt-BR',{minimumFractionDigits:2}),sym+' '+curV.toLocaleString('pt-BR',{minimumFractionDigits:2}),
+                  (p>=0?'+':'- ')+'R$ '+Math.abs(p).toLocaleString('pt-BR',{minimumFractionDigits:2}),i.broker||''];
+              }),
+              styles: { fontSize:7, cellPadding:2 },
               headStyles: { fillColor:[139,92,246], textColor:255 },
               alternateRowStyles: { fillColor:[245,245,250] }
             });
@@ -1798,6 +2388,27 @@
       }).catch(() => alert('Erro ao gerar PDF. Tente novamente.'));
     }
 
+    function changePassword() {
+      const cur = document.getElementById('currentPass').value;
+      const newP = document.getElementById('newPass').value;
+      const status = document.getElementById('changePassStatus');
+      if(!cur || !newP) { status.textContent = 'Preencha todos os campos'; status.style.display = 'block'; status.style.background = 'var(--red-bg)'; status.style.color = 'var(--red)'; return; }
+      if(newP.length < 6) { status.textContent = 'Nova senha deve ter no minimo 6 caracteres'; status.style.display = 'block'; status.style.background = 'var(--red-bg)'; status.style.color = 'var(--red)'; return; }
+      status.textContent = 'Alterando...'; status.style.display = 'block'; status.style.background = 'var(--blue-bg)'; status.style.color = 'var(--blue)';
+      if(_isElectron) {
+        window.electronAPI.changePassword(_tk, cur, newP).then(function(d) {
+          if(d && d.ok) { status.textContent = d.message; status.style.background = 'var(--green-bg)'; status.style.color = 'var(--green)'; document.getElementById('currentPass').value = ''; document.getElementById('newPass').value = ''; }
+          else { status.textContent = d.error || 'Erro'; status.style.background = 'var(--red-bg)'; status.style.color = 'var(--red)'; }
+        }).catch(function() { status.textContent = 'Erro de conexao'; status.style.background = 'var(--red-bg)'; status.style.color = 'var(--red)'; });
+      } else {
+        fetch('/api/change-password', {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify({currentPassword:cur, newPassword:newP})})
+        .then(r=>r.json()).then(d => {
+          if(d.ok) { status.textContent = d.message; status.style.background = 'var(--green-bg)'; status.style.color = 'var(--green)'; }
+          else { status.textContent = d.error || 'Erro'; status.style.background = 'var(--red-bg)'; status.style.color = 'var(--red)'; }
+        }).catch(function() { status.textContent = 'Erro de conexao'; });
+      }
+    }
+
     function restartApp() {
       const btn = event.currentTarget;
       btn.disabled = true;
@@ -1805,11 +2416,46 @@
       setTimeout(() => { window.location.reload(); }, 1500);
     }
 
+    function downloadApp(os, ext) {
+      const files = {
+        'linux-deb': 'Nelcitech3dFinance-Linux.deb',
+        'linux-appimage': 'Nelcitech3dFinance-Linux.AppImage',
+        'windows-exe': 'Nelcitech3dFinance-Windows.exe',
+        'mac-zip': 'Nelcitech3dFinance-Mac.zip'
+      };
+      const key = os + '-' + ext;
+      const filename = files[key] || 'Nelcitech3dFinance.zip';
+      const url = 'https://nelcitech3d.com.br/downloads/' + filename;
+      const status = document.getElementById('downloadStatus');
+      if(status) {
+        status.style.display = 'block';
+        status.style.background = 'var(--blue-bg, rgba(59,130,246,0.1))';
+        status.style.border = '1px solid var(--blue)';
+        status.style.color = 'var(--blue)';
+        status.innerHTML = 'Baixando ' + filename + '...';
+      }
+      if(_isElectron) {
+        window.electronAPI.download(url, filename).then(r => {
+          if(r && r.ok) {
+            if(status) { status.style.background = 'rgba(34,197,94,0.1)'; status.style.border = '1px solid #22c55e'; status.style.color = '#22c55e'; status.innerHTML = 'Download concluido! Arquivo salvo em: ' + r.path; }
+          } else if(r && r.canceled) {
+            if(status) status.style.display = 'none';
+          } else {
+            if(status) { status.style.background = 'rgba(239,68,68,0.1)'; status.style.border = '1px solid #ef4444'; status.style.color = '#ef4444'; status.innerHTML = 'Erro ao baixar: ' + (r ? r.error : 'Desconhecido'); }
+          }
+        }).catch(e => {
+          if(status) { status.style.background = 'rgba(239,68,68,0.1)'; status.style.border = '1px solid #ef4444'; status.style.color = '#ef4444'; status.innerHTML = 'Erro: ' + e; }
+        });
+      } else {
+        window.location.href = url;
+      }
+    }
+
     let aiHistory = [];
     async function loadAiKey() {
       if (!isAdmin) { document.getElementById('aiSetupPanel').style.display='none'; document.getElementById('aiChatPanel').style.display='block'; return; }
       try {
-        const r = await apiPost('/api/ai/get-key', {});
+        const r = await electronAPI.getAiKey(_tk);
         if (r.hasKey) { document.getElementById('aiSetupPanel').style.display='none'; document.getElementById('aiChatPanel').style.display='block'; }
         else { document.getElementById('aiSetupPanel').style.display='block'; document.getElementById('aiChatPanel').style.display='none'; }
       } catch(e) { document.getElementById('aiSetupPanel').style.display='block'; document.getElementById('aiChatPanel').style.display='none'; }
@@ -1819,7 +2465,7 @@
       const st = document.getElementById('aiKeyStatus');
       if (!key) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent='Insira uma chave valida'; return; }
       try {
-        const r = await apiPost('/api/ai/save-key', {apiKey: key});
+        const r = await electronAPI.saveAiKey(_tk, key);
         if (r.ok) { st.style.display='block'; st.style.background='rgba(34,197,94,0.1)'; st.style.color='#22c55e'; st.textContent='Chave salva!'; loadAiKey(); }
         else { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent=r.error||'Erro'; }
       } catch(e) { st.style.display='block'; st.style.background='rgba(239,68,68,0.1)'; st.style.color='#f87171'; st.textContent='Erro de conexao'; }
@@ -1836,7 +2482,7 @@
       box.innerHTML += '<div id="aiLoading" style="align-self:flex-start;color:var(--text-muted);font-size:0.85rem;padding:0.6rem 1rem">Pensando...</div>';
       box.scrollTop = box.scrollHeight;
       try {
-        const r = await apiPost('/api/ai/chat', {messages: aiHistory});
+        const r = await electronAPI.aiChat(_tk, aiHistory);
         const ld = document.getElementById('aiLoading'); if(ld) ld.remove();
         if (r.ok) {
           aiHistory.push({ role: 'assistant', content: r.reply });
@@ -1856,47 +2502,86 @@
       if (window.deferredPrompt) { window.deferredPrompt.prompt(); } else { alert('Para instalar, use o menu do navegador e selecione "Adicionar a tela inicial".'); }
     }
 
-    function changePassword() {
-      const cur = document.getElementById('currentPass').value;
-      const newP = document.getElementById('newPass').value;
-      const status = document.getElementById('changePassStatus');
-      if(!cur || !newP) { status.textContent = 'Preencha todos os campos'; status.style.display = 'block'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; return; }
-      if(newP.length < 6) { status.textContent = 'Nova senha deve ter no minimo 6 caracteres'; status.style.display = 'block'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; return; }
-      status.textContent = 'Alterando...'; status.style.display = 'block'; status.style.background = '#1b2d3b'; status.style.color = '#3b82f6';
-      fetch('/api/change-password', {method:'POST', headers:{'Content-Type':'application/json',..._ah}, body:JSON.stringify({currentPassword:cur, newPassword:newP})})
-      .then(r=>r.json()).then(d => {
-        if(d.ok) { status.textContent = d.message; status.style.background = '#1b2d1b'; status.style.color = '#22c55e'; document.getElementById('currentPass').value = ''; document.getElementById('newPass').value = ''; }
-        else { status.textContent = d.error || 'Erro'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; }
-      }).catch(function() { status.textContent = 'Erro de conexao'; status.style.background = '#2d1b1b'; status.style.color = '#ef4444'; });
-    }
-
     function initCharts() {
-      const muted = '#8b8fa3';
-      new Chart(document.getElementById('categoryChart').getContext('2d'), {
+      const isLight = _currentTheme === 'light';
+      const muted = isLight ? '#64748b' : '#8b8fa3';
+      const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(128,128,128,0.15)';
+
+      const txItems = _allTransactions || [];
+      const filtered = txItems.filter(i => {
+        const d = i.date || '';
+        if(d.length < 7) return false;
+        let dy, dm;
+        if(d.includes('-')) { dy = d.substring(0,4); dm = d.substring(5,7); }
+        else if(d.includes('/')) { const p = d.split('/'); if(p.length===3){ dm=p[1]; dy=p[2]; } else return false; }
+        else return false;
+        return dy === _selectedYear && (_selectedMonth === 'todos' || dm === _selectedMonth);
+      });
+
+      const cats = {};
+      const mNames = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      filtered.forEach(i => {
+        const cat = i.category || 'Outros';
+        const val = Number(i.value||0);
+        if(!cats[cat]) cats[cat] = {receita:0, despesa:0};
+        if(i.type === 'Receita') cats[cat].receita += val;
+        else cats[cat].despesa += val;
+      });
+      const catLabels = Object.keys(cats).sort();
+      const receitas = catLabels.map(c => cats[c].receita);
+      const despesas = catLabels.map(c => cats[c].despesa);
+
+      if(window._chartInstances) window._chartInstances.forEach(c => c.destroy());
+      window._chartInstances = [];
+
+      const c1 = new Chart(document.getElementById('categoryChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['Salario', 'Projeto', 'Servico', 'Moradia', 'Alimentacao', 'Servicos', 'Saude'],
+          labels: catLabels.length ? catLabels : ['Sem dados'],
           datasets: [
-            { label: 'Receitas', data: [5000, 2500, 2000, 0, 0, 0, 0], backgroundColor: 'rgba(34,197,94,0.7)', borderRadius: 4 },
-            { label: 'Despesas', data: [0, 0, 0, 2080, 420, 150, 120], backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4 }
+            { label: 'Receitas', data: receitas.length ? receitas : [0], backgroundColor: isLight ? 'rgba(22,163,74,0.75)' : 'rgba(34,197,94,0.7)', borderRadius: 4 },
+            { label: 'Despesas', data: despesas.length ? despesas : [0], backgroundColor: isLight ? 'rgba(220,38,38,0.75)' : 'rgba(239,68,68,0.7)', borderRadius: 4 }
           ]
         },
-        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 10 } }, grid: { color: gridColor } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: gridColor } } } }
       });
-      new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+
+      const monthMap = {};
+      txItems.forEach(i => {
+        const d = i.date || '';
+        if(d.length < 7) return;
+        let dy, dm;
+        if(d.includes('-')) { dy = d.substring(0,4); dm = d.substring(5,7); }
+        else if(d.includes('/')) { const p = d.split('/'); if(p.length===3){ dm=p[1]; dy=p[2]; } else return; }
+        else return;
+        if(dy !== _selectedYear) return;
+        if(!monthMap[dm]) monthMap[dm] = {receita:0, despesa:0};
+        const val = Number(i.value||0);
+        if(i.type === 'Receita') monthMap[dm].receita += val;
+        else monthMap[dm].despesa += val;
+      });
+      const sortedMonths = Object.keys(monthMap).sort();
+      const ml = sortedMonths.map(m => (mNames[parseInt(m)]||m) + '/' + _selectedYear.substring(2));
+      const recData = sortedMonths.map(m => monthMap[m].receita);
+      const desData = sortedMonths.map(m => monthMap[m].despesa);
+      const saldoData = sortedMonths.map((m,i) => recData[i] - desData[i]);
+
+      const c2 = new Chart(document.getElementById('monthlyChart').getContext('2d'), {
         type: 'line',
         data: {
-          labels: ['Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26'],
+          labels: ml.length ? ml : ['Sem dados'],
           datasets: [
-            { label: 'Saldo', data: [1200, 2100, 1800, 3200, 2900, 3500, 3780], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b82f6' },
-            { label: 'Receitas', data: [5000, 6500, 7200, 8000, 8500, 9000, 9500], borderColor: 'rgba(34,197,94,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] },
-            { label: 'Despesas', data: [3800, 4400, 5400, 4800, 5600, 5500, 5720], borderColor: 'rgba(239,68,68,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] }
+            { label: 'Saldo', data: saldoData.length ? saldoData : [0], borderColor: isLight ? '#2563eb' : '#3b82f6', backgroundColor: isLight ? 'rgba(37,99,235,0.1)' : 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 4, pointBackgroundColor: isLight ? '#2563eb' : '#3b82f6' },
+            { label: 'Receitas', data: recData.length ? recData : [0], borderColor: isLight ? 'rgba(22,163,74,0.85)' : 'rgba(34,197,94,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] },
+            { label: 'Despesas', data: desData.length ? desData : [0], borderColor: isLight ? 'rgba(220,38,38,0.85)' : 'rgba(239,68,68,0.8)', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,5] }
           ]
         },
-        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.15)' } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(128,128,128,0.15)' } } } }
+        options: { responsive: true, plugins: { legend: { labels: { color: muted, font: { size: 12 } } } }, scales: { x: { ticks: { color: muted, font: { size: 11 } }, grid: { color: gridColor } }, y: { ticks: { color: muted, font: { size: 11 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: gridColor } } } }
       });
+      window._chartInstances = [c1, c2];
     }
     initCharts();
+    initYearSelect();
     loadUpdates();
     checkPremium();
 
@@ -1912,7 +2597,8 @@
 
     function loadAdminPanelData() {
       if(!isAdmin) return;
-      fetch('/api/users',{headers:_ah}).then(r=>r.json()).then(d=>{
+      apiGet('/api/users').then(d=>{
+        if(d.error) { console.error('Erro ao carregar usuarios:', d.error); return; }
         adminData.users = d.users || [];
         document.getElementById('totalUsers').textContent = adminData.users.length;
         document.getElementById('totalPremium').textContent = adminData.users.filter(u=>u.premium).length;
@@ -1923,8 +2609,9 @@
         });
         html+='</tbody></table>';
         document.getElementById('usersTable').innerHTML = html;
-      });
-      fetch('/api/licenses',{headers:_ah}).then(r=>r.json()).then(d=>{
+      }).catch(e=>console.error('Erro ao carregar usuarios:', e));
+      apiGet('/api/licenses').then(d=>{
+        if(d.error) return;
         adminData.licenses = d;
         const codes = d.codes || [];
         document.getElementById('totalCodes').textContent = codes.filter(c=>!c.used).length;
@@ -1937,8 +2624,8 @@
         });
         html+='</tbody></table>';
         document.getElementById('codesTable').innerHTML = html;
-      });
-      fetch('/api/version',{headers:_ah}).then(r=>r.json()).then(d=>{
+      }).catch(e=>console.error('Erro ao carregar licencas:', e));
+      apiGet('/api/version').then(d=>{
         let html = '<p style="margin-bottom:0.5rem;font-size:0.9rem">Versao atual: <strong style="color:var(--green)">v'+d.current_version+'</strong></p>';
         html+='<table><thead><tr><th>Versao</th><th>Data</th><th>Status</th></tr></thead><tbody>';
         (d.updates||[]).forEach(u=>{
@@ -1946,16 +2633,14 @@
         });
         html+='</tbody></table>';
         document.getElementById('versionInfo').innerHTML = html;
-      });
+      }).catch(e=>console.error('Erro ao carregar versao:', e));
     }
 
     function adminGenerateCodes() {
       const count = document.getElementById('codeCount').value;
       const type = document.getElementById('codeType').value;
       const typeLabel = type === 'monthly' ? 'MENSAL (30d)' : 'ANUAL (365d)';
-      fetch('/api/admin/generate-code',{
-        method:'POST',headers:{'Content-Type':'application/json',..._ah},body:JSON.stringify({count:parseInt(count), type:type})
-      }).then(r=>r.json()).then(d=>{
+      apiPost('/api/admin/generate-code',{count:parseInt(count), type:type}).then(d=>{
         if(d.ok){
           let html = '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem"><p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.8rem">Codigos gerados <strong>'+typeLabel+'</strong> (clique para copiar):</p>';
           d.codes.forEach(c=>{
@@ -1971,7 +2656,7 @@
 
     function adminDeleteCode(code) {
       if(!confirm('Excluir codigo '+code+'?')) return;
-      fetch('/api/admin/delete-code',{method:'POST',headers:{'Content-Type':'application/json',..._ah},body:JSON.stringify({code:code})}).then(()=>loadAdminPanelData());
+      apiPost('/api/admin/delete-code',{code:code}).then(()=>loadAdminPanelData());
     }
 
     function showLockScreen(expireAt) {
@@ -1993,10 +2678,8 @@
     <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem">Renove seu plano para continuar usando o sistema.</p>
     <button class="plan-btn plan-btn-primary" onclick="unlockToRenew()" style="margin-bottom:0.8rem">Renovar Agora</button>
     <br>
-    <button onclick="localStorage.removeItem('nelci_token');window.location.href='/login.html'" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:0.6rem 1.5rem;border-radius:10px;cursor:pointer;font-size:0.85rem">Sair</button>
+    <button onclick="localStorage.removeItem('nelci_token');window.location.href='login.html'" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:0.6rem 1.5rem;border-radius:10px;cursor:pointer;font-size:0.85rem">Sair</button>
   </div>
-
-  <div style="position:fixed;bottom:1rem;right:1rem;z-index:5000;background:rgba(13,16,23,0.92);border:1px solid #2a2e3a;border-radius:20px;padding:0.35rem 0.75rem;font-size:0.72rem;color:#94a3b8;display:flex;align-items:center;gap:0.3rem;backdrop-filter:blur(6px)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> <span id="visitCount">0</span> visitas</div>
 
 </body>
 </html>

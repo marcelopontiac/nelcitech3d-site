@@ -1,10 +1,68 @@
 {
   "codes": [
     {
-      "code": "NELC-A0F5311E-B20DB678",
-      "used": false,
-      "used_by": "",
-      "created": "2026-07-21 20:31:02"
+      "code": "NELC-ANO-D5FD06-F13D72",
+      "type": "annual",
+      "used": true,
+      "used_by": "nelci.araujo.rib@gmail.com",
+      "created": "2026-07-22 15:25:48",
+      "used_at": "2026-07-22 15:42:25"
+    },
+    {
+      "code": "TEST-CODE-123",
+      "type": "annual",
+      "used": true,
+      "used_by": "test@test.com",
+      "created": "2026-07-22",
+      "used_at": "2026-07-22 16:09:19"
+    },
+    {
+      "code": "NELC-MES-8B51A1-FD97A8",
+      "type": "monthly",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-22 16:46:18",
+      "used_at": "2026-07-22 18:28:08"
+    },
+    {
+      "code": "NELC-MES-71AD68-04A763",
+      "type": "monthly",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-22 16:46:18",
+      "used_at": "2026-07-22 16:46:39"
+    },
+    {
+      "code": "NELC-2EB1DEB5-C61FD1AF",
+      "type": "monthly",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-21 23:24:38",
+      "used_at": "2026-07-22 18:40:08"
+    },
+    {
+      "code": "NELC-ANO-256455-026331",
+      "type": "annual",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-22 18:46:44",
+      "used_at": "2026-07-22 18:53:40"
+    },
+    {
+      "code": "NELC-ANO-868AEB-1BEBEC",
+      "type": "annual",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-22 21:54:05",
+      "used_at": "2026-07-22 18:55:47"
+    },
+    {
+      "code": "NELC-ANO-929206-1F1560",
+      "type": "annual",
+      "used": true,
+      "used_by": "pontiac3d@gmail.com",
+      "created": "2026-07-23 01:36:06",
+      "used_at": "2026-07-22 22:36:47"
     }
   ]
 }

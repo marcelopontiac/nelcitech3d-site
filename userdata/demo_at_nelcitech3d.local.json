@@ -1,0 +1,139 @@
+{
+  "transactions": [
+    {
+      "id": "dtx-1",
+      "date": "2026-07-01",
+      "type": "Receita",
+      "description": "Salario",
+      "category": "Salario",
+      "value": "5000"
+    },
+    {
+      "id": "dtx-2",
+      "date": "2026-07-05",
+      "type": "Receita",
+      "description": "Freelance Site",
+      "category": "Projeto",
+      "value": "2500"
+    },
+    {
+      "id": "dtx-3",
+      "date": "2026-07-08",
+      "type": "Receita",
+      "description": "Consultoria TI",
+      "category": "Servico",
+      "value": "2000"
+    },
+    {
+      "id": "dtx-4",
+      "date": "2026-07-02",
+      "type": "Despesa",
+      "description": "Aluguel",
+      "category": "Moradia",
+      "value": "1800"
+    },
+    {
+      "id": "dtx-5",
+      "date": "2026-07-03",
+      "type": "Despesa",
+      "description": "Supermercado",
+      "category": "Alimentacao",
+      "value": "420"
+    },
+    {
+      "id": "dtx-6",
+      "date": "2026-07-04",
+      "type": "Despesa",
+      "description": "Internet + TV",
+      "category": "Servicos",
+      "value": "150"
+    },
+    {
+      "id": "dtx-7",
+      "date": "2026-07-06",
+      "type": "Despesa",
+      "description": "Energia Eletrica",
+      "category": "Moradia",
+      "value": "280"
+    },
+    {
+      "id": "dtx-8",
+      "date": "2026-07-10",
+      "type": "Despesa",
+      "description": "Academia",
+      "category": "Saude",
+      "value": "120"
+    }
+  ],
+  "investments": [
+    {
+      "id": "dinv-1",
+      "category": "Acoes B3",
+      "ticker": "PETR4",
+      "name": "Petrobras PN",
+      "qty": "100",
+      "avg_price": "28.50",
+      "current_price": "36.80",
+      "date": "2026-01-15"
+    },
+    {
+      "id": "dinv-2",
+      "category": "Acoes B3",
+      "ticker": "VALE5",
+      "name": "Vale ON",
+      "qty": "50",
+      "avg_price": "62.00",
+      "current_price": "58.90",
+      "date": "2026-02-20"
+    },
+    {
+      "id": "dinv-3",
+      "category": "Acoes B3",
+      "ticker": "ITUB4",
+      "name": "Itau Unibanco PN",
+      "qty": "80",
+      "avg_price": "25.30",
+      "current_price": "31.50",
+      "date": "2026-03-10"
+    },
+    {
+      "id": "dinv-12",
+      "category": "Cripto",
+      "ticker": "BTC",
+      "name": "Bitcoin",
+      "qty": "0.05",
+      "avg_price": "350000.00",
+      "current_price": "520000.00",
+      "date": "2025-11-20"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "dsp-1",
+      "name": "Tech Solutions Ltda",
+      "contact": "Joao Pereira",
+      "cnpj": "12.345.678/0001-90",
+      "phone": "(11) 99999-1234",
+      "email": "contato@techsolutions.com.br"
+    }
+  ],
+  "purchases": [
+    {
+      "id": "dpu-1",
+      "date": "2026-07-01",
+      "description": "Compra de material de escritorio",
+      "supplier": "Tech Solutions Ltda",
+      "payment": "A Vista",
+      "value": "1250"
+    }
+  ],
+  "sales": [
+    {
+      "id": "dsl-1",
+      "date": "2026-07-05",
+      "description": "Venda de consultoria",
+      "payment": "3x",
+      "value": "4500"
+    }
+  ]
+}

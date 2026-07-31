@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+nohup.out
+node_modules/
+frontend/dist/
+backend/nelci.db

@@ -38,6 +38,7 @@ MIGRATIONS = {
     "investments": {
         "grupo": "TEXT DEFAULT 'Nacional'",
         "data_atualizacao": "TEXT DEFAULT ''",
+        "pct_cdi": "TEXT DEFAULT ''",
     },
 }
 

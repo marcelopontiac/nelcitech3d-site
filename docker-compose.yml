@@ -12,6 +12,14 @@ services:
     volumes:
       - api-data:/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/docs')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nelcitech-net
 
   frontend:
     build:
@@ -20,8 +28,15 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - nelcitech-net
 
 volumes:
   api-data:
+
+networks:
+  nelcitech-net:
+    driver: bridge

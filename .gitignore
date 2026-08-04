@@ -4,3 +4,4 @@ nohup.out
 node_modules/
 frontend/dist/
 backend/nelci.db
+opencode.json

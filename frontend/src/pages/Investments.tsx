@@ -24,9 +24,14 @@ const TABS = [
   { key: 'ETF Renda Fixa', label: 'ETF Renda Fixa' },
   { key: 'ETF Cripto', label: 'ETF Cripto' },
   { key: 'REITs', label: 'REITs' },
+  { key: 'acoes', label: 'Melhores Ações (B3)' },
+  { key: 'fiis', label: 'Melhores FIIs' },
+  { key: 'papel', label: 'Fundos de Papel' },
+  { key: 'tijolo', label: 'Fundos de Tijolo' },
 ];
 const GROUP_TABS = new Set(['Nacional','Internacional']);
 const CAT_TABS = new Set(['ETFs','ETF Renda Fixa','ETF Cripto','REITs']);
+const SUBFOLDER_TABS = new Set(['acoes','fiis','papel','tijolo']);
 
 const INTL_FOLDERS = [
   {
@@ -192,7 +197,6 @@ export default function Investments() {
   const [lastUpdate, setLastUpdate] = useState<string|null>(null);
   const [expandedRow, setExpandedRow] = useState<string|null>(null);
   const [intlFolder, setIntlFolder] = useState<string>('Todas');
-  const [nacFolder, setNacFolder] = useState<string>('Todas');
 
   const { data, isLoading } = useQuery({ queryKey:['data'], queryFn:()=>api.getData(), refetchOnWindowFocus:false });
 
@@ -288,10 +292,14 @@ export default function Investments() {
       {/* Abas: Nacional / Internacional / Todas / ETFs / ETF Renda Fixa / ETF Cripto / REITs */}
       <div className="flex flex-wrap gap-1 bg-gray-900/60 border border-gray-800/50 rounded-xl p-1 w-fit">
         {TABS.map(t=>(
-          <button key={t.key} onClick={()=>{setTab(t.key);setExpandedRow(null);setIntlFolder('Todas');setNacFolder('Todas');}}
+          <button key={t.key} onClick={()=>{setTab(t.key);setExpandedRow(null);setIntlFolder('Todas');}}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
               tab===t.key
-                ? (t.key==='Internacional' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30')
+                ? (SUBFOLDER_TABS.has(t.key)
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  : t.key==='Internacional'
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30')
                 : 'text-gray-400 hover:text-white border border-transparent'
             }`}>
             {t.label}
@@ -299,25 +307,14 @@ export default function Investments() {
         ))}
       </div>
 
-      {/* Nacional: subpastas com principais ativos B3 */}
+      {/* Nacional: todos os ativos B3 */}
       {tab==='Nacional' && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-1">
-            {['Todas', ...NACIONAL_FOLDERS.map(f=>f.key)].map(k=>(
-              <button key={k} onClick={()=>{setNacFolder(k);setExpandedRow(null);}}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                  nacFolder===k ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-gray-800/40 text-gray-500 hover:text-gray-300 border border-transparent'
-                }`}>
-                {k==='Todas'?'Todas':NACIONAL_FOLDERS.find(f=>f.key===k)!.label}
-              </button>
-            ))}
-          </div>
-
           <p className="text-gray-400 text-sm leading-relaxed">
             Os principais ativos da B3 reúnem ações e fundos imobiliários, destacando-se PETR4, VALE3 e ITUB4 nas ações, e MXRF11, KNCR11 e HGLG11 nos FIIs.
           </p>
 
-          {(nacFolder==='Todas'?NACIONAL_FOLDERS:NACIONAL_FOLDERS.filter(f=>f.key===nacFolder)).map(folder=>(
+          {NACIONAL_FOLDERS.map(folder=>(
             <div key={folder.key} className="space-y-2">
               <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider">{folder.label}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -339,31 +336,63 @@ export default function Investments() {
             </div>
           ))}
 
-          {nacFolder==='Todas' && (
-            <div className="bg-gray-900/40 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4 overflow-hidden">
-              <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Comparativo: Ações vs FIIs</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-gray-500 uppercase border-b border-gray-800/40">
-                      <th className="text-left px-3 py-2 font-semibold whitespace-nowrap">Característica</th>
-                      <th className="text-left px-3 py-2 font-semibold whitespace-nowrap text-emerald-400">Ações</th>
-                      <th className="text-left px-3 py-2 font-semibold whitespace-nowrap text-blue-400">Fundos Imobiliários</th>
+          <div className="bg-gray-900/40 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4 overflow-hidden">
+            <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Comparativo: Ações vs FIIs</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-gray-500 uppercase border-b border-gray-800/40">
+                    <th className="text-left px-3 py-2 font-semibold whitespace-nowrap">Característica</th>
+                    <th className="text-left px-3 py-2 font-semibold whitespace-nowrap text-emerald-400">Ações</th>
+                    <th className="text-left px-3 py-2 font-semibold whitespace-nowrap text-blue-400">Fundos Imobiliários</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {FII_VS_ACAO.map(r=>(
+                    <tr key={r.criterio} className="border-b border-gray-800/20">
+                      <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{r.criterio}</td>
+                      <td className="px-3 py-2 text-gray-300">{r.acao}</td>
+                      <td className="px-3 py-2 text-gray-300">{r.fii}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {FII_VS_ACAO.map(r=>(
-                      <tr key={r.criterio} className="border-b border-gray-800/20">
-                        <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{r.criterio}</td>
-                        <td className="px-3 py-2 text-gray-300">{r.acao}</td>
-                        <td className="px-3 py-2 text-gray-300">{r.fii}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* Sub-folders como abas independentes */}
+      {SUBFOLDER_TABS.has(tab) && (
+        <div className="space-y-4">
+          {(() => {
+            const folder = NACIONAL_FOLDERS.find(f => f.key === tab);
+            if (!folder) return null;
+            return (
+              <>
+                <h2 className="text-xl md:text-2xl font-bold text-white">{folder.label}</h2>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {folder.assets.length} ativos disponíveis para investimento.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {folder.assets.map(a => (
+                    <div key={a.ticker} className="bg-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4 hover:border-emerald-500/30 transition group">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="bg-emerald-500/15 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-mono font-semibold tracking-wide">{a.ticker}</span>
+                      </div>
+                      <p className="text-white font-bold text-sm">{a.name}</p>
+                      <p className="text-gray-500 text-xs mt-1 leading-relaxed">{a.desc}</p>
+                      <button onClick={() => openAsset(a, 'Nacional', folder.category, 'Clear')}
+                        className="mt-3 w-full bg-emerald-600/15 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-400 hover:text-white text-xs font-medium py-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
+                        Investir
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
 

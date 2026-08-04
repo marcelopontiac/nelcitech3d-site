@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useTheme } from '../hooks/useTheme';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   LineChart, Line, PieChart, Pie, Cell, Legend,
@@ -21,6 +22,7 @@ const META_KEY = 'comercial_meta_mensal';
 
 export default function Comercial() {
   const queryClient = useQueryClient();
+  const { chart } = useTheme();
   const [tab, setTab] = useState<Tab>('dashboard');
   const [editing, setEditing] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
@@ -232,10 +234,10 @@ export default function Comercial() {
                 <h2 className="text-white font-semibold mb-4">Evolução Mensal</h2>
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={monthlyVendas}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="month" stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} formatter={fmtTooltip} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                    <XAxis dataKey="month" stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <YAxis stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={chart.tooltip} formatter={fmtTooltip} />
                     <Legend />
                     <Line type="monotone" dataKey="vendas" stroke={COLORS.green} strokeWidth={2} dot={{ r: 3 }} name="Vendas" />
                     <Line type="monotone" dataKey="compras" stroke={COLORS.red} strokeWidth={2} dot={{ r: 3 }} name="Compras" />
@@ -258,10 +260,10 @@ export default function Comercial() {
                 {metaMensal > 0 ? (
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={vendasMetaChart}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="month" stroke="#6B7280" tick={{ fontSize: 12 }} />
-                      <YAxis stroke="#6B7280" tick={{ fontSize: 12 }} />
-                      <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} formatter={fmtTooltip} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                      <XAxis dataKey="month" stroke={chart.axis} tick={{ fontSize: 12 }} />
+                      <YAxis stroke={chart.axis} tick={{ fontSize: 12 }} />
+                      <Tooltip contentStyle={chart.tooltip} formatter={fmtTooltip} />
                       <Legend />
                       <Bar dataKey="vendas" fill={COLORS.green} radius={[4, 4, 0, 0]} name="Vendas" maxBarSize={36} />
                       <Line type="monotone" dataKey="meta" stroke={COLORS.blue} strokeWidth={2} strokeDasharray="5 5" dot={false} name="Meta" />
@@ -281,7 +283,7 @@ export default function Comercial() {
                     <Pie data={vendasPorCat} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}>
                       {vendasPorCat.map((_: any, i: number) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} formatter={fmtTooltip} />
+                    <Tooltip contentStyle={chart.tooltip} formatter={fmtTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -291,11 +293,11 @@ export default function Comercial() {
               <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
                 <h2 className="text-white font-semibold mb-4">Compras vs Vendas por Categoria</h2>
                 <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={comprasVendasPorCat} barCategoryGap={6}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="name" stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} formatter={fmtTooltip} />
+                    <BarChart data={comprasVendasPorCat} barCategoryGap={6}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                    <XAxis dataKey="name" stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <YAxis stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={chart.tooltip} formatter={fmtTooltip} />
                     <Legend />
                     <Bar dataKey="compras" fill={COLORS.red} radius={[4, 4, 0, 0]} name="Compras" maxBarSize={40} />
                     <Bar dataKey="vendas" fill={COLORS.green} radius={[4, 4, 0, 0]} name="Vendas" maxBarSize={40} />
@@ -309,10 +311,10 @@ export default function Comercial() {
                 <h2 className="text-white font-semibold mb-4">Lucro Mensal</h2>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={lucroMensalChart}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="month" stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#6B7280" tick={{ fontSize: 12 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} formatter={fmtTooltip} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                    <XAxis dataKey="month" stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <YAxis stroke={chart.axis} tick={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={chart.tooltip} formatter={fmtTooltip} />
                     <Bar dataKey="lucro" fill={COLORS.blue} radius={[4, 4, 0, 0]} name="Lucro" maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>

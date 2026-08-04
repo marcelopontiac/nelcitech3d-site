@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useAuth } from '../api/auth';
+import { useTheme } from '../hooks/useTheme';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   LineChart, Line, Legend,
@@ -18,6 +19,7 @@ const ftm = (v: any) => fmt(Number(v)||0);
 export default function Dashboard() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { chart } = useTheme();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState<string|null>(null);
@@ -165,14 +167,14 @@ export default function Dashboard() {
           {catData.length>0?(
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={catData} barCategoryGap={6} margin={{bottom:20}}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="name" stroke="#4b5563" tick={{fontSize:10}} axisLine={false} tickLine={false} />
-                <YAxis stroke="#4b5563" tick={{fontSize:10}} tickFormatter={(v:number)=>`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{backgroundColor:'#111827',border:'1px solid #1f2937',borderRadius:'8px',color:'#fff',fontSize:'12px',boxShadow:'0 4px 20px rgba(0,0,0,0.4)'}} formatter={ftm} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} vertical={false} />
+                <XAxis dataKey="name" stroke={chart.axis} tick={{fontSize:10}} axisLine={false} tickLine={false} />
+                <YAxis stroke={chart.axis} tick={{fontSize:10}} tickFormatter={(v:number)=>`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={chart.tooltip} formatter={ftm} />
                 <Bar dataKey="receita" fill={C.green} radius={[4,4,0,0]} name="Receitas" maxBarSize={24} />
                 <Bar dataKey="despesa" fill={C.red} radius={[4,4,0,0]} name="Despesas" maxBarSize={24} />
                 <Legend verticalAlign="bottom" iconType="rect" iconSize={12}
-                  formatter={(value:string)=> <span style={{color:value==='Receitas'?'#34D399':value==='Despesas'?'#F87171':'#9CA3AF',fontSize:'11px',fontWeight:'500'}}>{value}</span>} />
+                  formatter={(value:string)=> <span style={{color:value==='Receitas'?'#34D399':value==='Despesas'?'#F87171':chart.legendText,fontSize:'11px',fontWeight:'500'}}>{value}</span>} />
               </BarChart>
             </ResponsiveContainer>
           ):<p className="text-gray-600 text-center py-10 text-xs">Sem dados no período</p>}
@@ -182,10 +184,10 @@ export default function Dashboard() {
           {balanceData.length>0?(
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={balanceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis dataKey="month" stroke="#4b5563" tick={{fontSize:10}} axisLine={false} tickLine={false} />
-                <YAxis stroke="#4b5563" tick={{fontSize:10}} domain={[-100000, 'auto']} ticks={[0,-25000,-50000,-75000,-100000]} tickFormatter={(v:number)=>`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{backgroundColor:'#111827',border:'1px solid #1f2937',borderRadius:'8px',color:'#fff',fontSize:'12px',boxShadow:'0 4px 20px rgba(0,0,0,0.4)'}} formatter={ftm} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                <XAxis dataKey="month" stroke={chart.axis} tick={{fontSize:10}} axisLine={false} tickLine={false} />
+                <YAxis stroke={chart.axis} tick={{fontSize:10}} domain={[-100000, 'auto']} ticks={[0,-25000,-50000,-75000,-100000]} tickFormatter={(v:number)=>`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={chart.tooltip} formatter={ftm} />
                 <Legend verticalAlign="bottom" iconType="line" iconSize={20}
                   formatter={(value:string)=><span style={{color:value==='Saldo'?'#3B82F6':value==='Receitas'?'#34D399':'#F87171',fontSize:'11px',fontWeight:'500'}}>{value}</span>} />
                 <Line type="monotone" dataKey="receita" stroke={C.green} strokeWidth={2} strokeDasharray="0" dot={{r:2,fill:C.green,strokeWidth:0}} activeDot={{r:4,fill:C.green,stroke:'#111827',strokeWidth:2}} name="Receitas" />

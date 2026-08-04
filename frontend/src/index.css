@@ -18,7 +18,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scrollbar fina para sidebar e listas */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -34,76 +33,199 @@ html {
   background: rgba(75, 85, 99, 0.6);
 }
 
+/* ===== LIGHT MODE OVERRIDES ===== */
+
+/* Body */
 html.light body {
-  --tw-bg: #f3f4f6;
   background-color: #f3f4f6;
   color: #1f2937;
 }
 
-html.light .bg-gray-900,
-html.light .bg-gray-950 {
+/* ---- Backgrounds (solid) ---- */
+html.light .bg-gray-950,
+html.light .bg-gray-900 {
   background-color: #ffffff !important;
 }
-
 html.light .bg-gray-800 {
-  background-color: #e5e7eb !important;
+  background-color: #f1f5f9 !important;
 }
-
 html.light .bg-gray-700 {
-  background-color: #d1d5db !important;
+  background-color: #e2e8f0 !important;
+}
+html.light .bg-gray-600 {
+  background-color: #cbd5e1 !important;
 }
 
+/* ---- Backgrounds (opacity variants) ---- */
+html.light .bg-gray-950\/80,
+html.light .bg-gray-900\/90,
+html.light .bg-gray-900\/80,
+html.light .bg-gray-900\/60,
+html.light .bg-gray-900\/50,
+html.light .bg-gray-900\/40,
+html.light .bg-gray-900\/30 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+html.light .bg-gray-800\/80,
+html.light .bg-gray-800\/60,
+html.light .bg-gray-800\/50,
+html.light .bg-gray-800\/40 {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+}
+html.light .bg-gray-700\/60,
+html.light .bg-gray-700\/50,
+html.light .bg-gray-700\/40 {
+  background-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+/* ---- Overlays ---- */
+html.light .bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+}
+html.light .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+html.light .bg-black\/70 {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ---- Text (primary) ---- */
 html.light .text-white {
-  color: #1f2937 !important;
+  color: #1e293b !important;
+}
+html.light .text-gray-100,
+html.light .text-gray-200 {
+  color: #334155 !important;
+}
+html.light .text-gray-300 {
+  color: #475569 !important;
 }
 
-html.light .text-gray-400,
+/* ---- Text (secondary) ---- */
+html.light .text-gray-400 {
+  color: #64748b !important;
+}
 html.light .text-gray-500 {
   color: #6b7280 !important;
 }
+html.light .text-gray-600 {
+  color: #94a3b8 !important;
+}
 
+/* ---- Borders ---- */
 html.light .border-gray-800,
-html.light .border-gray-700 {
-  border-color: #d1d5db !important;
+html.light .border-gray-700,
+html.light .border-gray-700\/50,
+html.light .border-gray-800\/50,
+html.light .border-gray-800\/40,
+html.light .border-gray-800\/30,
+html.light .border-gray-800\/20 {
+  border-color: #e2e8f0 !important;
 }
 
-html.light .hover\:text-white:hover {
-  color: #1f2937 !important;
-}
-
-html.light .hover\:bg-gray-700:hover,
-html.light .hover\:bg-gray-800:hover {
-  background-color: #d1d5db !important;
-}
-
-html.light .bg-emerald-500\/10,
-html.light .bg-emerald-900\/20 {
-  background-color: rgba(16, 185, 129, 0.15) !important;
-}
-
-html.light .bg-gray-900\/80,
-html.light .bg-gray-900\/50,
-html.light .bg-gray-950\/80 {
-  background-color: rgba(255, 255, 255, 0.92) !important;
-}
-
-html.light .bg-gray-800\/50,
-html.light .bg-gray-800\/80 {
-  background-color: rgba(229, 231, 235, 0.6) !important;
-}
-
-html.light .bg-black\/50 {
-  background-color: rgba(0, 0, 0, 0.3) !important;
-}
-
-html.light .hover\:bg-gray-800\/50:hover {
-  background-color: rgba(209, 213, 219, 0.5) !important;
-}
-
-html.light .border-emerald-500\/20 {
-  border-color: rgba(16, 185, 129, 0.25) !important;
-}
-
+/* ---- Accent colors ---- */
 html.light .text-emerald-400 {
   color: #059669 !important;
+}
+html.light .text-emerald-500 {
+  color: #10b981 !important;
+}
+html.light .bg-emerald-500\/10,
+html.light .bg-emerald-900\/20 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+html.light .border-emerald-500\/20 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+html.light .text-rose-400 {
+  color: #e11d48 !important;
+}
+html.light .text-red-400 {
+  color: #dc2626 !important;
+}
+html.light .text-purple-400 {
+  color: #9333ea !important;
+}
+html.light .text-blue-400 {
+  color: #2563eb !important;
+}
+html.light .text-cyan-400 {
+  color: #0891b2 !important;
+}
+html.light .text-orange-400 {
+  color: #ea580c !important;
+}
+html.light .bg-rose-500\/10,
+html.light .bg-rose-900\/20 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+}
+
+/* ---- Hover states ---- */
+html.light .hover\:text-white:hover {
+  color: #1e293b !important;
+}
+html.light .hover\:text-gray-300:hover {
+  color: #475569 !important;
+}
+html.light .hover\:text-gray-400:hover {
+  color: #334155 !important;
+}
+html.light .hover\:bg-gray-800:hover,
+html.light .hover\:bg-gray-700:hover {
+  background-color: #e2e8f0 !important;
+}
+html.light .hover\:bg-gray-800\/50:hover,
+html.light .hover\:bg-gray-800\/60:hover,
+html.light .hover\:bg-gray-700\/60:hover {
+  background-color: rgba(226, 232, 240, 0.7) !important;
+}
+html.light .hover\:bg-white\/\[0\.02\]:hover,
+html.light .hover\:bg-white\/\[0\.03\]:hover {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+}
+html.light .hover\:border-gray-700:hover,
+html.light .hover\:border-gray-600\/50:hover {
+  border-color: #cbd5e1 !important;
+}
+
+/* ---- Form inputs ---- */
+html.light input[type="text"],
+html.light input[type="email"],
+html.light input[type="password"],
+html.light input[type="number"],
+html.light input[type="date"],
+html.light select,
+html.light textarea {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+html.light select option {
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+/* ---- Scrollbar for light mode ---- */
+html.light .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+}
+html.light .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* ---- Chart tooltips (light mode class on chart wrapper) ---- */
+html.light .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+html.light .recharts-cartesian-grid line {
+  stroke: #e2e8f0 !important;
+}
+html.light .recharts-text {
+  fill: #64748b !important;
 }

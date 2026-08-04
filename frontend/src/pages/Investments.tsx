@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useTheme } from '../hooks/useTheme';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, Legend, LineChart, Line,
@@ -116,6 +117,7 @@ function ExpandedRow({ inv }: { inv: any }) {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('3mo');
+  const { chart } = useTheme();
 
   useEffect(() => {
     if(!inv.ticker){ setLoading(false); return; }
@@ -162,13 +164,13 @@ function ExpandedRow({ inv }: { inv: any }) {
         ) : (
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={history}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-              <XAxis dataKey="date" stroke="#4b5563" tick={{ fontSize: 10 }} axisLine={false} tickLine={false}
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} vertical={false} />
+              <XAxis dataKey="date" stroke={chart.axis} tick={{ fontSize: 10 }} axisLine={false} tickLine={false}
                 tickFormatter={(v: string) => { const d = new Date(v); return `${d.getDate()}/${d.getMonth() + 1}`; }} />
-              <YAxis stroke="#4b5563" tick={{ fontSize: 10 }} axisLine={false} tickLine={false}
+              <YAxis stroke={chart.axis} tick={{ fontSize: 10 }} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => isIntl ? `$${v.toFixed(0)}` : `R$${v.toFixed(0)}`}
                 domain={['dataMin', 'dataMax']} />
-              <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+              <Tooltip contentStyle={chart.tooltip}
                 formatter={(v: any) => f(Number(v))} />
               <Line type="monotone" dataKey="close" stroke="#3B82F6" strokeWidth={2} dot={false} name={inv.ticker} />
             </LineChart>
@@ -181,6 +183,7 @@ function ExpandedRow({ inv }: { inv: any }) {
 
 export default function Investments() {
   const qc = useQueryClient();
+  const { chart } = useTheme();
   const [tab, setTab] = useState<string>('Nacional');
   const [editing, setEditing] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
@@ -435,9 +438,9 @@ export default function Investments() {
                 <Pie data={alocacao} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} dataKey="value">
                   {alocacao.map((_:any,i:number)=><Cell key={i} fill={PIE[i%PIE.length]}/>)}
                 </Pie>
-                <Tooltip contentStyle={{backgroundColor:'#111827',border:'1px solid #1f2937',borderRadius:'8px',color:'#fff',fontSize:'12px',boxShadow:'0 4px 20px rgba(0,0,0,0.4)'}} formatter={(v:any)=>isIntlTab?fnUS(Number(v)||0):fn(Number(v)||0)} />
+                <Tooltip contentStyle={chart.tooltip} formatter={(v:any)=>isIntlTab?fnUS(Number(v)||0):fn(Number(v)||0)} />
                 <Legend verticalAlign="bottom" iconType="circle" iconSize={8}
-                  formatter={(value:string)=><span style={{color:'#9CA3AF',fontSize:'10px'}}>{value}</span>} />
+                  formatter={(value:string)=><span style={{color:chart.legendText,fontSize:'10px'}}>{value}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -447,14 +450,14 @@ export default function Investments() {
             <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Valor de Compra vs Valor Atual</h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={investChart} barCategoryGap={6}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis type="category" dataKey="name" stroke="#4b5563" tick={{fontSize:10}} axisLine={false} tickLine={false} />
-                <YAxis type="number" stroke="#4b5563" tick={{fontSize:10}} tickFormatter={(v:number)=>isIntlTab?`$${(v/1000).toFixed(0)}k`:`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{backgroundColor:'#111827',border:'1px solid #1f2937',borderRadius:'8px',color:'#fff',fontSize:'12px',boxShadow:'0 4px 20px rgba(0,0,0,0.4)'}} formatter={(v:any)=>isIntlTab?fnUS(Number(v)||0):fn(Number(v)||0)} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} vertical={false} />
+                <XAxis type="category" dataKey="name" stroke={chart.axis} tick={{fontSize:10}} axisLine={false} tickLine={false} />
+                <YAxis type="number" stroke={chart.axis} tick={{fontSize:10}} tickFormatter={(v:number)=>isIntlTab?`$${(v/1000).toFixed(0)}k`:`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={chart.tooltip} formatter={(v:any)=>isIntlTab?fnUS(Number(v)||0):fn(Number(v)||0)} />
                 <Bar dataKey="invested" fill={C.purple} radius={[4,4,0,0]} name="Valor de Compra" maxBarSize={24} />
                 <Bar dataKey="current" fill={C.green} radius={[4,4,0,0]} name="Valor Atual" maxBarSize={24} />
                 <Legend verticalAlign="bottom" iconType="rect" iconSize={10}
-                  formatter={(value:string)=><span style={{color:'#9CA3AF',fontSize:'10px'}}>{value}</span>} />
+                  formatter={(value:string)=><span style={{color:chart.legendText,fontSize:'10px'}}>{value}</span>} />
               </BarChart>
             </ResponsiveContainer>
           </div>

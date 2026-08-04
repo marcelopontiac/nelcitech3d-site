@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../api/auth';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import MonitoringPanel from '../pages/Monitoring';
 
 const navItems = [
@@ -25,6 +25,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [monitorOpen, setMonitorOpen] = useState(false);
+  const [clipOpen, setClipOpen] = useState(false);
+  const [clipText, setClipText] = useState('');
+  const [clipSaved, setClipSaved] = useState(false);
+  const clipRef = useRef<HTMLTextAreaElement>(null);
 
   async function handleLogout() {
     await logout();
@@ -140,6 +144,92 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
         <MonitoringPanel open={monitorOpen} onClose={() => setMonitorOpen(false)} />
       </main>
+
+      {/* Botão flutuante Clipboard */}
+      <button
+        onClick={() => { setClipOpen(!clipOpen); setClipSaved(false); }}
+        className="fixed bottom-5 right-5 z-50 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all hover:scale-110"
+        title="Colar script/artigo"
+      >
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </button>
+
+      {/* Painel Clipboard */}
+      {clipOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-end p-4 md:p-6">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setClipOpen(false)} />
+          <div className="relative bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style={{ maxHeight: '80vh' }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+              <div>
+                <h3 className="text-white font-semibold text-sm">Clipboard</h3>
+                <p className="text-gray-500 text-xs">Cole scripts, artigos ou qualquer texto para análise</p>
+              </div>
+              <button onClick={() => setClipOpen(false)} className="text-gray-400 hover:text-white text-lg p-1">✕</button>
+            </div>
+            <div className="flex-1 overflow-hidden p-4">
+              <textarea
+                ref={clipRef}
+                value={clipText}
+                onChange={e => { setClipText(e.target.value); setClipSaved(false); }}
+                placeholder="Cole aqui seu script, artigo ou qualquer conteúdo..."
+                className="w-full h-full min-h-[200px] bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-mono resize-none focus:outline-none focus:border-blue-500/50 transition scrollbar-thin"
+                style={{ minHeight: '250px' }}
+              />
+            </div>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
+              <span className="text-gray-500 text-xs">{clipText.length} caracteres</span>
+              <div className="flex gap-2">
+                {clipText && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(clipText);
+                      setClipSaved(true);
+                      setTimeout(() => setClipSaved(false), 2000);
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-800/60 hover:bg-gray-700/60 text-gray-300 transition"
+                  >
+                    {clipSaved ? 'Copiado!' : 'Copiar'}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    if (!clipText.trim()) return;
+                    const blob = new Blob([clipText], { type: 'text/plain' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `script-${new Date().toISOString().slice(0,10)}.txt`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-800/60 hover:bg-gray-700/60 text-gray-300 transition"
+                >
+                  Salvar .txt
+                </button>
+                <button
+                  onClick={() => { setClipText(''); setClipSaved(false); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-800/60 hover:bg-gray-700/60 text-gray-300 transition"
+                >
+                  Limpar
+                </button>
+                <button
+                  onClick={() => {
+                    clipRef.current?.focus();
+                    navigator.clipboard.readText().then(t => {
+                      setClipText(t);
+                      setClipSaved(false);
+                    }).catch(() => {});
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition"
+                >
+                  Colar do clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

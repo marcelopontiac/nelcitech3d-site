@@ -217,12 +217,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onClick={async () => {
                     if (!clipText.trim()) return;
                     try {
+                      const token = localStorage.getItem('token') || '';
                       const res = await fetch('/api/analyze', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
                         body: JSON.stringify({ text: clipText }),
                       });
-                      await res.json();
+                      const result = await res.json();
+                      if (!res.ok) throw new Error(result.detail || 'Erro');
                       setClipSaved(true);
                       setTimeout(() => setClipSaved(false), 2000);
                     } catch {}

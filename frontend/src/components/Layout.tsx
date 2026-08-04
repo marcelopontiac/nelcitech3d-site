@@ -214,16 +214,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   Limpar
                 </button>
                 <button
-                  onClick={() => {
-                    clipRef.current?.focus();
-                    navigator.clipboard.readText().then(t => {
-                      setClipText(t);
-                      setClipSaved(false);
-                    }).catch(() => {});
+                  onClick={async () => {
+                    if (!clipText.trim()) return;
+                    try {
+                      const res = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: clipText }),
+                      });
+                      await res.json();
+                      setClipSaved(true);
+                      setTimeout(() => setClipSaved(false), 2000);
+                    } catch {}
                   }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition"
                 >
-                  Colar do clipboard
+                  Analisar
                 </button>
               </div>
             </div>

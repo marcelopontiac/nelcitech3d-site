@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -237,3 +238,36 @@ async def admin_delete_user(
     await db.delete(target)
     await db.commit()
     return {"ok": True}
+
+
+@router.post("/api/analyze")
+async def analyze_text(body: dict, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    text = body.get("text", "")
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Texto vazio")
+    lines = [l for l in text.splitlines() if l.strip()]
+    words = re.findall(r'\b\w+\b', text)
+    chars = len(text)
+    code_blocks = len(re.findall(r'```[\s\S]*?```', text))
+    result = {
+        "ok": True,
+        "stats": {
+            "caracteres": chars,
+            "palavras": len(words),
+            "linhas": len(lines),
+            "blocos_codigo": code_blocks,
+            "tem_python": "python" in text.lower() or "def " in text or "import " in text or "from " in text,
+            "tem_javascript": "javascript" in text.lower() or "function " in text or "const " in text or "let " in text or "var " in text,
+            "tem_html": "<html" in text.lower() or "<div" in text.lower() or "<script" in text.lower(),
+            "tem_css": "css" in text.lower() or ".{" in text or "display:" in text,
+        },
+        "preview": text[:500],
+    }
+    inbox_dir = os.path.expanduser("~/nelcitech3d-site/inbox")
+    os.makedirs(inbox_dir, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    path = os.path.join(inbox_dir, f"clipboard-{stamp}.txt")
+    with open(path, "w") as f:
+        f.write(text)
+    result["saved_to"] = path
+    return result

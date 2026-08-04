@@ -368,27 +368,127 @@ export default function Investments() {
           {(() => {
             const folder = NACIONAL_FOLDERS.find(f => f.key === tab);
             if (!folder) return null;
+            const folderItems = items.filter(i => i.category === folder.category);
+            const fTotalInvestido = folderItems.reduce((s:number,t:any) => s + (parseFloat(t.avg_price)||0)*(parseFloat(t.qty)||0), 0);
+            const fTotalAtual = folderItems.reduce((s:number,t:any) => s + (parseFloat(t.current_price)||parseFloat(t.avg_price)||0)*(parseFloat(t.qty)||0), 0);
+            const fLucro = fTotalAtual - fTotalInvestido;
+            const fLucroPct = fTotalInvestido>0 ? (fLucro/fTotalInvestido)*100 : 0;
+            const fAlocacao = folderItems.reduce((acc:any,inv:any) => {
+              const v = (parseFloat(inv.avg_price)||0)*(parseFloat(inv.qty)||0);
+              const c = inv.category||'Outro';
+              const e = acc.find((a:any) => a.name===c);
+              if (e) e.value+=v; else acc.push({name:c,value:v});
+              return acc;
+            },[]);
+            const fInvestChart = folderItems.map((inv:any) => {
+              const q = parseFloat(inv.qty)||0;
+              const a = parseFloat(inv.avg_price)||0;
+              const c = parseFloat(inv.current_price)||a;
+              return { name: inv.ticker||inv.name, invested: q*a, current: q*c, ticker: inv.ticker };
+            });
             return (
               <>
                 <h2 className="text-xl md:text-2xl font-bold text-white">{folder.label}</h2>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  {folder.assets.length} ativos disponíveis para investimento.
+                  {folderItems.length} ativos disponíveis para investimento.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {folder.assets.map(a => (
-                    <div key={a.ticker} className="bg-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-800/50 p-4 hover:border-emerald-500/30 transition group">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-emerald-500/15 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-mono font-semibold tracking-wide">{a.ticker}</span>
+
+                {/* Cards de resumo */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label:'Total Investido', value:fTotalInvestido, cls:'text-blue-400', icon:'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+                    { label:'Valor Atual', value:fTotalAtual, cls:'text-purple-400', icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                    { label:'Lucro/Prejuízo', value:fLucro, cls:fLucro>=0?'text-emerald-400':'text-red-400', icon:'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' },
+                    { label:'Rentabilidade', value:fLucroPct, cls:fLucroPct>=0?'text-emerald-400':'text-red-400', fmt:(v:number)=>`${v>=0?'+':''}${v.toFixed(1)}%`, icon:'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+                  ].map((c,i) => (
+                    <div key={i} className="relative group">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${c.cls.replace('text-','from-').replace('emerald-400','emerald-500').replace('red-400','red-500').replace('blue-400','blue-500').replace('purple-400','purple-500')} rounded-xl opacity-5 group-hover:opacity-10 transition-opacity`} />
+                      <div className="relative bg-gray-900/60 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">{c.label}</span>
+                          <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={c.icon}/></svg>
+                        </div>
+                        <p className={`text-lg md:text-xl font-bold ${c.cls}`}>{c.fmt?c.fmt(c.value):fn(c.value)}</p>
                       </div>
-                      <p className="text-white font-bold text-sm">{a.name}</p>
-                      <p className="text-gray-500 text-xs mt-1 leading-relaxed">{a.desc}</p>
-                      <button onClick={() => openAsset(a, 'Nacional', folder.category, 'Clear')}
-                        className="mt-3 w-full bg-emerald-600/15 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-400 hover:text-white text-xs font-medium py-1.5 rounded-lg transition flex items-center justify-center gap-1.5">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
-                        Investir
-                      </button>
                     </div>
                   ))}
+                </div>
+
+                {/* Gráficos */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {fAlocacao.length>0 && (
+                    <div className="bg-gray-900/40 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50">
+                      <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Alocação por Subpasta</h3>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <PieChart>
+                          <Pie data={fAlocacao} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} dataKey="value">
+                            {fAlocacao.map((_:any,i:number)=><Cell key={i} fill={PIE[i%PIE.length]}/>)}
+                          </Pie>
+                          <Tooltip contentStyle={chart.tooltip} formatter={(v:any)=>fn(Number(v)||0)} />
+                          <Legend verticalAlign="bottom" iconType="circle" iconSize={8}
+                            formatter={(value:string)=><span style={{color:chart.legendText,fontSize:'10px'}}>{value}</span>} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                  {fInvestChart.length>0 && (
+                    <div className="bg-gray-900/40 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50">
+                      <h3 className="text-white/80 text-xs font-semibold uppercase tracking-wider mb-3">Valor de Compra vs Valor Atual</h3>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={fInvestChart} barCategoryGap={6}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} vertical={false} />
+                          <XAxis type="category" dataKey="name" stroke={chart.axis} tick={{fontSize:10}} axisLine={false} tickLine={false} />
+                          <YAxis type="number" stroke={chart.axis} tick={{fontSize:10}} tickFormatter={(v:number)=>`R$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                          <Tooltip contentStyle={chart.tooltip} formatter={(v:any)=>fn(Number(v)||0)} />
+                          <Bar dataKey="invested" fill={C.purple} radius={[4,4,0,0]} name="Valor de Compra" maxBarSize={24} />
+                          <Bar dataKey="current" fill={C.green} radius={[4,4,0,0]} name="Valor Atual" maxBarSize={24} />
+                          <Legend verticalAlign="bottom" iconType="rect" iconSize={10}
+                            formatter={(value:string)=><span style={{color:chart.legendText,fontSize:'10px'}}>{value}</span>} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tabela de ativos */}
+                <div className="bg-gray-900/30 backdrop-blur-sm rounded-xl border border-gray-800/30 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 uppercase border-b border-gray-800/40">
+                          <th className="text-left px-3 py-2.5 font-semibold whitespace-nowrap">Nome do Ativo</th>
+                          <th className="text-left px-3 py-2.5 font-semibold whitespace-nowrap">Código</th>
+                          <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap">Qtd</th>
+                          <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap">Valor Compra</th>
+                          <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap">Valor Atual</th>
+                          <th className="text-right px-3 py-2.5 font-semibold whitespace-nowrap">Rentabilidade</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {folderItems.map((inv:any) => {
+                          const q = parseFloat(inv.qty)||0;
+                          const a = parseFloat(inv.avg_price)||0;
+                          const c = parseFloat(inv.current_price)||a;
+                          const rent = a>0 ? ((c-a)/a)*100 : 0;
+                          return (
+                            <tr key={inv.id} className="border-b border-gray-800/20 hover:bg-white/[0.02] transition-colors">
+                              <td className="px-3 py-2.5 text-white font-bold">{inv.name||'—'}</td>
+                              <td className="px-3 py-2.5 text-gray-400 font-mono">{inv.ticker||'—'}</td>
+                              <td className="px-3 py-2.5 text-right text-white font-medium">{q}</td>
+                              <td className="px-3 py-2.5 text-right text-gray-300">{fn(a)}</td>
+                              <td className="px-3 py-2.5 text-right text-gray-300">{fn(c)}</td>
+                              <td className={`px-3 py-2.5 text-right font-medium whitespace-nowrap ${rent>=0?'text-emerald-400':'text-red-400'}`}>
+                                {rent>=0?'+':''}{rent.toFixed(1)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {folderItems.length===0 && (
+                          <tr><td colSpan={6} className="text-center text-gray-600 py-8 text-sm">Nenhum ativo nesta categoria</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </>
             );

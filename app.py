@@ -8,8 +8,9 @@ app.secret_key = secrets.token_hex(32)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
 
-BASE_DIR = '/var/www/nelcitech3d'
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'finance.db')
+os.makedirs(BASE_DIR, exist_ok=True)
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)

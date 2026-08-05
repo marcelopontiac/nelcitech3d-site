@@ -85,6 +85,7 @@ class InvestmentSchema(DataItem):
     pct_cdi: str = ""
     date: str = ""
     data_atualizacao: str = ""
+    intl_sub: str = ""
 
 
 class DataResponse(BaseModel):

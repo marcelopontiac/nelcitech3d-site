@@ -94,3 +94,4 @@ class Investment(Base):
     pct_cdi: Mapped[str] = mapped_column(String, default="")
     date: Mapped[str] = mapped_column(String)
     data_atualizacao: Mapped[str] = mapped_column(String, default="")
+    intl_sub: Mapped[str] = mapped_column(String, default="")

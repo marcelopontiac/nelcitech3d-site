@@ -39,6 +39,7 @@ MIGRATIONS = {
         "grupo": "TEXT DEFAULT 'Nacional'",
         "data_atualizacao": "TEXT DEFAULT ''",
         "pct_cdi": "TEXT DEFAULT ''",
+        "intl_sub": "TEXT DEFAULT ''",
     },
 }
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
+  <script>try{var t=localStorage.getItem('nelci_theme')||'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -1138,13 +1139,18 @@
     let _currentTheme = localStorage.getItem('nelci_theme') || 'dark';
     function applyTheme(theme) {
       _currentTheme = theme;
+      try { localStorage.setItem('nelci_theme', theme); } catch(e) {}
       document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('nelci_theme', theme);
-      document.getElementById('themeToggle').innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) toggle.innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
       if(window._chartInstances) { window._chartInstances.forEach(c => c.destroy()); window._chartInstances = []; initCharts(); }
     }
     function toggleTheme() { applyTheme(_currentTheme === 'dark' ? 'light' : 'dark'); }
-    applyTheme(_currentTheme);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => applyTheme(_currentTheme));
+    } else {
+      applyTheme(_currentTheme);
+    }
     apiGet('/api/me').then(d=>{
       console.log('API /api/me response', d);
       if(!d.logged_in){ window.location.href=_isElectron?'login.html':'/login.html'; return; }

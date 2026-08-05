@@ -61,8 +61,16 @@
     [data-theme="light"] .month-tab { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
     [data-theme="light"] .month-tab:hover { background: var(--bg-hover); color: var(--text); }
     [data-theme="light"] .month-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    [data-theme="light"] .chart-container { background: var(--bg-card); border: 1px solid var(--border); }
+    [data-theme="light"] .chart-container { background: var(--bg-card); border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    [data-theme="light"] .chart-container:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
     [data-theme="light"] .chart-container h3 { color: var(--text-muted); }
+    [data-theme="light"] .card-balance { background: linear-gradient(135deg, #ffffff 0%, rgba(59,130,246,0.04) 100%); }
+    [data-theme="light"] .card-income { background: linear-gradient(135deg, #ffffff 0%, rgba(34,197,94,0.04) 100%); }
+    [data-theme="light"] .card-expense { background: linear-gradient(135deg, #ffffff 0%, rgba(239,68,68,0.04) 100%); }
+    [data-theme="light"] .card-count { background: linear-gradient(135deg, #ffffff 0%, rgba(168,85,247,0.04) 100%); }
+    [data-theme="light"] .month-tab { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
+    [data-theme="light"] .month-tab:hover { background: var(--bg-hover); color: var(--text); }
+    [data-theme="light"] .month-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
     [data-theme="light"] .form-group input:focus, [data-theme="light"] .form-group select:focus, [data-theme="light"] .form-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
     [data-theme="light"] .form-submit { background: var(--blue); color: #fff; }
     [data-theme="light"] .form-submit:hover { background: #1d4ed8; }
@@ -94,8 +102,18 @@
     .menu-fab svg { width: 20px; height: 20px; }
     .menu-fab svg circle { fill: var(--text-muted); transition: fill 0.2s; }
 
+    .theme-select { position: relative; display: inline-block; }
     .theme-toggle { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-hover); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; font-size: 1.1rem; }
     .theme-toggle:hover { background: var(--border); }
+    .theme-dropdown { display: none; position: absolute; top: 44px; right: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.4rem; min-width: 120px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); z-index: 300; }
+    .theme-dropdown.open { display: block; animation: fadeIn 0.15s ease-out; }
+    .theme-opt { display: block; width: 100%; padding: 0.5rem 0.8rem; border: none; background: none; color: var(--text); font-size: 0.82rem; font-weight: 500; cursor: pointer; border-radius: 8px; text-align: left; transition: background 0.1s; }
+    .theme-opt:hover { background: var(--bg-hover); }
+    .theme-opt.active { color: var(--blue); font-weight: 600; background: var(--blue-bg); }
+    .theme-divider { height: 1px; background: var(--border); margin: 0.2rem 0; }
+    .theme-apply { color: var(--green); font-weight: 600; border-top: 1px solid var(--border); margin-top: 0.2rem; padding-top: 0.6rem; }
+    .theme-apply:hover { background: var(--green-bg); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
     .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 250; }
     .menu-overlay.active { display: block; }
@@ -120,7 +138,12 @@
     .tab-content.active { display: block; }
 
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; transition: transform 0.15s, box-shadow 0.15s; }
+    .card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card-balance { border-left: 4px solid var(--blue); background: linear-gradient(135deg, var(--bg-card) 0%, rgba(59,130,246,0.03) 100%); }
+    .card-income { border-left: 4px solid var(--green); background: linear-gradient(135deg, var(--bg-card) 0%, rgba(34,197,94,0.03) 100%); }
+    .card-expense { border-left: 4px solid var(--red); background: linear-gradient(135deg, var(--bg-card) 0%, rgba(239,68,68,0.03) 100%); }
+    .card-count { border-left: 4px solid var(--purple); background: linear-gradient(135deg, var(--bg-card) 0%, rgba(168,85,247,0.03) 100%); }
     .card-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     .card-value { font-size: 1.6rem; font-weight: 700; }
     .card-balance { border-left: 4px solid var(--blue); }
@@ -133,7 +156,13 @@
     .card-count .card-value { color: var(--purple); }
 
     .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-    .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: box-shadow 0.2s; }
+    .chart-container:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .chart-container h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }
+    .dashboard-bg { background: linear-gradient(135deg, var(--bg) 0%, var(--bg-card) 50%, var(--bg) 100%); border-radius: 16px; padding: 1.5rem; margin: -0.5rem; }
+    [data-theme="light"] .dashboard-bg { background: linear-gradient(135deg, #f0f4f8 0%, #f8fafc 50%, #f0f4f8 100%); }
+    [data-theme="light"] .chart-container { box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    [data-theme="light"] .chart-container:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
     .chart-container h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }
 
     .transactions-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
@@ -325,7 +354,16 @@
         <span class="subtitle" id="userDisplay">Controle financeiro completo</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.6rem">
-        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">&#9790;</button>
+        <div class="theme-select" id="themeSelect">
+          <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">&#9790;</button>
+          <div class="theme-dropdown" id="themeDropdown">
+            <button class="theme-opt" data-theme="dark" onclick="selectTheme('dark')">Escuro</button>
+            <button class="theme-opt" data-theme="light" onclick="selectTheme('light')">Claro</button>
+            <button class="theme-opt" data-theme="auto" onclick="selectTheme('auto')">Sistema</button>
+            <div class="theme-divider"></div>
+            <button class="theme-opt theme-apply" onclick="applyPendingTheme()">&#10003; Aplicar</button>
+          </div>
+        </div>
         <button class="menu-fab" id="menuFab" onclick="toggleMenu()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>
       </button>
@@ -380,6 +418,7 @@
   <main>
     <!-- TAB: DASHBOARD -->
     <div class="tab-content active" id="tab-dashboard">
+      <div class="dashboard-bg">
       <section class="cards">
         <div class="card card-balance">
           <span class="card-label">Saldo</span>
@@ -445,6 +484,7 @@
           </table>
         </div>
       </section>
+      </div>
     </div>
 
     <!-- TAB: COMMERCIAL -->
@@ -1198,19 +1238,57 @@
 
     let isDemo = false;
     let _currentTheme = localStorage.getItem('nelci_theme') || 'dark';
+    let _pendingTheme = null;
     function applyTheme(theme) {
       _currentTheme = theme;
       try { localStorage.setItem('nelci_theme', theme); } catch(e) {}
       document.documentElement.setAttribute('data-theme', theme);
       const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
+      if (toggle) toggle.innerHTML = theme === 'dark' ? '&#9790;' : theme === 'light' ? '&#9728;' : '&#9889;';
+      updateThemeDropdown();
       if(window._chartInstances) { window._chartInstances.forEach(c => c.destroy()); window._chartInstances = []; initCharts(); }
     }
-    function toggleTheme() { applyTheme(_currentTheme === 'dark' ? 'light' : 'dark'); }
+    function toggleTheme() {
+      const next = _currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      closeThemeDropdown();
+    }
+    function selectTheme(theme) {
+      if (theme === 'auto') {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      _pendingTheme = theme;
+      updateThemeDropdown();
+    }
+    function applyPendingTheme() {
+      if (_pendingTheme) {
+        applyTheme(_pendingTheme);
+        _pendingTheme = null;
+        closeThemeDropdown();
+      }
+    }
+    function updateThemeDropdown() {
+      document.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === _currentTheme);
+      });
+    }
+    function toggleThemeDropdown() {
+      const dd = document.getElementById('themeDropdown');
+      if (dd) dd.classList.toggle('open');
+    }
+    function closeThemeDropdown() {
+      const dd = document.getElementById('themeDropdown');
+      if (dd) dd.classList.remove('open');
+    }
+    document.addEventListener('click', function(e) {
+      const sel = document.getElementById('themeSelect');
+      if (sel && !sel.contains(e.target)) closeThemeDropdown();
+    });
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => applyTheme(_currentTheme));
+      document.addEventListener('DOMContentLoaded', () => { applyTheme(_currentTheme); updateThemeDropdown(); });
     } else {
       applyTheme(_currentTheme);
+      updateThemeDropdown();
     }
     apiGet('/api/me').then(d=>{
       console.log('API /api/me response', d);

@@ -291,14 +291,15 @@
     },
     {
       "category": "Internacional",
-      "ticker": "ETFS",
+      "ticker": "XLRE",
       "name": "XLRE",
       "qty": "1.3756",
       "avg_price": "41.60",
       "current_price": "62.12",
       "date": "2026-03-01",
       "id": "58b0bfeea0428572",
-      "created": "2026-07-21 15:46:58"
+      "created": "2026-07-21 15:46:58",
+      "intl_sub": "REITs"
     },
     {
       "category": "FIIs",
